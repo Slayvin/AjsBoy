@@ -59,6 +59,10 @@ Cpu.prototype.instructions = {
 	0x45: function () {
 		this['LD r1,r2']('B', 'B');
 	},
+	// LD B,A
+	0x47: function () {
+		this['LD r1,r2']('B', 'A');
+	},
 	// LD C,B
 	0x48: function () {
 		this['LD r1,r2']('C', 'B');
@@ -82,6 +86,10 @@ Cpu.prototype.instructions = {
 	// LD C,L
 	0x4d: function () {
 		this['LD r1,r2']('C', 'L');
+	},
+	// LD C,A
+	0x4f: function () {
+		this['LD r1,r2']('C', 'A');
 	},
 	// LD D,B
 	0x50: function () {
@@ -107,6 +115,10 @@ Cpu.prototype.instructions = {
 	0x55: function () {
 		this['LD r1,r2']('D', 'L');
 	},
+	// LD D,A
+	0x57: function () {
+		this['LD r1,r2']('D', 'A');
+	},
 	// LD E,B
 	0x58: function () {
 		this['LD r1,r2']('E', 'B');
@@ -115,11 +127,11 @@ Cpu.prototype.instructions = {
 	0x59: function () {
 		this['LD r1,r2']('E', 'C');
 	},
-	//-------------------------------------------------------
-	// LD A,A
-	0x7f: function () {
-		this['LD r1,r2']('A', 'A');
+	// LD E,D
+	0x5a: function () {
+		this['LD r1,r2']('E', 'D');
 	},
+// ----------------------------------------------------------
 	// LD A,B
 	0x78: function () {
 		this['LD r1,r2']('A', 'B');
@@ -144,14 +156,70 @@ Cpu.prototype.instructions = {
 	0x7d: function () {
 		this['LD r1,r2']('A', 'L');
 	},
+	// LD A,A
+	0x7f: function () {
+		this['LD r1,r2']('A', 'A');
+	},
 	// LD A,n
 	0x3e: function () {
 		let n = this.read8(++this.PC);
 		this['LD r,n']('A', n);
 	},
-
-// LD n,A
-// 
+// LD A,addr
+// ----------------------------------------------------------
+	// LD A,(BC)
+	0x0a: function () {
+		let addr = this.BC;
+		this.A = this.memory[addr];
+		this.PC++;
+	},
+	// LD A,(DE)
+	0x1a: function () {
+		let addr = this.DE;
+		this.A = this.memory[addr];
+		this.PC++;
+	},
+	// LD A,(HL)
+	0x7e: function () {
+		let addr = this.HL;
+		this.A = this.memory[addr];
+		this.PC++;
+	},
+	// LD A,(nn)
+	0xfa: function () {
+		let addr = this.read16(++this.PC);
+		this.PC++;
+		this.A = this.memory[addr];
+		this.PC++;
+	},
+// LD addr,A
+// ----------------------------------------------------------
+	// LD (BC),A
+	0x02: function () {
+		let addr = this.BC;
+		this.memory[addr] = this.A;
+		this.PC++;
+	},
+	// LD (DE),A
+	0x12: function () {
+		let addr = this.DE;
+		this.memory[addr] = this.A;
+		this.PC++;
+	},
+	// LD (HL),A
+	0x77: function () {
+		let addr = this.HL;
+		this.memory[addr] = this.A;
+		this.PC++;
+	},
+	// LD (nn),A
+	0xea: function () {
+		let addr = this.read16(++this.PC);
+		this.PC++;
+		this.memory[addr] = this.A;
+		this.PC++;
+	},
+// ----------------------------------------------------------
 	// LD A,(C)
 	0xf2: function () {
 		let addr = 0xff00 + this.C;
@@ -192,12 +260,24 @@ Cpu.prototype.instructions = {
 		this.PC++;
 	},
 	// LDH (n),A
+	0xe0: function () {
+		let n = this.read8(++this.PC);
+		let addr = 0xff00 + n;
+		this.memory[addr] = this.A;
+		this.PC++;
+	},
 	// LDH A,(n)
+	0xf0: function () {
+		let n = this.read8(++this.PC);
+		let addr = 0xff00 + n;
+		this.A = this.memory[addr];
+		this.PC++;
+	},
 
 // 16-bits loads
 // ========================================================== 
 	// LD BC,nn
-	0x1: function () {
+	0x01: function () {
 		let nn = this.read16(++this.PC);
 		this.PC++;
 		this['LD rr,nn']('BC', nn);
@@ -220,11 +300,33 @@ Cpu.prototype.instructions = {
 		this.PC++;
 		this['LD rr,nn']('SP', nn);
 	},
-//-----------------------------------------------------------
+// ----------------------------------------------------------
 	// LD SP,HL
 	0xf9: function () {
 		this['LD rr,nn']('SP', this.HL);
 	},
+// ----------------------------------------------------------
+	// PUSH AF
+	0xf5: function () {
+		this.stack.push(this.AF);
+		this.PC++;
+	},
+	// PUSH BC
+	0xc5: function () {
+		this.stack.push(this.BC);
+		this.PC++;
+	},
+	// PUSH DE
+	0xd5: function () {
+		this.stack.push(this.DE);
+		this.PC++;
+	},
+	// PUSH HL
+	0xe5: function () {
+		this.stack.push(this.HL);
+		this.PC++;
+	},
+// ----------------------------------------------------------
 
 // 8-bits ALU
 // ==========================================================
@@ -331,10 +433,24 @@ Cpu.prototype.instructions = {
 		}
 	},
 
+// Calls
+// ==========================================================
+	// CALL nn
+	0xcd: function () {
+		let nn = this.read16(++this.PC);
+		this.stack.push(this.PC + 2);
+		this.PC = nn;
+	},
+
 // Extended instructions
 	0xcb: function () {
 		let opcode = this.memory[this.PC + 1];
-		this.instructions.extended[opcode].apply(this);
+		try {
+			this.instructions.extended[opcode].apply(this);
+		} catch (err) {
+			window.console.log(err);
+			throw 'Extended instruction 0xcb' + opcode.toString(16) + ' not implemented.';
+		}
 		this.PC += 2;
 	}
 

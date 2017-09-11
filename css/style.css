@@ -2,6 +2,19 @@ body{
 	background-color: #DDD;
 	color:#333;
 }
+#vram{
+	background-color: #888;
+	border: 1px solid #333;
+	padding:2px;
+	width: 512px;
+	height: 512px;
+	
+}
+#vram canvas{
+	transform: scale(4);
+	transform-origin: top left;
+	image-rendering: pixelated;
+}
 .table{
 	font-family : courier;
 	font-size: 12px;

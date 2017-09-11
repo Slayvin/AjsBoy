@@ -1,126 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-	<meta charset="UTF-8">
-	<title>GameBoy</title>
-	<link rel="stylesheet" href="css/style.css">
-</head>
+	<head>
+		<meta charset="UTF-8">
+		<title>GameBoy</title>
+		<link rel="stylesheet" href="css/style.css">
+	</head>
 
-<body>
-	<h1>GameBoy Emulation</h1>
+	<body>
+		<h1>GameBoy Emulation</h1>
 
-	<div id="debugger">
-		<div>
-			<table class="table">
-				<thead>
-					<tr>
-						<th colspan=3>CPU</th>
+		<div id="debugger">
+			<div>
+				<table class="table">
+					<thead>
+						<tr>
+							<th colspan=3>CPU</th>
+						</tr>
+					</thead>
+					<tr class="row">
+						<td>PC</td>
+						<td class="cell"><span id="pc"></span></td>
+						<td class="cellLong"><span id="code"></span></td>
 					</tr>
-				</thead>
-				<tr class="row">
-					<td>PC</td>
-					<td class="cell"><span id="pc"></span></td>
-					<td class="cellLong"><span id="code"></span></td>
-				</tr>
-				<tr class="row">
-					<td>SP</td>
-					<td class="cell"><span id="sp"></span></td>
-				</tr>
-			</table>
-
-			<table class="table">
-				<thead>
-					<tr>
-						<th colspan=2>Call Stack</th>
+					<tr class="row">
+						<td>SP</td>
+						<td class="cell"><span id="sp"></span></td>
 					</tr>
-				</thead>
-				<tr class="row">
-					<td>1</td>
-					<td class="cell"><span id="count"></span></td>
-				</tr>
-				<tr class="row">
-					<td>2</td>
-					<td class="cell"><span id="dt"></span></td>
-				</tr>
+				</table>
 
-			</table>
+				<table id="stack" class="table">
+					<thead>
+						<tr>
+							<th colspan=2>Call Stack</th>
+						</tr>
+					</thead>
+					<tr class="row">
+						<td>1</td>
+						<td class="cell"></td>
+					</tr>
+					<tr class="row">
+						<td>2</td>
+						<td class="cell"></td>
+					</tr>
+
+				</table>
+			</div>
+			<div>
+				<table class="table">
+					<thead>
+						<tr>
+							<th colspan=4>CPU Registers</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr class="row">
+							<td>A</td>
+							<td class="cell" id="reg-A"></td>
+							<td>F</td>
+							<td class="cell" id="reg-F"></td>
+						</tr>
+						<tr class="row">
+							<td>B</td>
+							<td class="cell" id="reg-B"></td>
+							<td>C</td>
+							<td class="cell" id="reg-C"></td>
+						</tr>
+						<tr class="row">
+							<td>D</td>
+							<td class="cell" id="reg-D"></td>
+							<td>E</td>
+							<td class="cell" id="reg-E"></td>
+						</tr>
+						<tr class="row">
+							<td>H</td>
+							<td class="cell" id="reg-H"></td>
+							<td>L</td>
+							<td class="cell" id="reg-L"></td>
+						</tr>
+					</tbody>
+				</table>
+				<table class="table">
+					<thead>
+						<tr>
+							<th colspan=2>CPU Flags</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr class="row">
+							<td>Z</td>
+							<td class="cell" id="flag-Z"></td>
+						</tr>
+						<tr class="row">
+							<td>N</td>
+							<td class="cell" id="flag-N"></td>
+						</tr>
+						<tr class="row">
+							<td>H</td>
+							<td class="cell" id="flag-H"></td>
+						</tr>
+						<tr class="row">
+							<td>C</td>
+							<td class="cell" id="flag-C"></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<div>
+				<button id="step">Next</button>
+				<button id="pause">Pause</button>
+				<button id="run">Run</button>
+				<input id="debug" name="debug" type="checkbox"> Debug
+			</div>
+			<div id="vram">
+				<canvas width=128 height=128></canvas>
+			</div>
 		</div>
-		<div>
-			<table class="table">
-				<thead>
-					<tr>
-						<th colspan=4>CPU Registers</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr class="row">
-						<td>A</td>
-						<td class="cell" id="reg-A"></td>
-						<td>F</td>
-						<td class="cell" id="reg-F"></td>
-					</tr>
-					<tr class="row">
-						<td>B</td>
-						<td class="cell" id="reg-B"></td>
-						<td>C</td>
-						<td class="cell" id="reg-C"></td>
-					</tr>
-					<tr class="row">
-						<td>D</td>
-						<td class="cell" id="reg-D"></td>
-						<td>E</td>
-						<td class="cell" id="reg-E"></td>
-					</tr>
-					<tr class="row">
-						<td>H</td>
-						<td class="cell" id="reg-H"></td>
-						<td>L</td>
-						<td class="cell" id="reg-L"></td>
-					</tr>
-				</tbody>
-			</table>
-			<table class="table">
-				<thead>
-					<tr>
-						<th colspan=2>CPU Flags</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr class="row">
-						<td>Z</td>
-						<td class="cell" id="flag-Z"></td>
-					</tr>
-					<tr class="row">
-						<td>N</td>
-						<td class="cell" id="flag-N"></td>
-					</tr>
-					<tr class="row">
-						<td>H</td>
-						<td class="cell" id="flag-H"></td>
-					</tr>
-					<tr class="row">
-						<td>C</td>
-						<td class="cell" id="flag-C"></td>
-					</tr>
-				</tbody>
-			</table>
-		</div>
-
-		<div id="stack"></div>
-
-		<div>
-			<button id="step">Next</button>
-			<button id="pause">Pause</button>
-			<button id="run">Run</button>
-			<input id="debug" name="debug" type="checkbox"> Debug
-		</div>
-	</div>
-	<script type="application/javascript" src="js/cpu.js"></script>
-	<script type="application/javascript" src="js/cpu-instructions.js"></script>
-	<script type="application/javascript" src="js/cpu-instructions-extended.js"></script>
-	<script type="application/javascript" src="js/gb.js"></script>
-	<script type="application/javascript" src="js/main.js"></script>
-</body>
+		<script type="application/javascript" src="js/cpu.js"></script>
+		<script type="application/javascript" src="js/cpu-instructions.js"></script>
+		<script type="application/javascript" src="js/cpu-instructions-extended.js"></script>
+		<script type="application/javascript" src="js/gb.js"></script>
+		<script type="application/javascript" src="js/main.js"></script>
+	</body>
 
 </html>

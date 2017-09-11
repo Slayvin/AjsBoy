@@ -1,6 +1,7 @@
 'use strict';
 function Cpu(memory) {
 	this.memory = memory;
+
 	this.code = '';
 	// 8-bits registers
 	this.A = 0x00; // For arithmetic operations
@@ -60,6 +61,14 @@ function Cpu(memory) {
 			}
 		});
 	}
+
+	this.stack = {
+		push: function (nn) {
+			this.memory[this.SP] = nn >> 8;
+			this.memory[this.SP+1] = nn & 0xFF;
+			this.SP -= 2;
+		}.bind(this),
+	};
 }
 
 Cpu.prototype.execute = function (opcode) {
