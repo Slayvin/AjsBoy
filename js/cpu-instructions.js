@@ -1,5 +1,83 @@
 /* global Cpu */
 'use strict';
+
+(function () {
+	// 8-bits loads
+	// ======================================================
+	this['LD r,n'] = function (r, n) {
+		this.code = 'LD ' + r + ',' + n.toString(16);
+		this[r] = n;
+		this.PC++;
+	};
+	this['LD r1,r2'] = function (r1, r2) {
+		this.code = 'LD ' + r1 + ',' + r2;
+		this[r1] = this[r2];
+		this.PC++;
+	};
+	this['LD A,addr'] = function (addr) {
+		this.code = 'LD A,' + addr.toString(16);
+		this.A = this.memory[addr];
+		this.PC++;
+	};
+	this['LD addr,A'] = function (addr) {
+		this.code = 'LD ' + addr.toString(16) + ',A';
+		this.memory[addr] = this.A;
+		this.PC++;
+	};
+
+	// 8-bits ALU
+	// ======================================================
+	this['XOR n'] = function (n) {
+		this.code = 'XOR n';
+		this.A = n ^ this.A;
+		this.PC++;
+	};
+	this['INC r'] = function (r) {
+		this.code = 'INC ' + r;
+		this[r] = (this[r] + 1) & 0xff;
+		this.PC++;
+	};
+	this['DEC r'] = function (r) {
+		this.code = 'DEC ' + r;
+		this[r] = (this[r] - 1) & 0xff;
+		this.PC++;
+	};
+	this['CP n'] = function (n) {
+		this.flags.Z = this.A === n ? 1 : 0;
+		this.flags.N = 1;
+		this.flags.H = (this.A & 0xF) < (n & 0xF) ? 1 : 0;
+		this.flags.C = this.A < n ? 1 : 0;
+		this.PC++;
+	};
+
+	// 16-bits loads
+	// ======================================================
+	this['LD rr,nn'] = function (rr, nn) {
+		this.code = 'LD ' + rr + ',' + nn.toString(16);
+		this[rr] = nn;
+		this.PC++;
+	};
+	this['PUSH nn'] = function (nn) {
+		this.code = 'PUSH ' + nn.toString(16);
+		this.memory[this.SP] = nn & 0xFF;
+		this.memory[this.SP + 1] = nn >> 8;
+		this.SP -= 2;
+	};
+
+	// 16-bits ALU
+	// ======================================================
+	this['INC rr'] = function (rr) {
+		this.code = 'INC ' + rr;
+		this[rr] = (this[rr] + 1) & 0xffff;
+		this.PC++;
+	};
+	this['DEC rr'] = function (rr) {
+		this.code = 'DEC ' + rr;
+		this[rr] = (this[rr] - 1) & 0xffff;
+		this.PC++;
+	};
+}).apply(Cpu.prototype);
+
 // All basic Operation codes
 Cpu.prototype.instructions = {
 // 8-bits Loads
@@ -131,6 +209,50 @@ Cpu.prototype.instructions = {
 	0x5a: function () {
 		this['LD r1,r2']('E', 'D');
 	},
+	// LD E,E
+	0x5b: function () {
+		this['LD r1,r2']('E', 'E');
+	},
+	// LD E,H
+	0x5c: function () {
+		this['LD r1,r2']('E', 'H');
+	},
+	// LD E,L
+	0x5d: function () {
+		this['LD r1,r2']('E', 'L');
+	},
+	// LD E,A
+	0x5f: function () {
+		this['LD r1,r2']('E', 'A');
+	},
+	// LD H,B
+	0x60: function () {
+		this['LD r1,r2']('H', 'B');
+	},
+	// LD H,C
+	0x61: function () {
+		this['LD r1,r2']('H', 'C');
+	},
+	// LD H,D
+	0x62: function () {
+		this['LD r1,r2']('H', 'D');
+	},
+	// LD H,E
+	0x63: function () {
+		this['LD r1,r2']('H', 'E');
+	},
+	// LD H,H
+	0x64: function () {
+		this['LD r1,r2']('H', 'H');
+	},
+	// LD H,L
+	0x65: function () {
+		this['LD r1,r2']('H', 'L');
+	},
+	// LD H,A
+	0x67: function () {
+		this['LD r1,r2']('H', 'A');
+	},
 // ----------------------------------------------------------
 	// LD A,B
 	0x78: function () {
@@ -170,58 +292,51 @@ Cpu.prototype.instructions = {
 	// LD A,(BC)
 	0x0a: function () {
 		let addr = this.BC;
-		this.A = this.memory[addr];
-		this.PC++;
+		this['LD A,addr'](addr);
 	},
 	// LD A,(DE)
 	0x1a: function () {
 		let addr = this.DE;
-		this.A = this.memory[addr];
-		this.PC++;
+		this['LD A,addr'](addr);
 	},
 	// LD A,(HL)
 	0x7e: function () {
 		let addr = this.HL;
-		this.A = this.memory[addr];
-		this.PC++;
+		this['LD A,addr'](addr);
 	},
 	// LD A,(nn)
 	0xfa: function () {
 		let addr = this.read16(++this.PC);
 		this.PC++;
-		this.A = this.memory[addr];
-		this.PC++;
+		this['LD A,addr'](addr);
 	},
 // LD addr,A
 // ----------------------------------------------------------
 	// LD (BC),A
 	0x02: function () {
 		let addr = this.BC;
-		this.memory[addr] = this.A;
-		this.PC++;
+		this['LD addr,A'](addr);
 	},
 	// LD (DE),A
 	0x12: function () {
 		let addr = this.DE;
-		this.memory[addr] = this.A;
-		this.PC++;
+		this['LD addr,A'](addr);
 	},
 	// LD (HL),A
 	0x77: function () {
 		let addr = this.HL;
-		this.memory[addr] = this.A;
-		this.PC++;
+		this['LD addr,A'](addr);
 	},
 	// LD (nn),A
 	0xea: function () {
 		let addr = this.read16(++this.PC);
 		this.PC++;
-		this.memory[addr] = this.A;
-		this.PC++;
+		this['LD addr,A'](addr);
 	},
 // ----------------------------------------------------------
 	// LD A,(C)
 	0xf2: function () {
+		this.code = 'LD A,(C)';
 		let addr = 0xff00 + this.C;
 		this.A = this.memory[addr];
 		this.PC++;
@@ -229,6 +344,7 @@ Cpu.prototype.instructions = {
 	},
 	// LD (C),A
 	0xe2: function () {
+		this.code = 'LD (C),A';
 		let addr = 0xff00 + this.C;
 		this.memory[addr] = this.A;
 		this.PC++;
@@ -236,6 +352,7 @@ Cpu.prototype.instructions = {
 	},
 	// LD A,(HLD) | LD A,(HL-) | LDD A,(HL)
 	0x3a: function () {
+		this.code = 'LD A,(HL-)';
 		this.A = this.memory[this.HL];
 		this.HL--;
 		this.PC++;
@@ -249,18 +366,21 @@ Cpu.prototype.instructions = {
 	},
 	// LD A,(HLI) | LD A,(HL+) | LDI A,(HL)
 	0x2a: function () {
+		this.code = 'LD A,(HL+)';
 		this.A = this.memory[this.HL];
 		this.HL++;
 		this.PC++;
 	},
 	// LD (HLI),A | LD (HL+),A | LDI (HL),A
 	0x22: function () {
+		this.code = 'LD (HL+),A';
 		this.memory[this.HL] = this.A;
 		this.HL++;
 		this.PC++;
 	},
 	// LDH (n),A
 	0xe0: function () {
+		this.code = 'LDH (n),A';
 		let n = this.read8(++this.PC);
 		let addr = 0xff00 + n;
 		this.memory[addr] = this.A;
@@ -268,6 +388,7 @@ Cpu.prototype.instructions = {
 	},
 	// LDH A,(n)
 	0xf0: function () {
+		this.code = 'LDH A,(n)';
 		let n = this.read8(++this.PC);
 		let addr = 0xff00 + n;
 		this.A = this.memory[addr];
@@ -308,22 +429,43 @@ Cpu.prototype.instructions = {
 // ----------------------------------------------------------
 	// PUSH AF
 	0xf5: function () {
-		this.stack.push(this.AF);
+		this['PUSH nn'](this.AF);
 		this.PC++;
 	},
 	// PUSH BC
 	0xc5: function () {
-		this.stack.push(this.BC);
+		this['PUSH nn'](this.BC);
 		this.PC++;
 	},
 	// PUSH DE
 	0xd5: function () {
-		this.stack.push(this.DE);
+		this['PUSH nn'](this.DE);
 		this.PC++;
 	},
 	// PUSH HL
 	0xe5: function () {
-		this.stack.push(this.HL);
+		this['PUSH nn'](this.HL);
+		this.PC++;
+	},
+// ----------------------------------------------------------
+	// POP AF
+	0xf1: function () {
+		this.stack.pop('AF');
+		this.PC++;
+	},
+	// POP BC
+	0xc1: function () {
+		this.stack.pop('BC');
+		this.PC++;
+	},
+	// POP DE
+	0xd1: function () {
+		this.stack.pop('DE');
+		this.PC++;
+	},
+	// POP HL
+	0xe1: function () {
+		this.stack.pop('HL');
 		this.PC++;
 	},
 // ----------------------------------------------------------
@@ -375,46 +517,123 @@ Cpu.prototype.instructions = {
 		let n = this.memory[this.HL];
 		this['XOR n'](n);
 	},
-// 8. CP n
+// ----------------------------------------------------------
+	// CP A
+	0xbf: function () {
+		this['CP n'](this.A);
+	},
+	// CP B
+	0xb8: function () {
+		this['CP n'](this.B);
+	},
+	// CP C
+	0xb9: function () {
+		this['CP n'](this.C);
+	},
+	// CP D
+	0xba: function () {
+		this['CP n'](this.D);
+	},
+	// CP E
+	0xbb: function () {
+		this['CP n'](this.E);
+	},
+	// CP H
+	0xbc: function () {
+		this['CP n'](this.H);
+	},
+	// CP L
+	0xbd: function () {
+		this['CP n'](this.L);
+	},
+	// CP (HL)
+	0xbe: function () {
+		let n = this.memory[this.HL];
+		this['CP n'](n);
+	},
+	// CP n
+	0xfe: function () {
+		let n = this.read8(++this.PC);
+		this['CP n'](n);
+	},
 // ----------------------------------------------------------
 	// INC A
 	0x3c: function () {
-		this.A++;
-		this.PC++;
+		this['INC r']('A');
 	},
 	// INC B
 	0x04: function () {
-		this.B++;
-		this.PC++;
+		this['INC r']('B');
 	},
 	// INC C
 	0x0c: function () {
-		this.C++;
-		this.PC++;
+		this['INC r']('C');
 	},
 	// INC D
 	0x14: function () {
-		this.D++;
-		this.PC++;
+		this['INC r']('D');
 	},
 	// INC E
 	0x1c: function () {
-		this.E++;
-		this.PC++;
+		this['INC r']('E');
 	},
 	// INC H
 	0x24: function () {
-		this.H++;
-		this.PC++;
+		this['INC r']('H');
 	},
 	// INC L
 	0x2c: function () {
-		this.L++;
-		this.PC++;
+		this['INC r']('L');
 	},
 // ----------------------------------------------------------
-// 10. DEC n
+	// DEC A
+	0x3d: function () {
+		this['DEC r']('A');
+	},
+	// DEC B
+	0x05: function () {
+		this['DEC r']('B');
+	},
 // ----------------------------------------------------------
+// 16-bits ALU
+// ==========================================================
+	// INC BC
+	0x03: function () {
+		this['INC rr']('BC');
+	},
+	// INC DE
+	0x13: function () {
+		this['INC rr']('DE');
+	},
+	// INC HL
+	0x23: function () {
+		this['INC rr']('HL');
+	},
+	// INC SP
+	0x33: function () {
+		this['INC rr']('SP');
+	},
+
+// Rotates & shifts
+	// RLCA
+	0x07: function () {
+		this.flags.C = this.A >>> 7;
+		this.A = (this.A << 1) & 0xFF | this.flags.C;
+		this.flags.Z = (this.A === 0) | 0;
+		this.flags.N = 0;
+		this.flags.H = 0;
+		this.PC++;
+	},
+	// RLA
+	0x17: function () {
+		let carry = this.A >>> 7;
+		this.A = (this.A << 1) & 0xFF | this.flags.C;
+		this.flags.C = carry;
+		this.flags.Z = (this.A === 0) | 0;
+		this.flags.N = 0;
+		this.flags.H = 0;
+		this.PC++;
+	},
 
 // Jumps
 // ==========================================================
@@ -426,9 +645,40 @@ Cpu.prototype.instructions = {
 	// JR NZ,n
 	0x20: function () {
 		this.code = 'JR NZ,n';
-		let n = 0xFFFFFF00 | this.memory[this.PC + 1];// signed
-		this.PC += 2;
+		let n = this.read8(++this.PC);
+		n = (n <= 0x7F) ? n : 0xFFFFFF00 | n;// signed
+		this.PC++;
 		if (!this.flags.Z) {
+			this.PC += n;
+		}
+	},
+	// JR Z,n
+	0x28: function () {
+		this.code = 'JR Z,n';
+		let n = this.read8(++this.PC);
+		n = (n <= 0x7F) ? n : 0xFFFFFF00 | n;// signed
+		this.PC++;
+		if (this.flags.Z) {
+			this.PC += n;
+		}
+	},
+	// JR NC,n
+	0x30: function () {
+		this.code = 'JR NC,n';
+		let n = this.read8(++this.PC);
+		n = (n <= 0x7F) ? n : 0xFFFFFF00 | n;// signed
+		this.PC++;
+		if (!this.flags.C) {
+			this.PC += n;
+		}
+	},
+	// JR C,n
+	0x38: function () {
+		this.code = 'JR C,n';
+		let n = this.read8(++this.PC);
+		n = (n <= 0x7F) ? n : 0xFFFFFF00 | n;// signed
+		this.PC++;
+		if (this.flags.C) {
 			this.PC += n;
 		}
 	},
@@ -437,8 +687,19 @@ Cpu.prototype.instructions = {
 // ==========================================================
 	// CALL nn
 	0xcd: function () {
+		this.code = 'CALL';
 		let nn = this.read16(++this.PC);
-		this.stack.push(this.PC + 2);
+		this['PUSH nn'](this.PC + 2);
+		this.PC = nn;
+	},
+
+// Returns
+// ==========================================================
+	// RET
+	0xc9: function () {
+		this.code = 'RET';
+		this.SP += 2;
+		let nn = this.read16(this.SP);
 		this.PC = nn;
 	},
 

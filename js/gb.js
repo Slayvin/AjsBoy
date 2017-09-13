@@ -3,6 +3,7 @@
 function gbEmu() {
 	this.name = 'JsBoy';
 	this.programLoaded = false;
+	this.paused = false;
 	this.memory = new Uint8Array(0x10000);
 	this.cpu = new Cpu(this.memory);
 	this.debugger = new gbEmu.debugger(this.cpu, this.memory);
@@ -48,10 +49,19 @@ gbEmu.prototype.init = function () {
 };
 
 gbEmu.prototype.run = function () {
-	for (var i = 0; i < 256; i++) {
+	let i = 0;
+	
+	while (i < 256) {
 		this.step();
+		i++;
+		if (this.cpu.PC === 0x0000) {
+			this.pause();
+			i = 256;
+		}
 	}
-	window.requestAnimationFrame(this.run.bind(this));
+	if (!this.paused) {
+		window.requestAnimationFrame(this.run.bind(this));
+	}
 
 };
 
@@ -61,6 +71,15 @@ gbEmu.prototype.step = function () {
 	this.debugger.update();
 	var iData = new ImageData(new Uint8ClampedArray(this.memory.buffer), 128, 128);
 	this.debugger.vram.putImageData(iData, 0, 0);
+};
+
+gbEmu.prototype.pause = function () {
+	this.paused = !this.paused;
+	if (this.paused) {
+		window.console.log('emulation paused');
+	} else {
+		this.run();
+	}
 };
 
 gbEmu.debugger = function (cpu, memory) {
@@ -88,7 +107,8 @@ gbEmu.debugger = function (cpu, memory) {
 gbEmu.debugger.prototype.update = function () {
 	this.pc.innerHTML = this.cpu.PC.toString(16);
 	this.sp.innerHTML = this.cpu.SP.toString(16);
-//	this.stack[0].innerHTML = this.cpu.stack[0];
+	this.stack[0].innerHTML = this.cpu.read16(0xfffe).toString(16);
+	this.stack[1].innerHTML = this.cpu.read16(0xfffc).toString(16);
 	this.code.innerHTML = this.cpu.code;
 	this.regA.innerHTML = this.cpu.A.toString(16);
 	this.regB.innerHTML = this.cpu.B.toString(16);
