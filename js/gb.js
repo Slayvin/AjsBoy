@@ -4,12 +4,20 @@ function gbEmu() {
 	this.name = 'JsBoy';
 	this.programLoaded = false;
 	this.paused = false;
-	this.memory = new Uint8Array(0x10000);
-	this.cpu = new Cpu(this.memory);
-	this.debugger = new gbEmu.debugger(this.cpu, this.memory);
+	this.memory = new MemController;
+	this.rom = this.memory.rom;
+	this.cpu = new Cpu(this.rom);
+	this.debugger = new gbEmu.debugger(this.cpu, this.rom);
 }
 
-// Load rom
+gbEmu.cyclesPerFrame = 256;
+
+/**
+ * Load program into rom
+ * 
+ * @param {string} name
+ * @returns {Promise}
+ */
 gbEmu.prototype.loadProgram = function (name) {
 	return new Promise(function (resolve, reject) {
 		// Load program.
@@ -22,7 +30,7 @@ gbEmu.prototype.loadProgram = function (name) {
 			let rom = new Uint8Array(xhr.response);
 
 			for (let i = 0; i < rom.length; i++) {
-				this.memory[i] = rom[i];
+				this.rom[i] = rom[i];
 			}
 			if (xhr.readyState === 4) {
 				console.log("Program loaded");
@@ -51,12 +59,12 @@ gbEmu.prototype.init = function () {
 gbEmu.prototype.run = function () {
 	let i = 0;
 	
-	while (i < 256) {
+	while (i < gbEmu.cyclesPerFrame) {
 		this.step();
 		i++;
-		if (this.cpu.PC === 0x0000) {
+		if (this.cpu.PC === 0xffff) {
 			this.pause();
-			i = 256;
+			i = gbEmu.cyclesPerFrame;
 		}
 	}
 	if (!this.paused) {
@@ -66,10 +74,10 @@ gbEmu.prototype.run = function () {
 };
 
 gbEmu.prototype.step = function () {
-	let opcode = this.memory[this.cpu.PC];
+	let opcode = this.rom[this.cpu.PC];
 	this.cpu.execute(opcode);
 	this.debugger.update();
-	var iData = new ImageData(new Uint8ClampedArray(this.memory.buffer), 128, 128);
+	var iData = new ImageData(new Uint8ClampedArray(this.rom.buffer), 128, 128);
 	this.debugger.vram.putImageData(iData, 0, 0);
 };
 

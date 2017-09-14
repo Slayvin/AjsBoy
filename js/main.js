@@ -26,8 +26,11 @@ pauseBtn.onclick = function () {
 
 // TEST =============================================
 function test() {
-	var memory = new Uint8Array(0x10000);
-	var cpu = new Cpu(memory);
+	var memory = new MemController();
+	memory.write8(0, 64);
+	console.log(memory.read8(0));
+
+	var cpu = new Cpu(memory.rom);
 	cpu.A = 0x10;
 	cpu.C = 0x10;
 	cpu.H = 0xab;

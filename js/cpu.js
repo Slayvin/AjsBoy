@@ -1,7 +1,23 @@
 'use strict';
-function Cpu(memory) {
+/**
+ * 
+ * @param {Uint8Array} mem
+ * @returns {Cpu}
+ */
+function Cpu(mem) {
 	// Init memory
-	this.memory = memory;
+	this.memory = mem;
+
+	var TIMA = 0xFF05;
+	var TMA = 0xFF06;
+	var TMC = 0xFF07;
+
+	// Tells if latest executed instruction is 0xCB
+	this.isExtendedInstruction = false;
+
+	// Interrupts flags
+	this.IME = 0;
+//	this.IF=0;
 
 	// 8-bits registers
 	this.A = 0x00; // Used mainly for arithmetic operations
@@ -27,7 +43,7 @@ function Cpu(memory) {
 	// Lowest 4 bits are unused
 
 	let flags = ['Z', 'N', 'H', 'C'];
-	for (var f = 0; f < flags.length; f++) {
+	for (let f = 0; f < flags.length; f++) {
 		Object.defineProperty(this.flags, flags[f], {
 			get: function (offset) {
 				let mask = 1 << (7 - offset);
@@ -74,7 +90,12 @@ function Cpu(memory) {
 
 Cpu.prototype.execute = function (opcode) {
 	try {
-		this.instructions[opcode].apply(this);
+		if (this.isExtendedInstruction) {
+			this.instructions.extended[opcode].apply(this);
+			this.isExtendedInstruction = false;
+		} else {
+			this.instructions[opcode].apply(this);
+		}
 	} catch (err) {
 		window.console.log(err);
 		window.console.log(this.memory);
@@ -91,4 +112,3 @@ Cpu.prototype.read16 = function (addr) {
 Cpu.prototype.read8 = function (addr) {
 	return this.memory[addr];
 };
-

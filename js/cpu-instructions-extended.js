@@ -16,6 +16,7 @@ Cpu.prototype.instructions.extended = {
 		this.flags.Z = (this.A === 0) | 0;
 		this.flags.N = 0;
 		this.flags.H = 0;
+		this.PC++;
 	},
 	// RL B
 	0x10: function () {
@@ -25,6 +26,7 @@ Cpu.prototype.instructions.extended = {
 		this.flags.Z = (this.B === 0) | 0;
 		this.flags.N = 0;
 		this.flags.H = 0;
+		this.PC++;
 	},
 	// RL C
 	0x11: function () {
@@ -34,6 +36,7 @@ Cpu.prototype.instructions.extended = {
 		this.flags.Z = (this.C === 0) | 0;
 		this.flags.N = 0;
 		this.flags.H = 0;
+		this.PC++;
 	},
 // ----------------------------------------------------------------
 	// BIT 7,H
@@ -43,6 +46,7 @@ Cpu.prototype.instructions.extended = {
 		this.flags.Z = !(mask & this.H) | 0;
 		this.flags.N = 0;
 		this.flags.H = 1;
+		this.PC++;
 	}
 
 };

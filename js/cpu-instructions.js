@@ -705,14 +705,8 @@ Cpu.prototype.instructions = {
 
 // Extended instructions
 	0xcb: function () {
-		let opcode = this.memory[this.PC + 1];
-		try {
-			this.instructions.extended[opcode].apply(this);
-		} catch (err) {
-			window.console.log(err);
-			throw 'Extended instruction 0xcb' + opcode.toString(16) + ' not implemented.';
-		}
-		this.PC += 2;
+		this.isExtendedInstruction = true;
+		this.PC++;
 	}
 
 };
