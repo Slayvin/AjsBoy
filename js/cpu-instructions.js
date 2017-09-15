@@ -14,14 +14,14 @@
 		this[r1] = this[r2];
 		this.PC++;
 	};
-	this['LD A,addr'] = function (addr) {
+	this['LD A,addr'] = function (rom, addr) {
 		this.code = 'LD A,' + addr.toString(16);
-		this.A = this.memory[addr];
+		this.A = rom.read8(addr);
 		this.PC++;
 	};
 	this['LD addr,A'] = function (addr) {
 		this.code = 'LD ' + addr.toString(16) + ',A';
-		this.memory[addr] = this.A;
+		this.memory.write(addr, this.A);
 		this.PC++;
 	};
 
@@ -59,8 +59,8 @@
 	};
 	this['PUSH nn'] = function (nn) {
 		this.code = 'PUSH ' + nn.toString(16);
-		this.memory[this.SP] = nn & 0xFF;
-		this.memory[this.SP + 1] = nn >> 8;
+		this.memory.write(this.SP, nn & 0xFF);
+		this.memory.write(this.SP + 1, nn >> 8);
 		this.SP -= 2;
 	};
 
@@ -83,33 +83,33 @@ Cpu.prototype.instructions = {
 // 8-bits Loads
 // ==========================================================
 	// LD B,n
-	0x06: function () {
-		let n = this.read8(++this.PC);
+	0x06: function (mem) {
+		let n = mem.read8(++this.PC);
 		this['LD r,n']('B', n);
 	},
 	// LD C,n
-	0x0e: function () {
-		let n = this.read8(++this.PC);
+	0x0e: function (mem) {
+		let n = mem.read8(++this.PC);
 		this['LD r,n']('C', n);
 	},
 	// LD D,n
-	0x16: function () {
-		let n = this.read8(++this.PC);
+	0x16: function (mem) {
+		let n = mem.read8(++this.PC);
 		this['LD r,n']('D', n);
 	},
 	// LD E,n
-	0x1e: function () {
-		let n = this.read8(++this.PC);
+	0x1e: function (mem) {
+		let n = mem.read8(++this.PC);
 		this['LD r,n']('E', n);
 	},
 	// LD H,n
-	0x26: function () {
-		let n = this.read8(++this.PC);
+	0x26: function (mem) {
+		let n = mem.read8(++this.PC);
 		this['LD r,n']('H', n);
 	},
 	// LD L,n
-	0x2e: function () {
-		let n = this.read8(++this.PC);
+	0x2e: function (mem) {
+		let n = mem.read8(++this.PC);
 		this['LD r,n']('L', n);
 	},
 	// ------------------------------------------------------
@@ -283,30 +283,30 @@ Cpu.prototype.instructions = {
 		this['LD r1,r2']('A', 'A');
 	},
 	// LD A,n
-	0x3e: function () {
-		let n = this.read8(++this.PC);
+	0x3e: function (mem) {
+		let n = mem.read8(++this.PC);
 		this['LD r,n']('A', n);
 	},
 // LD A,addr
 // ----------------------------------------------------------
 	// LD A,(BC)
-	0x0a: function () {
+	0x0a: function (mem) {
 		let addr = this.BC;
-		this['LD A,addr'](addr);
+		this['LD A,addr'](mem, addr);
 	},
 	// LD A,(DE)
-	0x1a: function () {
+	0x1a: function (mem) {
 		let addr = this.DE;
-		this['LD A,addr'](addr);
+		this['LD A,addr'](mem, addr);
 	},
 	// LD A,(HL)
-	0x7e: function () {
+	0x7e: function (mem) {
 		let addr = this.HL;
-		this['LD A,addr'](addr);
+		this['LD A,addr'](mem, addr);
 	},
 	// LD A,(nn)
-	0xfa: function () {
-		let addr = this.read16(++this.PC);
+	0xfa: function (mem) {
+		let addr = mem.read16(++this.PC);
 		this.PC++;
 		this['LD A,addr'](addr);
 	},
@@ -328,17 +328,17 @@ Cpu.prototype.instructions = {
 		this['LD addr,A'](addr);
 	},
 	// LD (nn),A
-	0xea: function () {
-		let addr = this.read16(++this.PC);
+	0xea: function (mem) {
+		let addr = mem.read16(++this.PC);
 		this.PC++;
 		this['LD addr,A'](addr);
 	},
 // ----------------------------------------------------------
 	// LD A,(C)
-	0xf2: function () {
+	0xf2: function (mem) {
 		this.code = 'LD A,(C)';
 		let addr = 0xff00 + this.C;
-		this.A = this.memory[addr];
+		this.A = mem.read8(addr);
 		this.PC++;
 
 	},
@@ -346,78 +346,78 @@ Cpu.prototype.instructions = {
 	0xe2: function () {
 		this.code = 'LD (C),A';
 		let addr = 0xff00 + this.C;
-		this.memory[addr] = this.A;
+		this.memory.write(addr, this.A);
 		this.PC++;
 
 	},
 	// LD A,(HLD) | LD A,(HL-) | LDD A,(HL)
-	0x3a: function () {
+	0x3a: function (mem) {
 		this.code = 'LD A,(HL-)';
-		this.A = this.memory[this.HL];
+		this.A = mem.read8(this.HL);
 		this.HL--;
 		this.PC++;
 	},
 	// LD (HLD),A | LD (HL-),A | LDD (HL),A
 	0x32: function () {
 		this.code = 'LD (HL-),A';
-		this.memory[this.HL] = this.A;
+		this.memory.write(this.HL, this.A);
 		this.HL--;
 		this.PC++;
 	},
 	// LD A,(HLI) | LD A,(HL+) | LDI A,(HL)
-	0x2a: function () {
+	0x2a: function (mem) {
 		this.code = 'LD A,(HL+)';
-		this.A = this.memory[this.HL];
+		this.A = mem.read8(this.HL);
 		this.HL++;
 		this.PC++;
 	},
 	// LD (HLI),A | LD (HL+),A | LDI (HL),A
 	0x22: function () {
 		this.code = 'LD (HL+),A';
-		this.memory[this.HL] = this.A;
+		this.memory.write(this.HL, this.A);
 		this.HL++;
 		this.PC++;
 	},
 	// LDH (n),A
-	0xe0: function () {
+	0xe0: function (mem) {
 		this.code = 'LDH (n),A';
-		let n = this.read8(++this.PC);
+		let n = mem.read8(++this.PC);
 		let addr = 0xff00 + n;
-		this.memory[addr] = this.A;
+		this.memory.write(addr, this.A);
 		this.PC++;
 	},
 	// LDH A,(n)
-	0xf0: function () {
+	0xf0: function (mem) {
 		this.code = 'LDH A,(n)';
-		let n = this.read8(++this.PC);
+		let n = mem.read8(++this.PC);
 		let addr = 0xff00 + n;
-		this.A = this.memory[addr];
+		this.A = mem.read8(addr);
 		this.PC++;
 	},
 
 // 16-bits loads
 // ========================================================== 
 	// LD BC,nn
-	0x01: function () {
-		let nn = this.read16(++this.PC);
+	0x01: function (mem) {
+		let nn = mem.read16(++this.PC);
 		this.PC++;
 		this['LD rr,nn']('BC', nn);
 	},
 	// LD DE,nn
-	0x11: function () {
-		let nn = this.read16(++this.PC);
+	0x11: function (mem) {
+		let nn = mem.read16(++this.PC);
 		this.PC++;
 		this['LD rr,nn']('DE', nn);
 	},
 	// LD HL,nn
-	0x21: function () {
-		let nn = this.read16(++this.PC);
+	0x21: function (mem) {
+		let nn = mem.read16(++this.PC);
 		this.PC++;
 		this['LD rr,nn']('HL', nn);
 	},
 	// LD SP,nn
-	0x31: function () {
-		let nn = this.read16(++this.PC);
+	0x31: function (mem) {
+		let nn = mem.read16(++this.PC);
 		this.PC++;
 		this['LD rr,nn']('SP', nn);
 	},
@@ -513,8 +513,8 @@ Cpu.prototype.instructions = {
 		this['XOR n'](this.L);
 	},
 	// XOR (HL)
-	0xae: function () {
-		let n = this.memory[this.HL];
+	0xae: function (mem) {
+		let n = mem.read8(this.HL);
 		this['XOR n'](n);
 	},
 // ----------------------------------------------------------
@@ -547,13 +547,13 @@ Cpu.prototype.instructions = {
 		this['CP n'](this.L);
 	},
 	// CP (HL)
-	0xbe: function () {
-		let n = this.memory[this.HL];
+	0xbe: function (mem) {
+		let n = mem.read8(this.HL);
 		this['CP n'](n);
 	},
 	// CP n
-	0xfe: function () {
-		let n = this.read8(++this.PC);
+	0xfe: function (mem) {
+		let n = mem.read8(++this.PC);
 		this['CP n'](n);
 	},
 // ----------------------------------------------------------
@@ -643,9 +643,9 @@ Cpu.prototype.instructions = {
 // 4. JR n
 // 5. JR cc,n
 	// JR NZ,n
-	0x20: function () {
+	0x20: function (mem) {
 		this.code = 'JR NZ,n';
-		let n = this.read8(++this.PC);
+		let n = mem.read8(++this.PC);
 		n = (n <= 0x7F) ? n : 0xFFFFFF00 | n;// signed
 		this.PC++;
 		if (!this.flags.Z) {
@@ -653,9 +653,9 @@ Cpu.prototype.instructions = {
 		}
 	},
 	// JR Z,n
-	0x28: function () {
+	0x28: function (mem) {
 		this.code = 'JR Z,n';
-		let n = this.read8(++this.PC);
+		let n = mem.read8(++this.PC);
 		n = (n <= 0x7F) ? n : 0xFFFFFF00 | n;// signed
 		this.PC++;
 		if (this.flags.Z) {
@@ -663,9 +663,9 @@ Cpu.prototype.instructions = {
 		}
 	},
 	// JR NC,n
-	0x30: function () {
+	0x30: function (mem) {
 		this.code = 'JR NC,n';
-		let n = this.read8(++this.PC);
+		let n = mem.read8(++this.PC);
 		n = (n <= 0x7F) ? n : 0xFFFFFF00 | n;// signed
 		this.PC++;
 		if (!this.flags.C) {
@@ -673,9 +673,9 @@ Cpu.prototype.instructions = {
 		}
 	},
 	// JR C,n
-	0x38: function () {
+	0x38: function (mem) {
 		this.code = 'JR C,n';
-		let n = this.read8(++this.PC);
+		let n = mem.read8(++this.PC);
 		n = (n <= 0x7F) ? n : 0xFFFFFF00 | n;// signed
 		this.PC++;
 		if (this.flags.C) {
@@ -686,9 +686,9 @@ Cpu.prototype.instructions = {
 // Calls
 // ==========================================================
 	// CALL nn
-	0xcd: function () {
+	0xcd: function (mem) {
 		this.code = 'CALL';
-		let nn = this.read16(++this.PC);
+		let nn = mem.read16(++this.PC);
 		this['PUSH nn'](this.PC + 2);
 		this.PC = nn;
 	},
@@ -696,10 +696,10 @@ Cpu.prototype.instructions = {
 // Returns
 // ==========================================================
 	// RET
-	0xc9: function () {
+	0xc9: function (mem) {
 		this.code = 'RET';
 		this.SP += 2;
-		let nn = this.read16(this.SP);
+		let nn = mem.read16(this.SP);
 		this.PC = nn;
 	},
 

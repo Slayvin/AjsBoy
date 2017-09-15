@@ -27,10 +27,10 @@ pauseBtn.onclick = function () {
 // TEST =============================================
 function test() {
 	var memory = new MemController();
-	memory.write8(0, 64);
+	memory.write(0, 64);
 	console.log(memory.read8(0));
 
-	var cpu = new Cpu(memory.rom);
+	var cpu = new Cpu(memory);
 	cpu.A = 0x10;
 	cpu.C = 0x10;
 	cpu.H = 0xab;
@@ -44,7 +44,7 @@ function test() {
 	cpu.HL = 0xa5de;
 	console.log('HL:', cpu.H.toString(16), cpu.L.toString(16), cpu.HL.toString(16));
 
-	cpu.A = 0xf0;
+	cpu.A = 0x31;
 	console.log(cpu.A, cpu.flags);
 	cpu.execute(0x17);
 	console.log(cpu.A, cpu.flags);

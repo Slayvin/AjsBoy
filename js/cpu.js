@@ -82,33 +82,24 @@ function Cpu(mem) {
 
 	this.stack = {
 		pop: function (rr) {
-			this[rr] = this.read16(this.SP);
+			this[rr] = this.memory.read16(this.SP);
 			this.SP += 2;
 		}.bind(this),
 	};
 }
 
 Cpu.prototype.execute = function (opcode) {
-	try {
+//	try {
 		if (this.isExtendedInstruction) {
-			this.instructions.extended[opcode].apply(this);
+			this.instructions.extended[opcode].call(this, this.memory);
 			this.isExtendedInstruction = false;
 		} else {
-			this.instructions[opcode].apply(this);
+			this.instructions[opcode].call(this, this.memory);
 		}
-	} catch (err) {
-		window.console.log(err);
-		window.console.log(this.memory);
-		throw 'Instruction 0x' + opcode.toString(16) + ' not implemented.';
-	}
+//	} catch (err) {
+//		window.console.log(err);
+//		window.console.log(this.memory.rom);
+//		throw 'Instruction 0x' + opcode.toString(16) + ' not implemented.';
+//	}
 };
 
-Cpu.prototype.read16 = function (addr) {
-	let lo = this.memory[addr];
-	let hi = this.memory[addr + 1];
-	return hi << 8 | lo;
-};
-
-Cpu.prototype.read8 = function (addr) {
-	return this.memory[addr];
-};

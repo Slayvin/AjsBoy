@@ -4,13 +4,13 @@ function gbEmu() {
 	this.name = 'JsBoy';
 	this.programLoaded = false;
 	this.paused = false;
-	this.memory = new MemController;
-	this.rom = this.memory.rom;
-	this.cpu = new Cpu(this.rom);
-	this.debugger = new gbEmu.debugger(this.cpu, this.rom);
+	this.memory = new MemController();
+	this.cpu = new Cpu(this.memory);
+	this.lcd = new Lcd();
+	this.debugger = new gbEmu.debugger(this.cpu, this.memory, this.lcd);
 }
 
-gbEmu.cyclesPerFrame = 256;
+gbEmu.cyclesPerFrame = 64;
 
 /**
  * Load program into rom
@@ -30,7 +30,7 @@ gbEmu.prototype.loadProgram = function (name) {
 			let rom = new Uint8Array(xhr.response);
 
 			for (let i = 0; i < rom.length; i++) {
-				this.rom[i] = rom[i];
+				this.memory.write(i, rom[i]);
 			}
 			if (xhr.readyState === 4) {
 				console.log("Program loaded");
@@ -58,7 +58,7 @@ gbEmu.prototype.init = function () {
 
 gbEmu.prototype.run = function () {
 	let i = 0;
-	
+
 	while (i < gbEmu.cyclesPerFrame) {
 		this.step();
 		i++;
@@ -67,6 +67,7 @@ gbEmu.prototype.run = function () {
 			i = gbEmu.cyclesPerFrame;
 		}
 	}
+	this.debugger.update();
 	if (!this.paused) {
 		window.requestAnimationFrame(this.run.bind(this));
 	}
@@ -74,11 +75,12 @@ gbEmu.prototype.run = function () {
 };
 
 gbEmu.prototype.step = function () {
-	let opcode = this.rom[this.cpu.PC];
+	let addr = this.cpu.PC;
+	let opcode = this.memory.read8(addr);
 	this.cpu.execute(opcode);
-	this.debugger.update();
-	var iData = new ImageData(new Uint8ClampedArray(this.rom.buffer), 128, 128);
-	this.debugger.vram.putImageData(iData, 0, 0);
+	if (this.paused) {
+		this.debugger.update();
+	}
 };
 
 gbEmu.prototype.pause = function () {
@@ -90,9 +92,10 @@ gbEmu.prototype.pause = function () {
 	}
 };
 
-gbEmu.debugger = function (cpu, memory) {
+gbEmu.debugger = function (cpu, memory, lcd) {
 	this.cpu = cpu;
 	this.memory = memory;
+	this.lcd = lcd;
 
 	this.pc = document.querySelector('#pc');
 	this.code = document.querySelector('#code');
@@ -111,12 +114,13 @@ gbEmu.debugger = function (cpu, memory) {
 	this.flagH = document.querySelector('#flag-H');
 	this.flagC = document.querySelector('#flag-C');
 	this.vram = document.querySelector('#vram canvas').getContext("2d");
+	this.lcdBuffer = document.querySelector('#lcd-buffer canvas').getContext("2d");
 };
 gbEmu.debugger.prototype.update = function () {
 	this.pc.innerHTML = this.cpu.PC.toString(16);
 	this.sp.innerHTML = this.cpu.SP.toString(16);
-	this.stack[0].innerHTML = this.cpu.read16(0xfffe).toString(16);
-	this.stack[1].innerHTML = this.cpu.read16(0xfffc).toString(16);
+	this.stack[0].innerHTML = this.memory.read16(0xfffe).toString(16);
+	this.stack[1].innerHTML = this.memory.read16(0xfffc).toString(16);
 	this.code.innerHTML = this.cpu.code;
 	this.regA.innerHTML = this.cpu.A.toString(16);
 	this.regB.innerHTML = this.cpu.B.toString(16);
@@ -130,4 +134,10 @@ gbEmu.debugger.prototype.update = function () {
 	this.flagN.innerHTML = this.cpu.flags.N.toString(2);
 	this.flagH.innerHTML = this.cpu.flags.H.toString(2);
 	this.flagC.innerHTML = this.cpu.flags.C.toString(2);
+
+	var iData = new ImageData(new Uint8ClampedArray(this.memory.rom.buffer), 128, 128);
+	this.vram.putImageData(iData, 0, 0);
+
+	var iData = new ImageData(this.lcd.buffer, 256, 256);
+	this.lcdBuffer.putImageData(iData, 0, 0);
 };

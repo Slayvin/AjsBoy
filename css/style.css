@@ -6,14 +6,21 @@ body{
 	background-color: #888;
 	border: 1px solid #333;
 	padding:2px;
-	width: 512px;
-	height: 512px;
-	
+	width: 384px;
+	height: 384px;
+	display: inline-block;
 }
 #vram canvas{
-	transform: scale(4);
-	transform-origin: top left;
+	width: 100%;
 	image-rendering: pixelated;
+}
+#lcd-buffer{
+	background-color: #ccc;
+	border: 1px solid #333;
+	padding:2px;
+	width: 256px;
+	height: 256px;
+	display: inline-block;
 }
 .table{
 	font-family : courier;
