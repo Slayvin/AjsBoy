@@ -4,6 +4,7 @@
  * @returns {Lcd}
  */
 function Lcd() {
+	this.background = new Uint8ClampedArray(0x40000);// 256px * 256px * [r,g,b,a]
 	this.buffer = new Uint8ClampedArray(0x40000);// 256px * 256px * [r,g,b,a]
 
 	this.reset = function () {

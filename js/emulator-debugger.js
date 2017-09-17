@@ -1,97 +1,12 @@
 'use strict';
 
-function gbEmu() {
-	this.name = 'JsBoy';
-	this.programLoaded = false;
-	this.paused = false;
-	this.memory = new MemController();
-	this.cpu = new Cpu(this.memory);
-	this.lcd = new Lcd();
-	this.debugger = new gbEmu.debugger(this.cpu, this.memory, this.lcd);
-}
-
-gbEmu.cyclesPerFrame = 64;
-
 /**
- * Load program into rom
  * 
- * @param {string} name
- * @returns {Promise}
+ * @param {Cpu} cpu
+ * @param {MemController} memory
+ * @param {Lcd} lcd
+ * @returns {gbEmu.debugger}
  */
-gbEmu.prototype.loadProgram = function (name) {
-	return new Promise(function (resolve, reject) {
-		// Load program.
-		var xhr = new XMLHttpRequest;
-
-		xhr.open("GET", "./roms/" + name, true);
-		xhr.responseType = "arraybuffer";
-
-		xhr.onload = function () {
-			let rom = new Uint8Array(xhr.response);
-
-			for (let i = 0; i < rom.length; i++) {
-				this.memory.write(i, rom[i]);
-			}
-			if (xhr.readyState === 4) {
-				console.log("Program loaded");
-				this.programLoaded = true;
-				resolve(xhr.response);
-			} else {
-				reject({
-					status: this.status
-				});
-			}
-		}.bind(this);
-
-		xhr.send();
-	}.bind(this));
-
-};
-
-gbEmu.prototype.init = function () {
-	// reset Program counter
-	this.cpu.PC = 0x0000;
-	this.loadProgram('DMG_ROM.bin').then(function () {
-		this.run();
-	}.bind(this));
-};
-
-gbEmu.prototype.run = function () {
-	let i = 0;
-
-	while (i < gbEmu.cyclesPerFrame) {
-		this.step();
-		i++;
-		if (this.cpu.PC === 0xffff) {
-			this.pause();
-			i = gbEmu.cyclesPerFrame;
-		}
-	}
-	this.debugger.update();
-	if (!this.paused) {
-		window.requestAnimationFrame(this.run.bind(this));
-	}
-
-};
-
-gbEmu.prototype.step = function () {
-	let addr = this.cpu.PC;
-	let opcode = this.memory.read8(addr);
-	this.cpu.execute(opcode);
-	if (this.paused) {
-		this.debugger.update();
-	}
-};
-
-gbEmu.prototype.pause = function () {
-	this.paused = !this.paused;
-	if (this.paused) {
-		window.console.log('emulation paused');
-	} else {
-		this.run();
-	}
-};
-
 gbEmu.debugger = function (cpu, memory, lcd) {
 	this.cpu = cpu;
 	this.memory = memory;
@@ -114,8 +29,10 @@ gbEmu.debugger = function (cpu, memory, lcd) {
 	this.flagH = document.querySelector('#flag-H');
 	this.flagC = document.querySelector('#flag-C');
 	this.vram = document.querySelector('#vram canvas').getContext("2d");
+	this.memoryMap = document.querySelector('#memory canvas').getContext("2d");
 	this.lcdBuffer = document.querySelector('#lcd-buffer canvas').getContext("2d");
 };
+
 gbEmu.debugger.prototype.update = function () {
 	this.pc.innerHTML = this.cpu.PC.toString(16);
 	this.sp.innerHTML = this.cpu.SP.toString(16);
@@ -135,9 +52,12 @@ gbEmu.debugger.prototype.update = function () {
 	this.flagH.innerHTML = this.cpu.flags.H.toString(2);
 	this.flagC.innerHTML = this.cpu.flags.C.toString(2);
 
-	var iData = new ImageData(new Uint8ClampedArray(this.memory.rom.buffer), 128, 128);
-	this.vram.putImageData(iData, 0, 0);
+	var iData = new ImageData(new Uint8ClampedArray(this.memory.memory.buffer), 64, 256);
+	this.memoryMap.putImageData(iData, 0, 0);
 
 	var iData = new ImageData(this.lcd.buffer, 256, 256);
 	this.lcdBuffer.putImageData(iData, 0, 0);
+	
+	var iData = new ImageData(new Uint8ClampedArray(this.memory.vram,0,0x2000), 64, 32);
+	this.vram.putImageData(iData, 0, 0);
 };

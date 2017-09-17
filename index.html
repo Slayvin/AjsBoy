@@ -113,8 +113,11 @@
 				<button id="run">Run</button>
 				<input id="debug" name="debug" type="checkbox"> Debug
 			</div>
+			<div id="memory">
+				<canvas width=64 height=256></canvas>
+			</div>
 			<div id="vram">
-				<canvas width=128 height=128></canvas>
+				<canvas width=64 height=32></canvas>
 			</div>
 			<div id="lcd-buffer">
 				<canvas width=256 height=256></canvas>
@@ -125,7 +128,8 @@
 		<script type="application/javascript" src="js/cpu.js"></script>
 		<script type="application/javascript" src="js/cpu-instructions.js"></script>
 		<script type="application/javascript" src="js/cpu-instructions-extended.js"></script>
-		<script type="application/javascript" src="js/gb.js"></script>
+		<script type="application/javascript" src="js/emulator.js"></script>
+		<script type="application/javascript" src="js/emulator-debugger.js"></script>
 		<script type="application/javascript" src="js/main.js"></script>
 	</body>
 
