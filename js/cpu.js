@@ -89,17 +89,17 @@ function Cpu(mem) {
 }
 
 Cpu.prototype.execute = function (opcode) {
-//	try {
+	try {
 		if (this.isExtendedInstruction) {
 			this.instructions.extended[opcode].call(this, this.memory);
 			this.isExtendedInstruction = false;
 		} else {
 			this.instructions[opcode].call(this, this.memory);
 		}
-//	} catch (err) {
-//		window.console.log(err);
-//		window.console.log(this.memory.memory);
-//		throw 'Instruction 0x' + opcode.toString(16) + ' not implemented.';
-//	}
+	} catch (err) {
+		window.console.log(err);
+		window.console.log(this.memory.memory);
+		throw 'Instruction 0x' + opcode.toString(16) + ' not implemented.';
+	}
 };
 

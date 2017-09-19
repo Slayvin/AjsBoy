@@ -3,7 +3,7 @@
 function gbEmu() {
 	this.name = 'JsBoy';
 	this.programLoaded = false;
-	this.paused = false;
+	this.paused = !false;
 	this.memory = new MemController();
 	this.cpu = new Cpu(this.memory);
 	this.lcd = new Lcd();
@@ -38,7 +38,7 @@ gbEmu.prototype.loadProgram = function (name, asCartridge) {
 				if (isCartridge) {
 					let titleData = new Uint8Array(rom.buffer, 0x134, 0xF);
 					let title = String.fromCharCode(...titleData);
-					console.log("Program loaded: " , title);
+					console.log("Program loaded: ", title);
 				}
 				this.programLoaded = true;
 				resolve(xhr.response);
@@ -78,6 +78,10 @@ gbEmu.prototype.run = function () {
 			i = gbEmu.cyclesPerFrame;
 		}
 	}
+	// TEST vblank
+	var line = this.memory.read8(0xff44);
+	this.memory.write(0xff44, ++line);
+	
 	this.debugger.update();
 	if (!this.paused) {
 		window.requestAnimationFrame(this.run.bind(this));

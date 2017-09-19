@@ -27,19 +27,40 @@
 
 	// 8-bits ALU
 	// ======================================================
+	this['SUB n'] = function (n) {
+		this.code = 'SUB n';
+		this.flags.Z = this.A === n ? 1 : 0;
+		this.flags.N = 1;
+		this.flags.H = (this.A & 0xF) < (n & 0xF) ? 1 : 0;
+		this.flags.C = this.A < n ? 1 : 0;
+		this.A = (this.A - n) & 0xff;
+		this.PC++;
+	};
 	this['XOR n'] = function (n) {
 		this.code = 'XOR n';
-		this.A = n ^ this.A;
+		this.A = (n ^ this.A) & 0xFF;
+		this.flags.Z = this.A === 0 ? 1 : 0;
+		this.flags.N = 0;
+		this.flags.H = 0;
+		this.flags.C = 0;
 		this.PC++;
 	};
 	this['INC r'] = function (r) {
 		this.code = 'INC ' + r;
+		let val = this[r];
 		this[r] = (this[r] + 1) & 0xff;
+		this.flags.Z = this[r] === 0 ? 1 : 0;
+		this.flags.N = 0;
+		this.flags.H = (this[r] & 0xF) < (val & 0xF) ? 1 : 0;//?????
 		this.PC++;
 	};
 	this['DEC r'] = function (r) {
 		this.code = 'DEC ' + r;
+		let val = this[r];
 		this[r] = (this[r] - 1) & 0xff;
+		this.flags.Z = this[r] === 0 ? 1 : 0;
+		this.flags.N = 1;
+		this.flags.H = (this[r] & 0xF) < (val & 0xF) ? 1 : 0;//?????
 		this.PC++;
 	};
 	this['CP n'] = function (n) {
@@ -80,6 +101,10 @@
 
 // All basic Operation codes
 Cpu.prototype.instructions = {
+	// NOP
+	0x0: function () {
+		this.PC++;
+	},
 // 8-bits Loads
 // ==========================================================
 	// LD B,n
@@ -476,7 +501,34 @@ Cpu.prototype.instructions = {
 // ----------------------------------------------------------
 // 2. ADC A,n
 // ----------------------------------------------------------
-// 3. SUB n
+	// SUB B
+	0x90: function () {
+		this['SUB n'](this.B);
+	},
+	// SUB C
+	0x91: function () {
+		this['SUB n'](this.C);
+	},
+	// SUB D
+	0x92: function () {
+		this['SUB n'](this.D);
+	},
+	// SUB E
+	0x93: function () {
+		this['SUB n'](this.E);
+	},
+	// SUB H
+	0x94: function () {
+		this['SUB n'](this.H);
+	},
+	// SUB L
+	0x95: function () {
+		this['SUB n'](this.L);
+	},
+	// SUB A
+	0x97: function () {
+		this['SUB n'](this.A);
+	},
 // ----------------------------------------------------------
 // 4. SBC A,n
 // ----------------------------------------------------------
@@ -594,6 +646,26 @@ Cpu.prototype.instructions = {
 	0x05: function () {
 		this['DEC r']('B');
 	},
+	// DEC C
+	0x0d: function () {
+		this['DEC r']('C');
+	},
+	// DEC D
+	0x15: function () {
+		this['DEC r']('D');
+	},
+	// DEC E
+	0x1d: function () {
+		this['DEC r']('E');
+	},
+	// DEC H
+	0x25: function () {
+		this['DEC r']('H');
+	},
+	// DEC L
+	0x2d: function () {
+		this['DEC r']('L');
+	},
 // ----------------------------------------------------------
 // 16-bits ALU
 // ==========================================================
@@ -617,6 +689,7 @@ Cpu.prototype.instructions = {
 // Rotates & shifts
 	// RLCA
 	0x07: function () {
+		this.code = 'RLCA';
 		this.flags.C = this.A >>> 7;
 		this.A = (this.A << 1) & 0xFF | this.flags.C;
 		this.flags.Z = (this.A === 0) | 0;
@@ -626,6 +699,7 @@ Cpu.prototype.instructions = {
 	},
 	// RLA
 	0x17: function () {
+		this.code = 'RLA';
 		let carry = this.A >>> 7;
 		this.A = (this.A << 1) & 0xFF | this.flags.C;
 		this.flags.C = carry;
@@ -637,7 +711,12 @@ Cpu.prototype.instructions = {
 
 // Jumps
 // ==========================================================
-// 1. JP nn
+	// JP nn
+	0xc3: function (mem) {
+		let addr = mem.read16(++this.PC);
+		this.code = 'JP ' + addr.toString(16);
+		this.PC = addr;
+	},
 // 2. JP cc,nn
 // 3. JP (HL)
 // 4. JR n
@@ -705,6 +784,7 @@ Cpu.prototype.instructions = {
 
 // Extended instructions
 	0xcb: function () {
+		this.code = '...';
 		this.isExtendedInstruction = true;
 		this.PC++;
 	}

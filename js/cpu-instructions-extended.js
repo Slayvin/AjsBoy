@@ -10,32 +10,35 @@ Cpu.prototype.instructions.extended = {
 // RL n
 	// RL A
 	0x17: function () {
+		this.code = 'RL A';
 		let carry = this.A >>> 7;
 		this.A = (this.A << 1) & 0xFF | this.flags.C;
-		this.flags.C = carry;
 		this.flags.Z = (this.A === 0) | 0;
 		this.flags.N = 0;
 		this.flags.H = 0;
+		this.flags.C = carry;
 		this.PC++;
 	},
 	// RL B
 	0x10: function () {
+		this.code = 'RL B';
 		let carry = this.B >>> 7;
 		this.B = (this.B << 1) & 0xFF | this.flags.C;
-		this.flags.C = carry;
 		this.flags.Z = (this.B === 0) | 0;
 		this.flags.N = 0;
 		this.flags.H = 0;
+		this.flags.C = carry;
 		this.PC++;
 	},
 	// RL C
 	0x11: function () {
+		this.code = 'RL C';
 		let carry = this.C >>> 7;
 		this.C = (this.C << 1) & 0xFF | this.flags.C;
-		this.flags.C = carry;
 		this.flags.Z = (this.C === 0) | 0;
 		this.flags.N = 0;
 		this.flags.H = 0;
+		this.flags.C = carry;
 		this.PC++;
 	},
 // ----------------------------------------------------------------
