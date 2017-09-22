@@ -28,8 +28,12 @@ function MemController() {
 	};
 
 	this.read16 = function (addr) {
-		let lo = this.memory[addr];
-		let hi = this.memory[addr + 1];
+		var lo = this.memory[addr];
+		var hi = this.memory[addr + 1];
 		return hi << 8 | lo;
 	};
+}
+
+if (typeof exports !== 'undefined') {
+	exports.MemController = MemController;
 }

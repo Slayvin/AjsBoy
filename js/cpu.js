@@ -5,6 +5,7 @@
  * @returns {Cpu}
  */
 function Cpu(mem) {
+	'use strict';
 	// Init memory
 	this.memory = mem;
 
@@ -42,15 +43,15 @@ function Cpu(mem) {
 	// C: Carry      (bit 4): is set when a carry from bit 7 is done in arithmetical operation
 	// Lowest 4 bits are unused
 
-	let flags = ['Z', 'N', 'H', 'C'];
-	for (let f = 0; f < flags.length; f++) {
+	var flags = ['Z', 'N', 'H', 'C'];
+	for (var f = 0; f < flags.length; f++) {
 		Object.defineProperty(this.flags, flags[f], {
 			get: function (offset) {
-				let mask = 1 << (7 - offset);
+				var mask = 1 << (7 - offset);
 				return ((this.F & mask) !== 0) | 0;
 			}.bind(this, f),
 			set: function (offset, val) {
-				let mask = 1 << (7 - offset);
+				var mask = 1 << (7 - offset);
 				if (val == 0) {
 					this.F &= ~mask;
 				} else {
@@ -65,27 +66,21 @@ function Cpu(mem) {
 	//	BC = () => this.B << 8 | this.C;
 	//	DE = () => this.D << 8 | this.E;
 	//	HL = () => this.H << 8 | this.L;
-	let registers = ['AF', 'BC', 'DE', 'HL'];
+	var registers = ['AF', 'BC', 'DE', 'HL'];
 	for (var r = 0; r < registers.length; r++) {
-		let hi = registers[r].substring(0, 1);
-		let lo = registers[r].substr(-1);
+		var hi = registers[r].substring(0, 1);
+		var lo = registers[r].substr(-1);
 		Object.defineProperty(this, registers[r], {
-			get: function () {
-				return this[hi] << 8 | this[lo];
-			},
-			set: function (val) {
-				this[hi] = val >> 8;
-				this[lo] = val & 0xFF;
-			}
+			get: function (registers) {
+				return this[registers.hi] << 8 | this[registers.lo];
+			}.bind(this, {'hi': hi, 'lo': lo}),
+			set: function (registers, val) {
+				this[registers.hi] = val >> 8;
+				this[registers.lo] = val & 0xFF;
+			}.bind(this, {'hi': hi, 'lo': lo})
 		});
 	}
 
-	this.stack = {
-		pop: function (rr) {
-			this[rr] = this.memory.read16(this.SP);
-			this.SP += 2;
-		}.bind(this),
-	};
 }
 
 Cpu.prototype.execute = function (opcode) {
@@ -103,3 +98,6 @@ Cpu.prototype.execute = function (opcode) {
 	}
 };
 
+if (typeof exports !== 'undefined') {
+	exports.Cpu = Cpu;
+}

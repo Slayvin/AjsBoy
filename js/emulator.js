@@ -10,7 +10,7 @@ function gbEmu() {
 	this.debugger = new gbEmu.debugger(this.cpu, this.memory, this.lcd);
 }
 
-gbEmu.cyclesPerFrame = 64;
+gbEmu.cyclesPerFrame = 4096;
 
 /**
  * Load program into rom
@@ -73,7 +73,7 @@ gbEmu.prototype.run = function () {
 	while (i < gbEmu.cyclesPerFrame) {
 		this.step();
 		i++;
-		if (this.cpu.PC === 0xffff) {
+		if (this.cpu.PC === 0x0040) {
 			this.pause();
 			i = gbEmu.cyclesPerFrame;
 		}
