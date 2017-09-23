@@ -1,3 +1,5 @@
+/* global gbEmu */
+/* global Lcd */
 'use strict';
 
 /**
@@ -7,9 +9,9 @@
  * @param {Lcd} lcd
  * @returns {gbEmu.debugger}
  */
-gbEmu.debugger = function (cpu, memory, lcd) {
+gbEmu.debugger = function (cpu, mc, lcd) {
 	this.cpu = cpu;
-	this.memory = memory;
+	this.mmu = mc;
 	this.lcd = lcd;
 
 	this.pc = document.querySelector('#pc');
@@ -28,16 +30,20 @@ gbEmu.debugger = function (cpu, memory, lcd) {
 	this.flagN = document.querySelector('#flag-N');
 	this.flagH = document.querySelector('#flag-H');
 	this.flagC = document.querySelector('#flag-C');
-	this.vram = document.querySelector('#vram canvas').getContext("2d");
+	this.bgMap = document.querySelector('#lcd-background canvas').getContext("2d");
+	this.tileMap = document.querySelector('#tile-map canvas').getContext("2d");
+	this.bgPalette = document.querySelector('#palette-bg canvas').getContext("2d");
+	this.objPalette0 = document.querySelector('#palette-0 canvas').getContext("2d");
+	this.objPalette1 = document.querySelector('#palette-1 canvas').getContext("2d");
 	this.memoryMap = document.querySelector('#memory canvas').getContext("2d");
-	this.lcdBuffer = document.querySelector('#lcd-buffer canvas').getContext("2d");
+	this.lcdBuffer = document.querySelector('#lcd canvas').getContext("2d");
 };
 
 gbEmu.debugger.prototype.update = function () {
 	this.pc.innerHTML = this.cpu.PC.toString(16);
 	this.sp.innerHTML = this.cpu.SP.toString(16);
-	this.stack[0].innerHTML = this.memory.read16(0xfffe).toString(16);
-	this.stack[1].innerHTML = this.memory.read16(0xfffc).toString(16);
+	this.stack[0].innerHTML = this.mmu.read16(0xfffe).toString(16);
+	this.stack[1].innerHTML = this.mmu.read16(0xfffc).toString(16);
 	this.code.innerHTML = this.cpu.code;
 	this.regA.innerHTML = this.cpu.A.toString(16);
 	this.regB.innerHTML = this.cpu.B.toString(16);
@@ -52,12 +58,57 @@ gbEmu.debugger.prototype.update = function () {
 	this.flagH.innerHTML = this.cpu.flags.H.toString(2);
 	this.flagC.innerHTML = this.cpu.flags.C.toString(2);
 
-	var iData = new ImageData(new Uint8ClampedArray(this.memory.memory.buffer), 64, 256);
+	var iData = new ImageData(new Uint8ClampedArray(this.mmu.memory.buffer), 64, 256);
 	this.memoryMap.putImageData(iData, 0, 0);
 
-	var iData = new ImageData(this.lcd.buffer, 256, 256);
+	var iData = new ImageData(this.lcd.data, 160, 144);
 	this.lcdBuffer.putImageData(iData, 0, 0);
-	
-	var iData = new ImageData(new Uint8ClampedArray(this.memory.vram,0,0x2000), 64, 32);
-	this.vram.putImageData(iData, 0, 0);
+
+//	var iData = new ImageData(new Uint8ClampedArray(this.mmu.tileMap), 128, 192);
+	for (var tile = 0; tile < 384; tile++) {
+		var tileData = this.getTile(tile);
+		this.tileMap.putImageData(tileData, 8 * (tile % 16), 8 * Math.floor(tile / 16));
+	}
+	for (var addr = 0; addr < 1024; addr++) {
+		var tile = this.mmu.vram.tileMap0[addr];
+		var tileData = this.getTile(tile);
+		this.bgMap.putImageData(tileData, 8 * (addr % 32), 8 * Math.floor(addr / 32));
+
+	}
+
+	// Palettes
+	var iData = new ImageData(new Uint8ClampedArray(this.lcd.backgroundPalette.getImageData()), 4, 1);
+	this.bgPalette.putImageData(iData, 0, 0);
+	var iData = new ImageData(new Uint8ClampedArray(this.lcd.spritePalette0.getImageData()), 4, 1);
+	this.objPalette0.putImageData(iData, 0, 0);
+	var iData = new ImageData(new Uint8ClampedArray(this.lcd.spritePalette1.getImageData()), 4, 1);
+	this.objPalette1.putImageData(iData, 0, 0);
+};
+
+gbEmu.debugger.prototype.updateTileMap = function () {
+	for (var addr = 0; addr < 6144; addr++) {
+		var lo = this.mmu.readVram(addr + addr);
+		var hi = this.mmu.readVram(addr + addr + 1);
+		for (var i = 0; i < 8; i++) {
+			var colorId = this.lcd.getColorId(lo, hi, i);
+			this.mmu.tileMap[4 * i + 0 + 32 * addr] = this.lcd.backgroundPalette.getColor(colorId);
+			this.mmu.tileMap[4 * i + 1 + 32 * addr] = this.lcd.backgroundPalette.getColor(colorId);
+			this.mmu.tileMap[4 * i + 2 + 32 * addr] = this.lcd.backgroundPalette.getColor(colorId);
+			this.mmu.tileMap[4 * i + 3 + 32 * addr] = 0xFF;
+		}
+	}
+};
+
+gbEmu.debugger.prototype.updateBackground = function () {
+	for (var addr = 0; addr < 1024; addr++) {
+		var tile = this.mmu.vram.tileMap0(addr);
+		var tileData = this.getTile(tile);
+		this.bgMap.putImageData(tileData, 8 * (addr % 32), 8 * Math.floor(addr / 32));
+
+	}
+};
+gbEmu.debugger.prototype.getTile = function (id) {
+	var tileArray = new Uint8ClampedArray(this.mmu.tileMap.buffer, id * 256, 256);
+	var tileData = new ImageData(tileArray, 8, 8);
+	return tileData;
 };

@@ -1,35 +1,57 @@
 body{
+	font-family: sans-serif;
 	background-color: #DDD;
 	color:#333;
 }
-#memory{
-	background-color: #888;
-	border: 1px solid #333;
-	padding:2px;
-	width: 256px;
-	display: inline-block;
+.row label{
+	font-size: 10px;
 }
-#memory canvas, #vram canvas{
-	width: 100%;
-	image-rendering: pixelated;
+.column{
+	float: left;
+	text-align: left;
 }
-#vram{
+.column:not(:first-of-type){
+	margin-left: 2px;
+}
+.column>div{
 	background-color: #aaa;
 	border: 1px solid #333;
 	padding:2px;
-	width: 256px;
-	display: inline-block;
-	vertical-align: top;
+	margin-bottom: 2px;
 }
-#lcd-buffer{
-	background-color: #ccc;
-	border: 1px solid #333;
-	padding:2px;
+canvas{
+	display: block;
+	width: 100%;
+	image-rendering: pixelated;
+}
+#memory{
+	width: 128px;
+}
+
+#lcd-background{
 	width: 256px;
 	height: 256px;
-	display: inline-block;
-	vertical-align: top;
 }
+#palette-bg,
+#palette-0,
+#palette-1{
+	width: 128px;
+	height: 32px;
+}
+#palette-bg canvas,
+#palette-0 canvas,
+#palette-1 canvas{
+	background-color: #FF00FF;
+}
+#tile-map canvas{
+	background-color: #FF00FF;
+	width:128px;
+}
+#lcd canvas{
+	background-color: #FF00FF;
+	width:160px;
+}
+
 .table{
 	font-family : courier;
 	font-size: 12px;

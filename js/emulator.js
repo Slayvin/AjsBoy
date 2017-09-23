@@ -3,11 +3,14 @@
 function gbEmu() {
 	this.name = 'JsBoy';
 	this.programLoaded = false;
-	this.paused = !false;
-	this.memory = new MemController();
-	this.cpu = new Cpu(this.memory);
-	this.lcd = new Lcd();
-	this.debugger = new gbEmu.debugger(this.cpu, this.memory, this.lcd);
+	this.paused = false;
+	this.realBoot = true;
+	this.debug = !false;
+
+	this.mmu = new MemController();
+	this.cpu = new Cpu(this.mmu);
+	this.lcd = new Lcd(this.mmu);
+	this.debugger = new gbEmu.debugger(this.cpu, this.mmu, this.lcd);
 }
 
 gbEmu.cyclesPerFrame = 4096;
@@ -29,15 +32,15 @@ gbEmu.prototype.loadProgram = function (name, asCartridge) {
 		xhr.responseType = "arraybuffer";
 
 		xhr.onload = function () {
-			let rom = new Uint8Array(xhr.response);
+			var rom = new Uint8Array(xhr.response);
 
-			for (let i = 0; i < rom.length; i++) {
-				this.memory.write(i, rom[i]);
+			for (var i = 0; i < rom.length; i++) {
+				this.mmu.write(i, rom[i]);
 			}
 			if (xhr.readyState === 4) {
 				if (isCartridge) {
-					let titleData = new Uint8Array(rom.buffer, 0x134, 0xF);
-					let title = String.fromCharCode(...titleData);
+					var titleData = new Uint8Array(rom.buffer, 0x134, 0xF);
+					var title = String.fromCharCode(...titleData);
 					console.log("Program loaded: ", title);
 				}
 				this.programLoaded = true;
@@ -61,28 +64,34 @@ gbEmu.prototype.loadBootstrap = function (name) {
 
 gbEmu.prototype.init = function () {
 	// reset Program counter
-	this.cpu.PC = 0x0000;
+	this.cpu.PC = this.realBoot ? 0x0000 : 0x0100;
 	this.loadBootstrap('DMG_ROM.bin').then(function () {
 		this.run();
 	}.bind(this));
 };
 
 gbEmu.prototype.run = function () {
-	let i = 0;
+	var i = 0;
 
 	while (i < gbEmu.cyclesPerFrame) {
-		this.step();
+		if (!this.paused) {
+			this.step();
+		}
 		i++;
-		if (this.cpu.PC === 0x0040) {
+		if (this.cpu.PC === 0xFFFF) {
 			this.pause();
 			i = gbEmu.cyclesPerFrame;
 		}
 	}
 	// TEST vblank
-	var line = this.memory.read8(0xff44);
-	this.memory.write(0xff44, ++line);
-	
-	this.debugger.update();
+	var line = this.mmu.read8(0xff44);
+	this.mmu.write(0xff44, ++line);
+
+	if (this.debug) {
+		this.debugger.update();
+	}
+	this.lcd.updatePalette();
+	this.debugger.updateTileMap();
 	if (!this.paused) {
 		window.requestAnimationFrame(this.run.bind(this));
 	}
@@ -90,11 +99,13 @@ gbEmu.prototype.run = function () {
 };
 
 gbEmu.prototype.step = function () {
-	let addr = this.cpu.PC;
-	let opcode = this.memory.read8(addr);
+	var addr = this.cpu.PC;
+	var opcode = this.mmu.read8(addr);
 	this.cpu.execute(opcode);
 	if (this.paused) {
 		this.debugger.update();
+		this.lcd.updatePalette();
+		this.debugger.updateTileMap();
 	}
 };
 

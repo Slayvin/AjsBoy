@@ -1,13 +1,13 @@
 'use strict';
 /**
  * 
- * @param {Uint8Array} mem
+ * @param {MemController} Mmu
  * @returns {Cpu}
  */
-function Cpu(mem) {
+function Cpu(Mmu) {
 	'use strict';
 	// Init memory
-	this.memory = mem;
+	this.memory = Mmu;
 
 	var TIMA = 0xFF05;
 	var TMA = 0xFF06;

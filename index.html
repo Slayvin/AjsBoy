@@ -113,17 +113,50 @@
 				<button id="run">Run</button>
 				<input id="debug" name="debug" type="checkbox"> Debug
 			</div>
-			<div id="memory">
-				<canvas width=64 height=256></canvas>
+
+			<div class="row">
+				<div class="column">
+					<label>Memory</label>
+					<div id="memory">
+						<canvas width=64 height=256></canvas>
+					</div>
+				</div>
+				<div class="column">
+					<label>Background Palette</label>
+					<div id="palette-bg">
+						<canvas width=4 height=1></canvas>
+					</div>
+					<label>Sprite Palette 0</label>
+					<div id="palette-0">
+						<canvas width=4 height=1></canvas>
+					</div>
+					<label>Sprite Palette 1</label>
+					<div id="palette-1">
+						<canvas width=4 height=1></canvas>
+					</div>
+					<label>Tile Map (VRAM)</label>
+					<div id="tile-map">
+						<canvas width=128 height=192></canvas>
+					</div>
+				</div>
+				<div class="column">
+					<label>Background</label>
+					<div id="lcd-background">
+						<canvas width=256 height=256></canvas>
+					</div>
+				</div>
+				<div class="column">
+					<label>LCD</label>
+					<div id="lcd">
+						<canvas width=160 height=144></canvas>
+					</div>
+				</div>
 			</div>
-			<div id="vram">
-				<canvas width=64 height=32></canvas>
-			</div>
-			<div id="lcd-buffer">
-				<canvas width=256 height=256></canvas>
-			</div>
+
 		</div>
+
 		<script type="application/javascript" src="js/lcd.js"></script>
+		<script type="application/javascript" src="js/palette.js"></script>
 		<script type="application/javascript" src="js/memory-controller.js"></script>
 		<script type="application/javascript" src="js/cpu.js"></script>
 		<script type="application/javascript" src="js/cpu-instructions.js"></script>

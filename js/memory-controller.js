@@ -6,6 +6,9 @@
 function MemController() {
 	this.memory = new Uint8Array(0x10000);
 	this.vram = new Uint8Array(this.memory.buffer, 0x8000, 0x2000);
+	this.vram.tileMap0 = new Uint8Array(this.memory.buffer, 0x9800, 0x400);
+	this.vram.tileMap1 = new Uint8Array(this.memory.buffer, 0x9C00, 0x400);
+	this.tileMap = new Uint8Array(0x18000);
 
 	/**
 	 * 
@@ -14,6 +17,10 @@ function MemController() {
 	 */
 	this.read8 = function (addr) {
 		return this.memory[addr];
+	};
+
+	this.readVram = function (addr) {
+		return this.vram[addr];
 	};
 
 	/**

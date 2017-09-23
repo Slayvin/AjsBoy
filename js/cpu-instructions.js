@@ -32,6 +32,16 @@ if (typeof exports !== 'undefined') {
 
 		// 8-bits ALU
 		// ======================================================
+		this['ADD n'] = function (r, n) {
+			this.code = 'ADD A,n';
+			var result = (this.A + n) & 0xff;
+			this.flags.Z = result === 0 ? 1 : 0;
+			this.flags.N = 0;
+//			this.flags.H 
+//			this.flags.C 
+			this.A = result;
+			this.PC++;
+		};
 		this['SUB n'] = function (n) {
 			this.code = 'SUB n';
 			var result = (this.A - n) & 0xff;
@@ -112,10 +122,7 @@ if (typeof exports !== 'undefined') {
 
 // All basic Operation codes
 	Cpu.prototype.instructions = {
-		// NOP
-		0x0: function () {
-			this.PC++;
-		},
+
 // 8-bits Loads
 // ==========================================================
 		// LD B,n
@@ -508,7 +515,11 @@ if (typeof exports !== 'undefined') {
 
 // 8-bits ALU
 // ==========================================================
-// 1. ADD A,n
+		// ADD A,(HL)
+		0x86: function (mem) {
+			var n = mem.read8(this.HL);
+			this['ADD n']('A', n);
+		},
 // ----------------------------------------------------------
 // 2. ADC A,n
 // ----------------------------------------------------------
@@ -677,6 +688,7 @@ if (typeof exports !== 'undefined') {
 		0x2d: function () {
 			this['DEC r']('L');
 		},
+
 // ----------------------------------------------------------
 // 16-bits ALU
 // ==========================================================
@@ -697,7 +709,35 @@ if (typeof exports !== 'undefined') {
 			this['INC rr']('SP');
 		},
 
+// ----------------------------------------------------------
+// Misc
+// ==========================================================
+		// SWAP n
+		// DAA
+		// CPL
+		// CCF
+		// SCF
+		// NOP
+		0x0: function () {
+			// TODO
+			this.PC++;
+		},
+		// HALT
+		// STOP
+		// DI
+		0xf3: function (mem) {
+			// TODO
+			this.PC++;
+		},
+		// EI
+		0xfb: function (mem) {
+			// TODO
+			this.PC++;
+		},
+
+// ----------------------------------------------------------
 // Rotates & shifts
+// ==========================================================
 		// RLCA
 		0x07: function () {
 			this.code = 'RLCA';
@@ -720,6 +760,7 @@ if (typeof exports !== 'undefined') {
 			this.PC++;
 		},
 
+// ----------------------------------------------------------
 // Jumps
 // ==========================================================
 		// JP nn
