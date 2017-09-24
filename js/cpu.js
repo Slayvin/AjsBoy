@@ -94,7 +94,11 @@ Cpu.prototype.execute = function (opcode) {
 	} catch (err) {
 		window.console.log(err);
 		window.console.log(this.memory.memory);
-		throw 'Instruction 0x' + opcode.toString(16) + ' not implemented.';
+		if (this.isExtendedInstruction) {
+			throw 'Instruction 0x' + opcode.toString(16) + ' not implemented.';
+		} else {
+			throw 'Extended (0xCB) instruction 0x' + opcode.toString(16) + ' not implemented.';
+		}
 	}
 };
 

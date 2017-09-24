@@ -5,7 +5,7 @@ var testRomsPath = 'blargg-tests/cpu_instrs/individual/';
 var gameRomsPath = 'games/';
 
 
-//emulator.loadProgram(testRomsPath + '01-special.gb').then(function () {
+//emulator.loadProgram(testRomsPath + '06-ld r,r.gb').then(function () {
 emulator.loadProgram(gameRomsPath + 'Tetris (World).gb').then(function () {
 	// Start emulation
 	emulator.init();

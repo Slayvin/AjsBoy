@@ -13,7 +13,7 @@ function gbEmu() {
 	this.debugger = new gbEmu.debugger(this.cpu, this.mmu, this.lcd);
 }
 
-gbEmu.cyclesPerFrame = 4096;
+gbEmu.cyclesPerFrame = 16384;
 
 /**
  * Load program into rom

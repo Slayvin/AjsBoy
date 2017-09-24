@@ -1,4 +1,5 @@
 /* global Cpu */
+/* global Utils */
 'use strict';
 if (typeof exports !== 'undefined') {
 	var CpuModule = require('./cpu.js');
@@ -6,9 +7,13 @@ if (typeof exports !== 'undefined') {
 }
 
 (function (Cpu) {
+// ============================================================================
+// Common instructions
+// ============================================================================
 	(function () {
+		// ====================================================================
 		// 8-bits loads
-		// ======================================================
+		// ====================================================================
 		this['LD r,n'] = function (r, n) {
 			this.code = 'LD ' + r + ',' + n.toString(16);
 			this[r] = n;
@@ -29,22 +34,28 @@ if (typeof exports !== 'undefined') {
 			this.memory.write(addr, this.A);
 			this.PC++;
 		};
+		this['LD addr,n'] = function (addr, n) {
+			this.code = 'LD ' + addr.toString(16) + ',' + n.toString(16);
+			this.memory.write(addr, n);
+			this.PC++;
+		};
 
+		// ====================================================================
 		// 8-bits ALU
-		// ======================================================
-		this['ADD n'] = function (r, n) {
-			this.code = 'ADD A,n';
-			var result = (this.A + n) & 0xff;
+		// ====================================================================
+		this['ADD A,n'] = function (n) {
+			this.code = 'ADD A,' + n.toString(16);
+			var result = (this.A + n) & 0xFF;
 			this.flags.Z = result === 0 ? 1 : 0;
 			this.flags.N = 0;
-//			this.flags.H 
-//			this.flags.C 
+			this.flags.H = Utils.carryFromBit3(this.A, n);
+			this.flags.C = result > 0xFF ? 1 : 0; // ??
 			this.A = result;
 			this.PC++;
 		};
 		this['SUB n'] = function (n) {
 			this.code = 'SUB n';
-			var result = (this.A - n) & 0xff;
+			var result = (this.A - n) & 0xFF;
 			this.flags.Z = result === 0 ? 1 : 0;
 			this.flags.N = 1;
 			this.flags.H = (this.A ^ n ^ result) & 0x10; //(this.A & 0xF) < (n & 0xF) ? 1 : 0;
@@ -52,8 +63,26 @@ if (typeof exports !== 'undefined') {
 			this.A = result;
 			this.PC++;
 		};
+		this['AND n'] = function (n) {
+			this.code = 'AND ' + n.toString();
+			this.A = (n & this.A) & 0xFF;
+			this.flags.Z = this.A === 0 ? 1 : 0;
+			this.flags.N = 0;
+			this.flags.H = 1;
+			this.flags.C = 0;
+			this.PC++;
+		};
+		this['OR n'] = function (n) {
+			this.code = 'OR ' + n.toString();
+			this.A = (n | this.A) & 0xFF;
+			this.flags.Z = this.A === 0 ? 1 : 0;
+			this.flags.N = 0;
+			this.flags.H = 0;
+			this.flags.C = 0;
+			this.PC++;
+		};
 		this['XOR n'] = function (n) {
-			this.code = 'XOR n';
+			this.code = 'XOR ' + n.toString();
 			this.A = (n ^ this.A) & 0xFF;
 			this.flags.Z = this.A === 0 ? 1 : 0;
 			this.flags.N = 0;
@@ -120,11 +149,19 @@ if (typeof exports !== 'undefined') {
 		};
 	}).apply(Cpu.prototype);
 
+// ============================================================================
 // All basic Operation codes
+// ============================================================================
 	Cpu.prototype.instructions = {
 
+// ============================================================================
 // 8-bits Loads
-// ==========================================================
+// ============================================================================
+		// LD A,n
+		0x3e: function (mem) {
+			var n = mem.read8(++this.PC);
+			this['LD r,n']('A', n);
+		},
 		// LD B,n
 		0x06: function (mem) {
 			var n = mem.read8(++this.PC);
@@ -155,7 +192,75 @@ if (typeof exports !== 'undefined') {
 			var n = mem.read8(++this.PC);
 			this['LD r,n']('L', n);
 		},
-		// ------------------------------------------------------
+// ----------------------------------------------------------------------------
+		// LD B,(HL)
+		0x46: function (mem) {
+			var n = mem.read8(this.HL);
+			this['LD r,n']('B', n);
+		},
+		// LD C,(HL)
+		0x4e: function (mem) {
+			var n = mem.read8(this.HL);
+			this['LD r,n']('C', n);
+		},
+		// LD D,(HL)
+		0x56: function (mem) {
+			var n = mem.read8(this.HL);
+			this['LD r,n']('D', n);
+		},
+		// LD E,(HL)
+		0x5e: function (mem) {
+			var n = mem.read8(this.HL);
+			this['LD r,n']('E', n);
+		},
+		// LD H,(HL)
+		0x66: function (mem) {
+			var n = mem.read8(this.HL);
+			this['LD r,n']('H', n);
+		},
+		// LD L,(HL)
+		0x6e: function (mem) {
+			var n = mem.read8(this.HL);
+			this['LD r,n']('L', n);
+		},
+// ----------------------------------------------------------------------------
+		// LD (HL),B
+		0x70: function (mem) {
+			var addr = mem.read8(this.HL);
+			this['LD addr,n'](addr, this.B);
+		},
+		// LD (HL),C
+		0x71: function (mem) {
+			var addr = mem.read8(this.HL);
+			this['LD addr,n'](addr, this.C);
+		},
+		// LD (HL),D
+		0x72: function (mem) {
+			var addr = mem.read8(this.HL);
+			this['LD addr,n'](addr, this.D);
+		},
+		// LD (HL),E
+		0x73: function (mem) {
+			var addr = mem.read8(this.HL);
+			this['LD addr,n'](addr, this.E);
+		},
+		// LD (HL),H
+		0x74: function (mem) {
+			var addr = mem.read8(this.HL);
+			this['LD addr,n'](addr, this.H);
+		},
+		// LD (HL),L
+		0x75: function (mem) {
+			var addr = mem.read8(this.HL);
+			this['LD addr,n'](addr, this.L);
+		},
+		// LD (HL),n
+		0x36: function (mem) {
+			var n = mem.read8(++this.PC);
+			var addr = mem.read8(this.HL);
+			this['LD addr,n'](addr, n);
+		},
+// ----------------------------------------------------------------------------
 		// LD B,B
 		0x40: function () {
 			this['LD r1,r2']('B', 'B');
@@ -296,7 +401,7 @@ if (typeof exports !== 'undefined') {
 		0x67: function () {
 			this['LD r1,r2']('H', 'A');
 		},
-// ----------------------------------------------------------
+// ----------------------------------------------------------------------------
 		// LD A,B
 		0x78: function () {
 			this['LD r1,r2']('A', 'B');
@@ -325,13 +430,7 @@ if (typeof exports !== 'undefined') {
 		0x7f: function () {
 			this['LD r1,r2']('A', 'A');
 		},
-		// LD A,n
-		0x3e: function (mem) {
-			var n = mem.read8(++this.PC);
-			this['LD r,n']('A', n);
-		},
-// LD A,addr
-// ----------------------------------------------------------
+// ----------------------------------------------------------------------------
 		// LD A,(BC)
 		0x0a: function (mem) {
 			var addr = this.BC;
@@ -351,10 +450,9 @@ if (typeof exports !== 'undefined') {
 		0xfa: function (mem) {
 			var addr = mem.read16(++this.PC);
 			this.PC++;
-			this['LD A,addr'](addr);
+			this['LD A,addr'](mem, addr);
 		},
-// LD addr,A
-// ----------------------------------------------------------
+// ----------------------------------------------------------------------------
 		// LD (BC),A
 		0x02: function () {
 			var addr = this.BC;
@@ -376,14 +474,13 @@ if (typeof exports !== 'undefined') {
 			this.PC++;
 			this['LD addr,A'](addr);
 		},
-// ----------------------------------------------------------
+// ----------------------------------------------------------------------------
 		// LD A,(C)
 		0xf2: function (mem) {
 			this.code = 'LD A,(C)';
 			var addr = 0xff00 + this.C;
 			this.A = mem.read8(addr);
 			this.PC++;
-
 		},
 		// LD (C),A
 		0xe2: function () {
@@ -391,7 +488,6 @@ if (typeof exports !== 'undefined') {
 			var addr = 0xff00 + this.C;
 			this.memory.write(addr, this.A);
 			this.PC++;
-
 		},
 		// LD A,(HLD) | LD A,(HL-) | LDD A,(HL)
 		0x3a: function (mem) {
@@ -438,8 +534,9 @@ if (typeof exports !== 'undefined') {
 			this.PC++;
 		},
 
+// ============================================================================
 // 16-bits loads
-// ========================================================== 
+// ============================================================================
 		// LD BC,nn
 		0x01: function (mem) {
 			var nn = mem.read16(++this.PC);
@@ -464,12 +561,28 @@ if (typeof exports !== 'undefined') {
 			this.PC++;
 			this['LD rr,nn']('SP', nn);
 		},
-// ----------------------------------------------------------
+// ----------------------------------------------------------------------------
 		// LD SP,HL
 		0xf9: function () {
 			this['LD rr,nn']('SP', this.HL);
 		},
-// ----------------------------------------------------------
+		// LD HL,SP+n | LDHL SP,n
+		0xf8: function (mem) {
+			var n = Utils.sign(mem.read8(++this.PC));
+			var nn = this.SP + n;
+			this['LD rr,nn']('HL', nn);
+			this.flags.Z = 0;
+			this.flags.N = 0;
+//			this.flags.H = 0; ??
+//			this.flags.C = 0; ??
+		},
+		// LD (nn),SP
+		0x08: function (mem) {
+			var addr = mem.read16(++this.PC);
+			this.PC++;
+			mem.write(addr, this.SP);
+		},
+// ----------------------------------------------------------------------------
 		// PUSH AF
 		0xf5: function () {
 			this['PUSH nn'](this.AF);
@@ -490,7 +603,7 @@ if (typeof exports !== 'undefined') {
 			this['PUSH nn'](this.HL);
 			this.PC++;
 		},
-// ----------------------------------------------------------
+// ----------------------------------------------------------------------------
 		// POP AF
 		0xf1: function () {
 			this['POP rr']('AF');
@@ -511,18 +624,63 @@ if (typeof exports !== 'undefined') {
 			this['POP rr']('HL');
 			this.PC++;
 		},
-// ----------------------------------------------------------
 
+// ============================================================================
 // 8-bits ALU
-// ==========================================================
+// ============================================================================
+		// ADD A,A
+		0x87: function () {
+			var n = this.A;
+			this['ADD A,n'](n);
+		},
+		// ADD A,B
+		0x80: function () {
+			var n = this.B;
+			this['ADD A,n'](n);
+		},
+		// ADD A,C
+		0x81: function () {
+			var n = this.C;
+			this['ADD A,n'](n);
+		},
+		// ADD A,D
+		0x82: function () {
+			var n = this.D;
+			this['ADD A,n'](n);
+		},
+		// ADD A,E
+		0x83: function () {
+			var n = this.E;
+			this['ADD A,n'](n);
+		},
+		// ADD A,H
+		0x84: function () {
+			var n = this.H;
+			this['ADD A,n'](n);
+		},
+		// ADD A,L
+		0x85: function () {
+			var n = this.L;
+			this['ADD A,n'](n);
+		},
 		// ADD A,(HL)
 		0x86: function (mem) {
 			var n = mem.read8(this.HL);
-			this['ADD n']('A', n);
+			this['ADD A,n'](n);
 		},
-// ----------------------------------------------------------
+		// ADD A,n
+		0xc6: function (mem) {
+			var n = mem.read8(++this.PC);
+			this['ADD A,n'](n);
+		},
+
+// ----------------------------------------------------------------------------
 // 2. ADC A,n
-// ----------------------------------------------------------
+// ----------------------------------------------------------------------------
+		// SUB A
+		0x97: function () {
+			this['SUB n'](this.A);
+		},
 		// SUB B
 		0x90: function () {
 			this['SUB n'](this.B);
@@ -547,17 +705,87 @@ if (typeof exports !== 'undefined') {
 		0x95: function () {
 			this['SUB n'](this.L);
 		},
-		// SUB A
-		0x97: function () {
-			this['SUB n'](this.A);
+		// SUB (HL)
+		0x96: function (mem) {
+			var n = mem.read8(this.HL);
+			this['SUB n'](n);
 		},
-// ----------------------------------------------------------
+		// SUB (HL)
+		0xd6: function (mem) {
+			var n = mem.read8(++this.PC);
+			this['SUB n'](n);
+		},
+// ----------------------------------------------------------------------------
 // 4. SBC A,n
-// ----------------------------------------------------------
-// 5. AND n
-// ----------------------------------------------------------
-// 6. OR n
-// ----------------------------------------------------------
+// ----------------------------------------------------------------------------
+		// AND A
+		0xa7: function () {
+			this['AND n'](this.A);
+		},
+		// AND B
+		0xa0: function () {
+			this['AND n'](this.B);
+		},
+		// AND C
+		0xa1: function () {
+			this['AND n'](this.C);
+		},
+		// AND D
+		0xa2: function () {
+			this['AND n'](this.D);
+		},
+		// AND E
+		0xa3: function () {
+			this['AND n'](this.E);
+		},
+		// AND H
+		0xa4: function () {
+			this['AND n'](this.H);
+		},
+		// AND L
+		0xa5: function () {
+			this['AND n'](this.L);
+		},
+		// AND (HL)
+		0xa6: function (mem) {
+			var n = mem.read8(this.HL);
+			this['AND n'](n);
+		},
+		// AND n
+		0xe6: function (mem) {
+			var n = mem.read8(++this.PC);
+			this['AND n'](n);
+		},
+// ----------------------------------------------------------------------------
+		// OR A
+		0xb7: function () {
+			this['OR n'](this.A);
+		},
+		// OR B
+		0xb0: function () {
+			this['OR n'](this.B);
+		},
+		// OR C
+		0xb1: function () {
+			this['OR n'](this.C);
+		},
+		// OR D
+		0xb2: function () {
+			this['OR n'](this.D);
+		},
+		// OR E
+		0xb3: function () {
+			this['OR n'](this.E);
+		},
+		// OR H
+		0xb4: function () {
+			this['OR n'](this.H);
+		},
+		// OR L
+		0xb5: function () {
+			this['OR n'](this.L);
+		},
+// ----------------------------------------------------------------------------
 		// XOR A
 		0xaf: function () {
 			this['XOR n'](this.A);
@@ -591,7 +819,7 @@ if (typeof exports !== 'undefined') {
 			var n = mem.read8(this.HL);
 			this['XOR n'](n);
 		},
-// ----------------------------------------------------------
+// ----------------------------------------------------------------------------
 		// CP A
 		0xbf: function () {
 			this['CP n'](this.A);
@@ -630,7 +858,7 @@ if (typeof exports !== 'undefined') {
 			var n = mem.read8(++this.PC);
 			this['CP n'](n);
 		},
-// ----------------------------------------------------------
+// ----------------------------------------------------------------------------
 		// INC A
 		0x3c: function () {
 			this['INC r']('A');
@@ -659,7 +887,7 @@ if (typeof exports !== 'undefined') {
 		0x2c: function () {
 			this['INC r']('L');
 		},
-// ----------------------------------------------------------
+// ----------------------------------------------------------------------------
 		// DEC A
 		0x3d: function () {
 			this['DEC r']('A');
@@ -689,9 +917,9 @@ if (typeof exports !== 'undefined') {
 			this['DEC r']('L');
 		},
 
-// ----------------------------------------------------------
+// ============================================================================
 // 16-bits ALU
-// ==========================================================
+// ============================================================================
 		// INC BC
 		0x03: function () {
 			this['INC rr']('BC');
@@ -708,18 +936,51 @@ if (typeof exports !== 'undefined') {
 		0x33: function () {
 			this['INC rr']('SP');
 		},
+// ----------------------------------------------------------------------------
+		// INC BC
+		0x0b: function () {
+			this['DEC rr']('BC');
+		},
+		// INC DE
+		0x1b: function () {
+			this['DEC rr']('DE');
+		},
+		// INC HL
+		0x2b: function () {
+			this['DEC rr']('HL');
+		},
+		// INC SP
+		0x3b: function () {
+			this['DEC rr']('SP');
+		},
 
-// ----------------------------------------------------------
+// ============================================================================
 // Misc
-// ==========================================================
+// ============================================================================
 		// SWAP n
 		// DAA
 		// CPL
+		0x2f: function () {
+			this.A = (0xFF - this.A);
+			this.flags.N = 1;
+			this.flags.H = 1;
+			this.PC++;
+		},
 		// CCF
+		0x3f: function () {
+			this.flags.N = 0;
+			this.flags.H = 0;
+			this.flags.C = this.flags.C ? 0 : 1;
+		},
 		// SCF
+		0x37: function () {
+			this.flags.N = 0;
+			this.flags.H = 0;
+			this.flags.C = 1;
+			this.PC++;
+		},
 		// NOP
 		0x0: function () {
-			// TODO
 			this.PC++;
 		},
 		// HALT
@@ -735,9 +996,9 @@ if (typeof exports !== 'undefined') {
 			this.PC++;
 		},
 
-// ----------------------------------------------------------
+// ============================================================================
 // Rotates & shifts
-// ==========================================================
+// ============================================================================
 		// RLCA
 		0x07: function () {
 			this.code = 'RLCA';
@@ -760,9 +1021,9 @@ if (typeof exports !== 'undefined') {
 			this.PC++;
 		},
 
-// ----------------------------------------------------------
+// ============================================================================
 // Jumps
-// ==========================================================
+// ============================================================================
 		// JP nn
 		0xc3: function (mem) {
 			var addr = mem.read16(++this.PC);
@@ -774,16 +1035,14 @@ if (typeof exports !== 'undefined') {
 // 4. JR n
 		0x18: function (mem) {
 			this.code = 'JR n';
-			var n = mem.read8(++this.PC);
-			n = (n <= 0x7F) ? n : 0xFFFFFF00 | n;// signed
+			var n = Utils.sign(mem.read8(++this.PC));
 			this.PC += n + 1;
 		},
-// 5. JR cc,n
+// ----------------------------------------------------------------------------
 		// JR NZ,n
 		0x20: function (mem) {
 			this.code = 'JR NZ,n';
-			var n = mem.read8(++this.PC);
-			n = (n <= 0x7F) ? n : 0xFFFFFF00 | n;// signed
+			var n = Utils.sign(mem.read8(++this.PC));
 			this.PC++;
 			if (!this.flags.Z) {
 				this.PC += n;
@@ -792,8 +1051,7 @@ if (typeof exports !== 'undefined') {
 		// JR Z,n
 		0x28: function (mem) {
 			this.code = 'JR Z,n';
-			var n = mem.read8(++this.PC);
-			n = (n <= 0x7F) ? n : 0xFFFFFF00 | n;// signed
+			var n = Utils.sign(mem.read8(++this.PC));
 			this.PC++;
 			if (this.flags.Z) {
 				this.PC += n;
@@ -802,8 +1060,7 @@ if (typeof exports !== 'undefined') {
 		// JR NC,n
 		0x30: function (mem) {
 			this.code = 'JR NC,n';
-			var n = mem.read8(++this.PC);
-			n = (n <= 0x7F) ? n : 0xFFFFFF00 | n;// signed
+			var n = Utils.sign(mem.read8(++this.PC));
 			this.PC++;
 			if (!this.flags.C) {
 				this.PC += n;
@@ -812,16 +1069,16 @@ if (typeof exports !== 'undefined') {
 		// JR C,n
 		0x38: function (mem) {
 			this.code = 'JR C,n';
-			var n = mem.read8(++this.PC);
-			n = (n <= 0x7F) ? n : 0xFFFFFF00 | n;// signed
+			var n = Utils.sign(mem.read8(++this.PC));
 			this.PC++;
 			if (this.flags.C) {
 				this.PC += n;
 			}
 		},
 
+// ============================================================================
 // Calls
-// ==========================================================
+// ============================================================================
 		// CALL nn
 		0xcd: function (mem) {
 			this.code = 'CALL';
@@ -829,9 +1086,46 @@ if (typeof exports !== 'undefined') {
 			this['PUSH nn'](this.PC + 2);
 			this.PC = nn;
 		},
+		// CALL NZ,nn
+		0xc4: function (mem) {
+			var nn = mem.read16(++this.PC);
+			this.code = 'CALL NZ,' + nn.toString(16);
+			if (!this.flags.Z) {
+				this['PUSH nn'](this.PC + 2);
+				this.PC = nn;
+			}
+		},
+		// CALL Z,nn
+		0xcc: function (mem) {
+			var nn = mem.read16(++this.PC);
+			this.code = 'CALL Z,' + nn.toString(16);
+			if (this.flags.Z) {
+				this['PUSH nn'](this.PC + 2);
+				this.PC = nn;
+			}
+		},
+		// CALL NC,nn
+		0xd4: function (mem) {
+			var nn = mem.read16(++this.PC);
+			this.code = 'CALL NC,' + nn.toString(16);
+			if (!this.flags.C) {
+				this['PUSH nn'](this.PC + 2);
+				this.PC = nn;
+			}
+		},
+		// CALL C,nn
+		0xdc: function (mem) {
+			var nn = mem.read16(++this.PC);
+			this.code = 'CALL C,' + nn.toString(16);
+			if (this.flags.C) {
+				this['PUSH nn'](this.PC + 2);
+				this.PC = nn;
+			}
+		},
 
+// ============================================================================
 // Returns
-// ==========================================================
+// ============================================================================
 		// RET
 		0xc9: function (mem) {
 			this.code = 'RET';
@@ -840,7 +1134,9 @@ if (typeof exports !== 'undefined') {
 			this.PC = nn;
 		},
 
+// ============================================================================
 // Extended instructions
+// ============================================================================
 		0xcb: function () {
 			this.code = '...';
 			this.isExtendedInstruction = true;
