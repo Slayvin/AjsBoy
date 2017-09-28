@@ -4,7 +4,7 @@ function gbEmu() {
 	this.name = 'JsBoy';
 	this.programLoaded = false;
 	this.paused = false;
-	this.realBoot = true;
+	this.realBoot = !true;
 	this.debug = !false;
 
 	this.mmu = new MemController();
@@ -64,10 +64,15 @@ gbEmu.prototype.loadBootstrap = function (name) {
 
 gbEmu.prototype.init = function () {
 	// reset Program counter
-	this.cpu.PC = this.realBoot ? 0x0000 : 0x0100;
-	this.loadBootstrap('DMG_ROM.bin').then(function () {
+	if (this.realBoot) {
+		this.cpu.PC = 0x0000;
+		this.loadBootstrap('DMG_ROM.bin').then(function () {
+			this.run();
+		}.bind(this));
+	} else {
+		this.cpu.PC = 0x0100;
 		this.run();
-	}.bind(this));
+	}
 };
 
 gbEmu.prototype.run = function () {
