@@ -1,17 +1,19 @@
 console.log('Starting main program');
 
 var emulator = new gbEmu();
-var testRomsPath = 'blargg-tests/cpu_instrs/individual/';
+var testRomsPath = 'blargg-tests/cpu_instrs/';
 var gameRomsPath = 'games/';
 
 
-//emulator.loadProgram(testRomsPath + '01-special.gb').then(function () {
-//emulator.loadProgram(testRomsPath + '02-interrupts.gb').then(function () {
-//emulator.loadProgram(testRomsPath + '03-op sp,hl.gb').then(function () {
-//emulator.loadProgram(testRomsPath + '04-op r,imm.gb').then(function () {
-//emulator.loadProgram(testRomsPath + '05-op rp.gb').then(function () {
-//emulator.loadProgram(testRomsPath + '06-ld r,r.gb').then(function () {
-emulator.loadProgram(gameRomsPath + 'Tetris (World).gb').then(function () {
+emulator.loadProgram(testRomsPath + 'cpu_instrs.gb').then(function () {
+//emulator.loadProgram(testRomsPath + 'individual/01-special.gb').then(function () {
+//emulator.loadProgram(testRomsPath + 'individual/02-interrupts.gb').then(function () {
+//emulator.loadProgram(testRomsPath + 'individual/03-op sp,hl.gb').then(function () {
+//emulator.loadProgram(testRomsPath + 'individual/04-op r,imm.gb').then(function () {
+//emulator.loadProgram(testRomsPath + 'individual/05-op rp.gb').then(function () {
+//emulator.loadProgram(testRomsPath + 'individual/06-ld r,r.gb').then(function () {
+//emulator.loadProgram(testRomsPath + 'individual/07-jr,jp,call,ret,rst.gb').then(function () {
+//emulator.loadProgram(gameRomsPath + 'Tetris (World).gb').then(function () {
 	// Start emulation
 	emulator.init();
 });
@@ -58,4 +60,4 @@ function test() {
 }
 
 // Run tests
-test();
+//test();

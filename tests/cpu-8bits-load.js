@@ -6,6 +6,27 @@ var memoryModule = require('../js/memory-controller.js');
 
 var memController = new memoryModule.MemController();
 var cpu = new cpuModule.Cpu(memController);
+var memory = memController.memory;
+
+function randomByte() {
+	var byte = Math.floor(Math.random() * 255) & 0xFF;
+	return byte;
+}
+function randomWord() {
+	var word = Math.floor(Math.random() * 0xFFFF) & 0xFFFF;
+	return word;
+}
+
+function randomizeRegisters() {
+	cpu.A = randomByte();
+	cpu.B = randomByte();
+	cpu.C = randomByte();
+	cpu.D = randomByte();
+	cpu.E = randomByte();
+	cpu.H = randomByte();
+	cpu.L = randomByte();
+}
+
 
 describe('Cpu', function () {
 	describe('[LD r,n]', function () {
@@ -18,36 +39,33 @@ describe('Cpu', function () {
 			assert.equal(5, cpu.A);
 		});
 	});
-});
-
-describe('Cpu 8-bits ALU', function () {
-	describe('[SUB n]', function () {
-		it('should substract n from register A, with n < A', function () {
-			var currentA = cpu.A;
-			cpu['SUB n'](1);
-			assert.equal(currentA - 1, cpu.A);
-			assert.equal(0, cpu.flags.Z);
-			assert.equal(1, cpu.flags.N);
-//			assert.equal(1, cpu.flags.H);
-			assert.equal(0, cpu.flags.C);
+	describe('[LD r2,r2]', function () {
+		it('should load register C into register B', function () {
+			randomizeRegisters();
+			cpu['LD r1,r2']('B', 'C');
+			assert.equal(cpu.C, cpu.B);
 		});
-		it('should substract n from register A, with n = A', function () {
-			var currentA = cpu.A;
-			cpu['SUB n'](currentA);
-			assert.equal(0, cpu.A);
-			assert.equal(1, cpu.flags.Z);
-			assert.equal(1, cpu.flags.N);
-//			assert.equal(1, cpu.flags.H);
-			assert.equal(0, cpu.flags.C);
+		it('should load register H into register A', function () {
+			randomizeRegisters();
+			cpu['LD r1,r2']('A', 'H');
+			assert.equal(cpu.A, cpu.H);
 		});
-		it('should substract n from register A, with n > A', function () {
-			var currentA = cpu.A;
-			cpu['SUB n'](currentA);
-			assert.equal(0, cpu.A);
-			assert.equal(1, cpu.flags.Z);
-			assert.equal(1, cpu.flags.N);
-//			assert.equal(1, cpu.flags.H);
-			assert.equal(1, cpu.flags.C);
+	});
+	describe('[LD A,addr]', function () {
+		it('should load memory[addr] into register A', function () {
+			randomizeRegisters();
+			var addr = randomByte();
+			cpu['LD A,addr'](addr);
+			assert.equal(cpu.A, memory[addr]);
+		});
+	});
+	describe('[LD addr,n]', function () {
+		it('should load n in memory[addr]', function () {
+			var n = randomByte();
+			var addr = randomWord();
+			cpu['LD addr,n'](addr, n);
+			assert.equal(memory[addr], n);
 		});
 	});
 });
+

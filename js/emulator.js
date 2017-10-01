@@ -4,7 +4,7 @@ function gbEmu() {
 	this.name = 'JsBoy';
 	this.programLoaded = false;
 	this.paused = false;
-	this.realBoot = !true;
+	this.realBoot = true;
 	this.debug = !false;
 
 	this.mmu = new MemController();
@@ -13,7 +13,7 @@ function gbEmu() {
 	this.debugger = new gbEmu.debugger(this.cpu, this.mmu, this.lcd);
 }
 
-gbEmu.cyclesPerFrame = 16384;
+gbEmu.cyclesPerFrame = 16384 / 1;
 
 /**
  * Load program into rom
@@ -33,10 +33,14 @@ gbEmu.prototype.loadProgram = function (name, asCartridge) {
 
 		xhr.onload = function () {
 			var rom = new Uint8Array(xhr.response);
-
-			for (var i = 0; i < rom.length; i++) {
-				this.mmu.write(i, rom[i]);
+			if (isCartridge) {
+				this.mmu.rom = rom;
+			} else {
+				for (var i = 0; i < rom.length; i++) {
+					this.mmu.memory[i] = rom[i];
+				}
 			}
+
 			if (xhr.readyState === 4) {
 				if (isCartridge) {
 					var titleData = new Uint8Array(rom.buffer, 0x134, 0xF);
@@ -89,7 +93,7 @@ gbEmu.prototype.run = function () {
 		}
 	}
 	// TEST vblank
-	var line = this.mmu.read8(0xff44);
+	var line = this.mmu.read8(0xff44) & 0xFF;
 	this.mmu.write(0xff44, ++line);
 
 	if (this.debug) {
@@ -107,6 +111,7 @@ gbEmu.prototype.step = function () {
 	var addr = this.cpu.PC;
 	var opcode = this.mmu.read8(addr);
 	this.cpu.execute(opcode);
+	this.cpu.PC &= 0xFFFF;
 	if (this.paused) {
 		this.debugger.update();
 		this.lcd.updatePalette();
