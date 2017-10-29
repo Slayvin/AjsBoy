@@ -21,7 +21,7 @@
 		};
 		this['RR n'] = function (n) {
 			this.code = 'RR ' + n.toString(16);
-			var result = (n >>> 1) & (this.flags.C << 7);
+			var result = (n >>> 1) | (this.flags.C << 7);
 			this.flags.Z = result === 0 ? 1 : 0;
 			this.flags.N = 0;
 			this.flags.H = 0;
@@ -47,6 +47,15 @@
 			this.PC++;
 			return result;
 		};
+		// Read bit at position n for register r
+		this['BIT n,r'] = function (n, r) {
+			this.code = 'BIT ' + n + ',' + r;
+			var mask = 0x1 << n;
+			this.flags.Z = !(mask & this[r]) | 0;
+			this.flags.N = 0;
+			this.flags.H = 1;
+			this.PC++;
+		};
 	}).apply(Cpu.prototype);
 // ============================================================================
 // All extended Operation codes
@@ -55,7 +64,7 @@
 // RLCA
 // RLA
 // RRCA
-		
+
 // RLC n
 // ----------------------------------------------------------------------------
 		// RL A
@@ -130,20 +139,35 @@
 		0x3d: function () {
 			this.L = this['SRL n'](this.L);
 		},
+		// SRL (HL)
+		0x3e: function () {
+			var addr = this.HL;
+			var n = this.memory.read8(addr);
+			var result = this['SRL n'](n);
+			this.memory.write(addr, result);
+		},
 // ----------------------------------------------------------------------------
+		// BIT 6,B
+		0x70: function () {
+			this['BIT n,r'](6, 'B');
+		},
+		// BIT 6,C
+		0x71: function () {
+			this['BIT n,r'](6, 'C');
+		},
 		// BIT 7,H
 		0x7c: function () {
-			this.code = 'BIT 7,H';
-			var mask = 0x1 << 7;
-			this.flags.Z = !(mask & this.H) | 0;
-			this.flags.N = 0;
-			this.flags.H = 1;
-			this.PC++;
+			this['BIT n,r'](7, 'H');
 		},
 // ----------------------------------------------------------------------------
 		// SET 0,B
 		0xc0: function () {
 			this.B = this.B | 1;
+			this.PC++;
+		},
+		// SET 4,E
+		0xe3: function () {
+			this.E = this.E | 0x10;
 			this.PC++;
 		},
 		// SET 5,A

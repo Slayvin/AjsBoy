@@ -61,10 +61,15 @@ if (typeof exports !== 'undefined') {
 			var result = (this.A - n) & 0xFF;
 			this.flags.Z = result === 0 ? 1 : 0;
 			this.flags.N = 1;
-			this.flags.H = (this.A ^ n ^ result) & 0x10; //(this.A & 0xF) < (n & 0xF) ? 1 : 0;
+			this.flags.H = (this.A ^ n ^ result) & 0x10;
+//			this.flags.H = (this.A & 0xF) < (n & 0xF) ? 1 : 0;
 			this.flags.C = this.A < n ? 1 : 0;
 			this.A = result;
 			this.PC++;
+		};
+		this['SBC A,n'] = function (n) {
+			this.code = 'SBC A,n';
+			this['SUB n'](n + this.flags.C);
 		};
 		this['AND n'] = function (n) {
 			this.code = 'AND ' + n.toString();
@@ -113,7 +118,7 @@ if (typeof exports !== 'undefined') {
 		};
 		this['CP n'] = function (n) {
 			var result = (this.A - n) & 0xFF;
-			this.flags.Z = this.A === n ? 1 : 0;
+			this.flags.Z = result === 0 ? 1 : 0;
 			this.flags.N = 1;
 			this.flags.H = (this.A ^ n ^ result) & 0x10;
 			this.flags.C = this.A < n ? 1 : 0;
@@ -170,6 +175,8 @@ if (typeof exports !== 'undefined') {
 // ============================================================================
 // 8-bits Loads
 // ============================================================================
+// 
+// ----------------------------------------------------------------------------
 		// LD A,n
 		0x3e: function (mem) {
 			var n = mem.read8(++this.PC);
@@ -280,23 +287,23 @@ if (typeof exports !== 'undefined') {
 		},
 		// LD B,C
 		0x41: function () {
-			this['LD r1,r2']('B', 'B');
+			this['LD r1,r2']('B', 'C');
 		},
 		// LD B,D
 		0x42: function () {
-			this['LD r1,r2']('B', 'B');
+			this['LD r1,r2']('B', 'D');
 		},
 		// LD B,E
 		0x43: function () {
-			this['LD r1,r2']('B', 'B');
+			this['LD r1,r2']('B', 'E');
 		},
 		// LD B,H
 		0x44: function () {
-			this['LD r1,r2']('B', 'B');
+			this['LD r1,r2']('B', 'H');
 		},
 		// LD B,L
 		0x45: function () {
-			this['LD r1,r2']('B', 'B');
+			this['LD r1,r2']('B', 'L');
 		},
 		// LD B,A
 		0x47: function () {
@@ -572,6 +579,8 @@ if (typeof exports !== 'undefined') {
 // ============================================================================
 // 16-bits loads
 // ============================================================================
+// 
+// 1. ----------------------------------------------------------------------------
 		// LD BC,nn
 		0x01: function (mem) {
 			var nn = mem.read16(++this.PC);
@@ -596,31 +605,34 @@ if (typeof exports !== 'undefined') {
 			this.PC++;
 			this['LD rr,nn']('SP', nn);
 		},
-// ----------------------------------------------------------------------------
+// 2. ----------------------------------------------------------------------------
 		// LD SP,HL
 		0xf9: function () {
 			this['LD rr,nn']('SP', this.HL);
 		},
+// 3-4. ----------------------------------------------------------------------------
 		// LD HL,SP+n | LDHL SP,n
 		0xf8: function (mem) {
 			var n = Utils.sign(mem.read8(++this.PC));
-			var nn = this.SP + n;
-			this['LD rr,nn']('HL', nn);
+			var result = this.SP + n;
+			this['LD rr,nn']('HL', result & 0xFFFF);
 			this.flags.Z = 0;
 			this.flags.N = 0;
-//			this.flags.H = 0; ??
-//			this.flags.C = 0; ??
+			this.flags.H = 0;// ?? TODO
+			this.flags.C = (this.SP & 0xFF) + n > 0xFF ? 1 : 0;// ?? TODO
 		},
+// 5. ----------------------------------------------------------------------------
 		// LD (nn),SP
 		0x08: function (mem) {
 			var addr = mem.read16(++this.PC);
-			this.PC++;
-			mem.write(addr, this.SP);
+			this.PC += 2;
+			mem.write(addr, this.SP & 0xFF);
+			mem.write(addr + 1, this.SP >>> 8);
 		},
-// ----------------------------------------------------------------------------
+// 6. ----------------------------------------------------------------------------
 		// PUSH AF
 		0xf5: function () {
-			this['PUSH nn'](this.AF);
+			this['PUSH nn'](this.AF & 0xFFF0);
 			this.PC++;
 		},
 		// PUSH BC
@@ -638,7 +650,7 @@ if (typeof exports !== 'undefined') {
 			this['PUSH nn'](this.HL);
 			this.PC++;
 		},
-// ----------------------------------------------------------------------------
+// 7. ----------------------------------------------------------------------------
 		// POP AF
 		0xf1: function () {
 			this['POP rr']('AF');
@@ -786,9 +798,46 @@ if (typeof exports !== 'undefined') {
 			var n = mem.read8(++this.PC);
 			this['SUB n'](n);
 		},
-// ----------------------------------------------------------------------------
-// 4. SBC A,n
-// ----------------------------------------------------------------------------
+// 4. ----------------------------------------------------------------------------
+		// SBC A,A
+		0x9f: function () {
+			this['SBC A,n'](this.A);
+		},
+		// SBC A,B
+		0x98: function () {
+			this['SBC A,n'](this.B);
+		},
+		// SBC A,C
+		0x99: function () {
+			this['SBC A,n'](this.C);
+		},
+		// SBC A,D
+		0x9a: function () {
+			this['SBC A,n'](this.D);
+		},
+		// SBC A,E
+		0x9b: function () {
+			this['SBC A,n'](this.E);
+		},
+		// SBC A,H
+		0x9c: function () {
+			this['SBC A,n'](this.H);
+		},
+		// SBC A,L
+		0x9d: function () {
+			this['SBC A,n'](this.L);
+		},
+		// SBC A,(HL)
+		0x9e: function (mem) {
+			var n = mem.read8(this.HL);
+			this['SBC A,n'](n);
+		},
+		// SBC A,n
+		0xde: function (mem) {
+			var n = mem.read8(++this.PC);
+			this['SBC A,n'](n);
+		},
+// 5. ----------------------------------------------------------------------------
 		// AND A
 		0xa7: function () {
 			this['AND n'](this.A);
@@ -827,7 +876,7 @@ if (typeof exports !== 'undefined') {
 			var n = mem.read8(++this.PC);
 			this['AND n'](n);
 		},
-// ----------------------------------------------------------------------------
+// 6. ----------------------------------------------------------------------------
 		// OR A
 		0xb7: function () {
 			this['OR n'](this.A);
@@ -1035,6 +1084,13 @@ if (typeof exports !== 'undefined') {
 			this['ADD HL,nn'](this.SP);
 		},
 // ----------------------------------------------------------------------------
+		// ADD SP,n
+		0xe8: function (mem) {
+			var n = Utils.sign(mem.read8(++this.PC));
+			this.SP += n;
+			this.PC++;
+		},
+// ----------------------------------------------------------------------------
 		// INC BC
 		0x03: function () {
 			this['INC rr']('BC');
@@ -1074,6 +1130,30 @@ if (typeof exports !== 'undefined') {
 // ============================================================================
 		// SWAP n
 		// DAA
+		0x27: function () {
+			if (!this.flags.N) {
+				// ADDITION
+				if (this.flags.C || this.A > 0x99) {
+					this.A += 0x60;
+					this.flags.C = 1;
+				}
+				if (this.flags.H || (this.A & 0x0F) > 9) {
+					this.A += 6;
+				}
+			} else {
+				// SUBTRACTION
+				if (this.flags.C) {
+					this.A -= 0x60;
+				}
+				if (this.flags.H) {
+					this.A -= 6;
+				}
+			}
+			this.A &= 0xFF;
+			this.flags.Z = this.A === 0 ? 1 : 0;
+			this.flags.H = 0;
+			this.PC++;
+		},
 		// CPL
 		0x2f: function () {
 			this.A = (0xFF - this.A);
@@ -1100,13 +1180,12 @@ if (typeof exports !== 'undefined') {
 		},
 		// HALT
 		0x76: function () {
-//			this.PC = 0x40; // TEST ONLY
 			this.PC++;
 			// TODO
 		},
 		// STOP
 		0x10: function () {
-			this.PC = 0x40; // TEST ONLY
+			this.PC++;
 			// TODO
 		},
 		// DI
@@ -1202,7 +1281,8 @@ if (typeof exports !== 'undefined') {
 // ----------------------------------------------------------------------------
 		// JP (HL)
 		0xe9: function (mem) {
-			var addr = mem.read16(this.HL);
+//			var addr = mem.read16(this.HL);
+			var addr = this.HL;
 			this.code = 'JP (HL)' + addr.toString(16);
 			this.PC = addr;
 		},
@@ -1269,6 +1349,8 @@ if (typeof exports !== 'undefined') {
 			if (!this.flags.Z) {
 				this['PUSH nn'](this.PC + 2);
 				this.PC = nn;
+			} else {
+				this.PC += 2;
 			}
 		},
 		// CALL Z,nn
@@ -1278,6 +1360,8 @@ if (typeof exports !== 'undefined') {
 			if (this.flags.Z) {
 				this['PUSH nn'](this.PC + 2);
 				this.PC = nn;
+			} else {
+				this.PC += 2;
 			}
 		},
 		// CALL NC,nn
@@ -1287,6 +1371,8 @@ if (typeof exports !== 'undefined') {
 			if (!this.flags.C) {
 				this['PUSH nn'](this.PC + 2);
 				this.PC = nn;
+			} else {
+				this.PC += 2;
 			}
 		},
 		// CALL C,nn
@@ -1296,6 +1382,8 @@ if (typeof exports !== 'undefined') {
 			if (this.flags.C) {
 				this['PUSH nn'](this.PC + 2);
 				this.PC = nn;
+			} else {
+				this.PC += 2;
 			}
 		},
 // ============================================================================

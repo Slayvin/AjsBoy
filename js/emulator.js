@@ -4,7 +4,7 @@ function gbEmu() {
 	this.name = 'JsBoy';
 	this.programLoaded = false;
 	this.paused = false;
-	this.realBoot = true;
+	this.realBoot = !true;
 	this.debug = !false;
 
 	this.mmu = new MemController();
@@ -66,6 +66,14 @@ gbEmu.prototype.loadBootstrap = function (name) {
 
 };
 
+gbEmu.prototype.setDefaults = function () {
+	this.cpu.AF = 0x01B0;
+	this.cpu.BC = 0x0013;
+	this.cpu.DE = 0x00D8;
+	this.cpu.HL = 0x014D;
+	this.cpu.SP = 0xFFFE;
+};
+
 gbEmu.prototype.init = function () {
 	// reset Program counter
 	if (this.realBoot) {
@@ -74,6 +82,7 @@ gbEmu.prototype.init = function () {
 			this.run();
 		}.bind(this));
 	} else {
+		this.setDefaults();
 		this.cpu.PC = 0x0100;
 		this.run();
 	}
@@ -81,20 +90,24 @@ gbEmu.prototype.init = function () {
 
 gbEmu.prototype.run = function () {
 	var i = 0;
-
+	var breakpoints = [
+		0x0101,
+	];
 	while (i < gbEmu.cyclesPerFrame) {
 		if (!this.paused) {
 			this.step();
 		}
 		i++;
-		if (this.cpu.PC === 0xFFFF) {
-			this.pause();
-			i = gbEmu.cyclesPerFrame;
+		if (breakpoints.indexOf(this.cpu.PC) > -1) {
+			this.paused = true;
+//			i = gbEmu.cyclesPerFrame;
+		}
+		// TEST vblank
+		if ((i % 192) === 0) {// TODO: get actual value from instructions
+			var line = this.mmu.read8(0xff44) & 0xFF;
+			this.mmu.write(0xff44, ++line);
 		}
 	}
-	// TEST vblank
-	var line = this.mmu.read8(0xff44) & 0xFF;
-	this.mmu.write(0xff44, ++line);
 
 	if (this.debug) {
 		this.debugger.update();
@@ -106,7 +119,6 @@ gbEmu.prototype.run = function () {
 	}
 
 };
-
 gbEmu.prototype.step = function () {
 	var addr = this.cpu.PC;
 	var opcode = this.mmu.read8(addr);
@@ -118,7 +130,6 @@ gbEmu.prototype.step = function () {
 		this.debugger.updateTileMap();
 	}
 };
-
 gbEmu.prototype.pause = function () {
 	this.paused = !this.paused;
 	if (this.paused) {

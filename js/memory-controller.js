@@ -4,13 +4,18 @@
  * @returns {MemController}
  */
 function MemController() {
-	this.rom;
+	this.rom_bank0 = new Uint8Array(0x4000);
+	this.rom_bank1 = new Uint8Array(0x4000);
 	this.memory = new Uint8Array(0x10000);
 	this.vram = new Uint8Array(this.memory.buffer, 0x8000, 0x2000);
+	this.oam = new Uint8Array(this.memory.buffer, 0xFE00, 0xA0);// 0xFE00 - 0xFE9F
+	this.io = new Uint8Array(this.memory.buffer, 0xFF00, 0x80);
+	this.hram = new Uint8Array(this.memory.buffer, 0xFF80, 0x80);
+
 	this.vram.tileMap0 = new Uint8Array(this.memory.buffer, 0x9800, 0x400);
 	this.vram.tileMap1 = new Uint8Array(this.memory.buffer, 0x9C00, 0x400);
 	this.tileMap = new Uint8Array(0x18000);
-
+	
 	/**
 	 * 
 	 * @param {int} addr

@@ -19,6 +19,7 @@ function Cpu(Mmu) {
 	// Interrupts flags
 	this.IME = 0;
 //	this.IF=0;
+//	this.IE=0;
 
 	// 8-bits registers
 	this.A = 0x00; // Used mainly for arithmetic operations
@@ -52,7 +53,7 @@ function Cpu(Mmu) {
 			}.bind(this, f),
 			set: function (offset, val) {
 				var mask = 1 << (7 - offset);
-				if (val == 0) {
+				if (val === 0) {
 					this.F &= ~mask;
 				} else {
 					this.F |= mask;
@@ -62,10 +63,6 @@ function Cpu(Mmu) {
 	}
 
 	// 16-bits registers (8-bits registers used in pairs)
-	//	AF = () => this.A << 8 | this.F;
-	//	BC = () => this.B << 8 | this.C;
-	//	DE = () => this.D << 8 | this.E;
-	//	HL = () => this.H << 8 | this.L;
 	var registers = ['AF', 'BC', 'DE', 'HL'];
 	for (var r = 0; r < registers.length; r++) {
 		var hi = registers[r].substring(0, 1);
@@ -75,7 +72,7 @@ function Cpu(Mmu) {
 				return this[registers.hi] << 8 | this[registers.lo];
 			}.bind(this, {'hi': hi, 'lo': lo}),
 			set: function (registers, val) {
-				this[registers.hi] = val >> 8;
+				this[registers.hi] = (val & 0xFF00) >> 8;
 				this[registers.lo] = val & 0xFF;
 			}.bind(this, {'hi': hi, 'lo': lo})
 		});
@@ -90,6 +87,7 @@ Cpu.prototype.execute = function (opcode) {
 			this.isExtendedInstruction = false;
 		} catch (err) {
 			window.console.log(err);
+			window.console.log(this.memory.memory);
 			throw 'Extended (0xCB) instruction 0x' + opcode.toString(16) + ' not implemented.';
 		}
 	} else {

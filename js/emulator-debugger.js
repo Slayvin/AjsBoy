@@ -30,6 +30,8 @@ gbEmu.debugger = function (cpu, mc, lcd) {
 	this.flagN = document.querySelector('#flag-N');
 	this.flagH = document.querySelector('#flag-H');
 	this.flagC = document.querySelector('#flag-C');
+	this.ly = document.querySelector('#lcd-ly');
+	this.lcdc = document.querySelector('#lcd-c');
 	this.bgMap = document.querySelector('#lcd-background canvas').getContext("2d");
 	this.tileMap = document.querySelector('#tile-map canvas').getContext("2d");
 	this.bgPalette = document.querySelector('#palette-bg canvas').getContext("2d");
@@ -57,6 +59,8 @@ gbEmu.debugger.prototype.update = function () {
 	this.flagN.innerHTML = this.cpu.flags.N.toString(2);
 	this.flagH.innerHTML = this.cpu.flags.H.toString(2);
 	this.flagC.innerHTML = this.cpu.flags.C.toString(2);
+	this.ly.innerHTML = this.mmu.read8(0xff44);
+	this.lcdc.innerHTML = this.mmu.read8(0xff40).toString(16);
 
 	var iData = new ImageData(new Uint8ClampedArray(this.mmu.memory.buffer), 64, 256);
 	this.memoryMap.putImageData(iData, 0, 0);
