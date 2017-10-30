@@ -18,8 +18,8 @@ function Cpu(Mmu) {
 
 	// Interrupts flags
 	this.IME = 0;
-//	this.IF=0;
-//	this.IE=0;
+//	this.IF=0xFF0F;
+//	this.IE=0xFFFF;
 
 	// 8-bits registers
 	this.A = 0x00; // Used mainly for arithmetic operations

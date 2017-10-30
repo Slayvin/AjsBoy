@@ -44,9 +44,9 @@ function MemController() {
 	this.write = function (addr, data) {
 		// TODO must check if write is allowed, or do memory bank switching
 		if (addr < 0x8000) {
-//			throw 'Cannot write (' + data + ') in ROM at address 0x' + addr.toString(16);
-			console.log('Cannot write (' + data + ') in ROM at address 0x' + addr.toString(16));
-			this.memory[addr] = data;
+//			console.log('Cannot write (' + data + ') in ROM at address 0x' + addr.toString(16));
+//			// TODO : handling of ROM/RAM banks
+//			this.memory[addr] = data;
 		} else {
 			this.memory[addr] = data;
 		}

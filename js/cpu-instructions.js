@@ -44,32 +44,44 @@ if (typeof exports !== 'undefined') {
 		// ====================================================================
 		this['ADD A,n'] = function (n) {
 			this.code = 'ADD A,' + n.toString(16);
-			var result = (this.A + n) & 0xFF;
-			this.flags.Z = result === 0 ? 1 : 0;
+			var result = (this.A + n);
+			this.flags.Z = (result & 0xFF) === 0 ? 1 : 0;
 			this.flags.N = 0;
 			this.flags.H = Utils.carryFromBit3(this.A, n);
-			this.flags.C = (this.A + n) > 0xFF ? 1 : 0; // ??
-			this.A = result;
+			this.flags.C = Utils.carryFromBit7(this.A, n);
+			this.A = result & 0xFF;
 			this.PC++;
 		};
 		this['ADC A,n'] = function (n) {
 			this.code = 'ADC A,' + n.toString(16);
-			this['ADD A,n'](n + this.flags.C);
+			var result = (this.A + n + this.flags.C);
+			this.flags.Z = (result & 0xFF) === 0 ? 1 : 0;
+			this.flags.N = 0;
+			this.flags.H = ((this.A & 0x0F) + (n & 0x0F) + this.flags.C) > 0x0F ? 1 : 0;
+			this.flags.C = (this.A + n + this.flags.C) > 0xFF ? 1 : 0;
+			this.A = result & 0xFF;
+			this.PC++;
+
 		};
 		this['SUB n'] = function (n) {
 			this.code = 'SUB n';
 			var result = (this.A - n) & 0xFF;
 			this.flags.Z = result === 0 ? 1 : 0;
 			this.flags.N = 1;
-			this.flags.H = (this.A ^ n ^ result) & 0x10;
-//			this.flags.H = (this.A & 0xF) < (n & 0xF) ? 1 : 0;
+			this.flags.H = (this.A & 0x0F) < (n & 0x0F) ? 1 : 0;
 			this.flags.C = this.A < n ? 1 : 0;
 			this.A = result;
 			this.PC++;
 		};
 		this['SBC A,n'] = function (n) {
 			this.code = 'SBC A,n';
-			this['SUB n'](n + this.flags.C);
+			var result = this.A - n - this.flags.C;
+			this.flags.Z = (result & 0xFF) === 0 ? 1 : 0;
+			this.flags.N = 1;
+			this.flags.H = ((this.A ^ n ^ (result & 0xFF)) & 0x10) !== 0 ? 1 : 0;
+			this.flags.C = result < 0 ? 1 : 0;
+			this.A = result & 0xFF;
+			this.PC++;
 		};
 		this['AND n'] = function (n) {
 			this.code = 'AND ' + n.toString();
@@ -112,7 +124,7 @@ if (typeof exports !== 'undefined') {
 			var result = (n - 1) & 0xff;
 			this.flags.Z = result === 0 ? 1 : 0;
 			this.flags.N = 1;
-			this.flags.H = (n ^ 1 ^ result) & 0x10 ? 1 : 0;//?????
+			this.flags.H = (n ^ 1 ^ result) & 0x10 ? 1 : 0;
 			this.PC++;
 			return result;
 		};
@@ -151,7 +163,7 @@ if (typeof exports !== 'undefined') {
 			var result = this.HL + nn;
 			this.flags.N = 0;
 			this.flags.H = Utils.carryFromBit11(this.HL, nn);
-			this.flags.C = result > 0xFFFF ? 1 : 0;
+			this.flags.C = Utils.carryFromBit15(this.HL, nn);
 			this.HL = result & 0xFFFF;
 			this.PC++;
 		};
@@ -613,13 +625,14 @@ if (typeof exports !== 'undefined') {
 // 3-4. ----------------------------------------------------------------------------
 		// LD HL,SP+n | LDHL SP,n
 		0xf8: function (mem) {
-			var n = Utils.sign(mem.read8(++this.PC));
-			var result = this.SP + n;
+			var n = mem.read8(++this.PC);
+			var result = this.SP + Utils.sign(n);
 			this['LD rr,nn']('HL', result & 0xFFFF);
 			this.flags.Z = 0;
 			this.flags.N = 0;
-			this.flags.H = 0;// ?? TODO
-			this.flags.C = (this.SP & 0xFF) + n > 0xFF ? 1 : 0;// ?? TODO
+			this.flags.H = Utils.carryFromBit3(this.SP, n);
+			this.flags.C = Utils.carryFromBit7(this.SP, n);
+
 		},
 // 5. ----------------------------------------------------------------------------
 		// LD (nn),SP
@@ -1086,8 +1099,14 @@ if (typeof exports !== 'undefined') {
 // ----------------------------------------------------------------------------
 		// ADD SP,n
 		0xe8: function (mem) {
-			var n = Utils.sign(mem.read8(++this.PC));
-			this.SP += n;
+			var n = mem.read8(++this.PC);
+			var result = this.SP + Utils.sign(n);
+			this.flags.Z = 0;
+			this.flags.N = 0;
+			this.flags.H = Utils.carryFromBit3(this.SP, n);
+			this.flags.C = Utils.carryFromBit7(this.SP, n);
+
+			this.SP = result & 0xFFFF;
 			this.PC++;
 		},
 // ----------------------------------------------------------------------------
@@ -1190,12 +1209,12 @@ if (typeof exports !== 'undefined') {
 		},
 		// DI
 		0xf3: function (mem) {
-			// TODO
+			this.IME = 0;
 			this.PC++;
 		},
 		// EI
 		0xfb: function (mem) {
-			// TODO
+			this.IME = 1;
 			this.PC++;
 		},
 

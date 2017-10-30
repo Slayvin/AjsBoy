@@ -9,11 +9,11 @@ var demoRomsPath = 'demo/';
 //emulator.loadProgram(testRomsPath + 'cpu_instrs.gb').then(function () {
 //emulator.loadProgram(testRomsPath + 'individual/01-special.gb').then(function () { // PASSED
 //emulator.loadProgram(testRomsPath + 'individual/02-interrupts.gb').then(function () {
-emulator.loadProgram(testRomsPath + 'individual/03-op sp,hl.gb').then(function () {
-//emulator.loadProgram(testRomsPath + 'individual/04-op r,imm.gb').then(function () {
+//emulator.loadProgram(testRomsPath + 'individual/03-op sp,hl.gb').then(function () { // PASSED
+//emulator.loadProgram(testRomsPath + 'individual/04-op r,imm.gb').then(function () { // PASSED
 //emulator.loadProgram(testRomsPath + 'individual/05-op rp.gb').then(function () { // PASSED
 //emulator.loadProgram(testRomsPath + 'individual/06-ld r,r.gb').then(function () { // PASSED
-//emulator.loadProgram(testRomsPath + 'individual/07-jr,jp,call,ret,rst.gb').then(function () {
+emulator.loadProgram(testRomsPath + 'individual/07-jr,jp,call,ret,rst.gb').then(function () {
 //emulator.loadProgram(testRomsPath + 'individual/08-misc instrs.gb').then(function () {
 //emulator.loadProgram(testRomsPath + 'individual/09-op r,r.gb').then(function () {
 //emulator.loadProgram(testRomsPath + 'individual/10-bit ops.gb').then(function () {

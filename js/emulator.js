@@ -91,7 +91,7 @@ gbEmu.prototype.init = function () {
 gbEmu.prototype.run = function () {
 	var i = 0;
 	var breakpoints = [
-		0x0101,
+//		0x0101,
 	];
 	while (i < gbEmu.cyclesPerFrame) {
 		if (!this.paused) {
