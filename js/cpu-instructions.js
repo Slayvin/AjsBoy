@@ -146,14 +146,14 @@ if (typeof exports !== 'undefined') {
 		};
 		this['PUSH nn'] = function (nn) {
 			this.code = 'PUSH ' + nn.toString(16);
-			this.memory.write(this.SP, nn & 0xFF);
-			this.memory.write(this.SP + 1, nn >>> 8);
+			this.memory.write(this.SP - 1, nn >>> 8);
+			this.memory.write(this.SP - 2, nn & 0xFF);
 			this.SP -= 2;
 		};
 		this['POP rr'] = function (rr) {
 			this.code = 'POP ';
-			this.SP += 2;
 			this[rr] = this.memory.read16(this.SP);
+			this.SP += 2;
 		};
 
 		// 16-bits ALU
@@ -1461,8 +1461,8 @@ if (typeof exports !== 'undefined') {
 		// RET
 		0xc9: function (mem) {
 			this.code = 'RET';
-			this.SP += 2;
 			var nn = mem.read16(this.SP);
+			this.SP += 2;
 			this.PC = nn;
 		},
 // ----------------------------------------------------------------------------
@@ -1470,8 +1470,8 @@ if (typeof exports !== 'undefined') {
 		0xc0: function (mem) {
 			this.code = 'RET NZ';
 			if (!this.flags.Z) {
-				this.SP += 2;
 				var nn = mem.read16(this.SP);
+				this.SP += 2;
 				this.PC = nn;
 			} else {
 				this.PC++;
@@ -1481,8 +1481,8 @@ if (typeof exports !== 'undefined') {
 		0xc8: function (mem) {
 			this.code = 'RET Z';
 			if (this.flags.Z) {
-				this.SP += 2;
 				var nn = mem.read16(this.SP);
+				this.SP += 2;
 				this.PC = nn;
 			} else {
 				this.PC++;
@@ -1492,8 +1492,8 @@ if (typeof exports !== 'undefined') {
 		0xd0: function (mem) {
 			this.code = 'RET NC';
 			if (!this.flags.C) {
-				this.SP += 2;
 				var nn = mem.read16(this.SP);
+				this.SP += 2;
 				this.PC = nn;
 			} else {
 				this.PC++;
@@ -1503,8 +1503,8 @@ if (typeof exports !== 'undefined') {
 		0xd8: function (mem) {
 			this.code = 'RET C';
 			if (this.flags.C) {
-				this.SP += 2;
 				var nn = mem.read16(this.SP);
+				this.SP += 2;
 				this.PC = nn;
 			} else {
 				this.PC++;
@@ -1514,8 +1514,8 @@ if (typeof exports !== 'undefined') {
 		// RETI
 		0xd9: function (mem) {//TODO
 			this.code = 'RETI';
-			this.SP += 2;
 			var addr = mem.read16(this.SP);
+			this.SP += 2;
 			this.PC = addr;
 			// then enable Interrupts
 			// TODO this.IME = 1;
