@@ -72,6 +72,8 @@ gbEmu.prototype.setDefaults = function () {
 	this.cpu.DE = 0x00D8;
 	this.cpu.HL = 0x014D;
 	this.cpu.SP = 0xFFFE;
+
+	this.mmu.memory[0xFF50] = 1; // TODO use flags instead
 };
 
 gbEmu.prototype.init = function () {
@@ -90,8 +92,27 @@ gbEmu.prototype.init = function () {
 
 gbEmu.prototype.run = function () {
 	var i = 0;
-	var breakpoints = [
-//		0x0101,
+	var breakpoints = [];
+	var breakpoints_ = [
+		0x0000,
+		0x0101,
+		0xC0E2,
+//		0xC25A,
+//		0xC263,
+		0xC26F,
+//		0xC7E0,
+		0xC45C,
+//		0xC49A,
+//		0xC4E3,
+//		0xC6BA,
+
+
+//		0xC2CC,
+
+//		0xC4E6,
+//		0xCBA6,
+//		0xCBB0,
+//		0xD801
 	];
 	while (i < gbEmu.cyclesPerFrame) {
 		if (!this.paused) {

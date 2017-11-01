@@ -39,6 +39,16 @@
 			this.PC++;
 			return result;
 		};
+		this['SET b,n'] = function (b, n) {
+			var mask = 1 << b;
+			this.PC++;
+			return n | mask;
+		};
+		this['RES b,n'] = function (b, n) {
+			var mask = 0xFF ^ (1 << b);
+			this.PC++;
+			return n & mask;
+		};
 		this['SWAP n'] = function (n) {
 			this.code = 'SWAP ' + n.toString(16);
 			var lo = n & 0x0F;
@@ -140,11 +150,11 @@
 			this.L = this['SRL n'](this.L);
 		},
 		// SRL (HL)
-		0x3e: function () {
+		0x3e: function (mem) {
 			var addr = this.HL;
-			var n = this.memory.read8(addr);
+			var n = mem.read8(addr);
 			var result = this['SRL n'](n);
-			this.memory.write(addr, result);
+			mem.write(addr, result);
 		},
 // ----------------------------------------------------------------------------
 		// BIT 6,B
@@ -162,18 +172,311 @@
 // ----------------------------------------------------------------------------
 		// SET 0,B
 		0xc0: function () {
-			this.B = this.B | 1;
-			this.PC++;
+			this.B = this['SET b,n'](0, this.B);
 		},
 		// SET 4,E
 		0xe3: function () {
-			this.E = this.E | 0x10;
-			this.PC++;
+			this.E = this['SET b,n'](4, this.E);
 		},
 		// SET 5,A
 		0xef: function () {
-			this.A = this.A | 0x20;
-			this.PC++;
+			this.A = this['SET b,n'](5, this.A);
+		},
+// ----------------------------------------------------------------------------
+// RESET BIT 0
+		// RES 0,B
+		0x80: function () {
+			this.B = this['RES b,n'](0, this.B);
+		},
+		// RES 0,C
+		0x81: function () {
+			this.C = this['RES b,n'](0, this.C);
+		},
+		// RES 0,D
+		0x82: function () {
+			this.D = this['RES b,n'](0, this.D);
+		},
+		// RES 0,E
+		0x83: function () {
+			this.E = this['RES b,n'](0, this.E);
+		},
+		// RES 0,H
+		0x84: function () {
+			this.H = this['RES b,n'](0, this.H);
+		},
+		// RES 0,L
+		0x85: function () {
+			this.L = this['RES b,n'](0, this.L);
+		},
+		// RES 0,(HL)
+		0x86: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			this.result = this['RES b,n'](0, n);
+			mem.write(addr, result);
+		},
+		// RES 0,A
+		0x87: function () {
+			this.A = this['RES b,n'](0, this.A);
+		},
+// ----------------------------------------------------------------------------
+// RESET BIT 1
+		// RES 1,B
+		0x88: function () {
+			this.B = this['RES b,n'](1, this.B);
+		},
+		// RES 1,C
+		0x89: function () {
+			this.C = this['RES b,n'](1, this.C);
+		},
+		// RES 1,D
+		0x8a: function () {
+			this.D = this['RES b,n'](1, this.D);
+		},
+		// RES 1,E
+		0x8b: function () {
+			this.E = this['RES b,n'](1, this.E);
+		},
+		// RES 1,H
+		0x8c: function () {
+			this.H = this['RES b,n'](1, this.H);
+		},
+		// RES 1,L
+		0x8d: function () {
+			this.L = this['RES b,n'](1, this.L);
+		},
+		// RES 1,(HL)
+		0x8e: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			this.result = this['RES b,n'](1, n);
+			mem.write(addr, result);
+		},
+		// RES 1,A
+		0x8f: function () {
+			this.A = this['RES b,n'](1, this.A);
+		},
+// ----------------------------------------------------------------------------
+// RESET BIT 2
+		// RES 2,B
+		0x90: function () {
+			this.B = this['RES b,n'](2, this.B);
+		},
+		// RES 2,C
+		0x91: function () {
+			this.C = this['RES b,n'](2, this.C);
+		},
+		// RES 2,D
+		0x92: function () {
+			this.D = this['RES b,n'](2, this.D);
+		},
+		// RES 2,E
+		0x93: function () {
+			this.E = this['RES b,n'](2, this.E);
+		},
+		// RES 2,H
+		0x94: function () {
+			this.H = this['RES b,n'](2, this.H);
+		},
+		// RES 2,L
+		0x95: function () {
+			this.L = this['RES b,n'](2, this.L);
+		},
+		// RES 2,(HL)
+		0x96: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			this.result = this['RES b,n'](2, n);
+			mem.write(addr, result);
+		},
+		// RES 2,A
+		0x97: function () {
+			this.A = this['RES b,n'](2, this.A);
+		},
+// ----------------------------------------------------------------------------
+// RESET BIT 3
+		// RES 3,B
+		0x98: function () {
+			this.B = this['RES b,n'](3, this.B);
+		},
+		// RES 3,C
+		0x99: function () {
+			this.C = this['RES b,n'](3, this.C);
+		},
+		// RES 3,D
+		0x9a: function () {
+			this.D = this['RES b,n'](3, this.D);
+		},
+		// RES 3,E
+		0x9b: function () {
+			this.E = this['RES b,n'](3, this.E);
+		},
+		// RES 3,H
+		0x9c: function () {
+			this.H = this['RES b,n'](3, this.H);
+		},
+		// RES 3,L
+		0x9d: function () {
+			this.L = this['RES b,n'](3, this.L);
+		},
+		// RES 3,(HL)
+		0x9e: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			this.result = this['RES b,n'](3, n);
+			mem.write(addr, result);
+		},
+		// RES 3,A
+		0x9f: function () {
+			this.A = this['RES b,n'](3, this.A);
+		},
+// ----------------------------------------------------------------------------
+// RESET BIT 4
+		// RES 4,B
+		0xa0: function () {
+			this.B = this['RES b,n'](4, this.B);
+		},
+		// RES 4,C
+		0xa1: function () {
+			this.C = this['RES b,n'](4, this.C);
+		},
+		// RES 4,D
+		0xa2: function () {
+			this.D = this['RES b,n'](4, this.D);
+		},
+		// RES 4,E
+		0xa3: function () {
+			this.E = this['RES b,n'](4, this.E);
+		},
+		// RES 4,H
+		0xa4: function () {
+			this.H = this['RES b,n'](4, this.H);
+		},
+		// RES 4,L
+		0xa5: function () {
+			this.L = this['RES b,n'](4, this.L);
+		},
+		// RES 4,(HL)
+		0xa6: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			this.result = this['RES b,n'](4, n);
+			mem.write(addr, result);
+		},
+		// RES 4,A
+		0xa7: function () {
+			this.A = this['RES b,n'](4, this.A);
+		},
+// ----------------------------------------------------------------------------
+// RESET BIT 5
+		// RES 5,B
+		0xa8: function () {
+			this.B = this['RES b,n'](5, this.B);
+		},
+		// RES 5,C
+		0xa9: function () {
+			this.C = this['RES b,n'](5, this.C);
+		},
+		// RES 5,D
+		0xaa: function () {
+			this.D = this['RES b,n'](5, this.D);
+		},
+		// RES 5,E
+		0xab: function () {
+			this.E = this['RES b,n'](5, this.E);
+		},
+		// RES 5,H
+		0xac: function () {
+			this.H = this['RES b,n'](5, this.H);
+		},
+		// RES 5,L
+		0xad: function () {
+			this.L = this['RES b,n'](5, this.L);
+		},
+		// RES 5,(HL)
+		0xae: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			this.result = this['RES b,n'](5, n);
+			mem.write(addr, result);
+		},
+		// RES 5,A
+		0xaf: function () {
+			this.A = this['RES b,n'](5, this.A);
+		},
+// ----------------------------------------------------------------------------
+// RESET BIT 6
+		// RES 6,B
+		0xb0: function () {
+			this.B = this['RES b,n'](6, this.B);
+		},
+		// RES 6,C
+		0xb1: function () {
+			this.C = this['RES b,n'](6, this.C);
+		},
+		// RES 6,D
+		0xb2: function () {
+			this.D = this['RES b,n'](6, this.D);
+		},
+		// RES 6,E
+		0xb3: function () {
+			this.E = this['RES b,n'](6, this.E);
+		},
+		// RES 6,H
+		0xb4: function () {
+			this.H = this['RES b,n'](6, this.H);
+		},
+		// RES 6,L
+		0xb5: function () {
+			this.L = this['RES b,n'](6, this.L);
+		},
+		// RES 6,(HL)
+		0xb6: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			this.result = this['RES b,n'](6, n);
+			mem.write(addr, result);
+		},
+		// RES 6,A
+		0xb7: function () {
+			this.A = this['RES b,n'](6, this.A);
+		},
+// ----------------------------------------------------------------------------
+// RESET BIT 7
+		// RES 7,B
+		0xb8: function () {
+			this.B = this['RES b,n'](7, this.B);
+		},
+		// RES 7,C
+		0xb9: function () {
+			this.C = this['RES b,n'](7, this.C);
+		},
+		// RES 7,D
+		0xba: function () {
+			this.D = this['RES b,n'](7, this.D);
+		},
+		// RES 7,E
+		0xbb: function () {
+			this.E = this['RES b,n'](7, this.E);
+		},
+		// RES 7,H
+		0xbc: function () {
+			this.H = this['RES b,n'](7, this.H);
+		},
+		// RES 7,L
+		0xbd: function () {
+			this.L = this['RES b,n'](7, this.L);
+		},
+		// RES 7,(HL)
+		0xbe: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			this.result = this['RES b,n'](7, n);
+			mem.write(addr, result);
+		},
+		// RES 7,A
+		0xbf: function () {
+			this.A = this['RES b,n'](7, this.A);
 		},
 // ----------------------------------------------------------------------------
 		// SWAP A

@@ -15,7 +15,7 @@ function MemController() {
 	this.vram.tileMap0 = new Uint8Array(this.memory.buffer, 0x9800, 0x400);
 	this.vram.tileMap1 = new Uint8Array(this.memory.buffer, 0x9C00, 0x400);
 	this.tileMap = new Uint8Array(0x18000);
-	
+
 	/**
 	 * 
 	 * @param {int} addr
@@ -23,11 +23,11 @@ function MemController() {
 	 */
 	this.read8 = function (addr) {
 		if (addr < 0x100 && this.memory[0xFF50] === 1) {
-			return this.rom[addr];
+			return this.rom[addr] & 0xFF;
 		} else if (0x100 <= addr && addr < 0x8000) {
-			return this.rom[addr];
+			return this.rom[addr] & 0xFF;
 		} else {
-			return this.memory[addr];
+			return this.memory[addr] & 0xFF;
 		}
 	};
 

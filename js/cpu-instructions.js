@@ -532,58 +532,58 @@ if (typeof exports !== 'undefined') {
 		// LD A,(C)
 		0xf2: function (mem) {
 			this.code = 'LD A,(C)';
-			var addr = 0xff00 + this.C;
+			var addr = 0xFF00 + this.C;
 			this.A = mem.read8(addr);
 			this.PC++;
 		},
 		// LD (C),A
-		0xe2: function () {
+		0xe2: function (mem) {
 			this.code = 'LD (C),A';
-			var addr = 0xff00 + this.C;
-			this.memory.write(addr, this.A);
+			var addr = 0xFF00 + this.C;
+			mem.write(addr, this.A);
 			this.PC++;
 		},
 		// LD A,(HLD) | LD A,(HL-) | LDD A,(HL)
 		0x3a: function (mem) {
 			this.code = 'LD A,(HL-)';
 			this.A = mem.read8(this.HL);
-			this.HL--;
+			this.HL = (this.HL - 1) & 0xFFFF;
 			this.PC++;
 		},
 		// LD (HLD),A | LD (HL-),A | LDD (HL),A
-		0x32: function () {
+		0x32: function (mem) {
 			this.code = 'LD (HL-),A';
-			this.memory.write(this.HL, this.A);
-			this.HL--;
+			mem.write(this.HL, this.A);
+			this.HL = (this.HL - 1) & 0xFFFF;
 			this.PC++;
 		},
 		// LD A,(HLI) | LD A,(HL+) | LDI A,(HL)
 		0x2a: function (mem) {
 			this.code = 'LD A,(HL+)';
 			this.A = mem.read8(this.HL);
-			this.HL++;
+			this.HL = (this.HL + 1) & 0xFFFF;
 			this.PC++;
 		},
 		// LD (HLI),A | LD (HL+),A | LDI (HL),A
-		0x22: function () {
+		0x22: function (mem) {
 			this.code = 'LD (HL+),A';
-			this.memory.write(this.HL, this.A);
-			this.HL++;
+			mem.write(this.HL, this.A);
+			this.HL = (this.HL + 1) & 0xFFFF;
 			this.PC++;
 		},
 		// LDH (n),A
 		0xe0: function (mem) {
 			this.code = 'LDH (n),A';
 			var n = mem.read8(++this.PC);
-			var addr = 0xff00 + n;
-			this.memory.write(addr, this.A);
+			var addr = 0xFF00 + n;
+			mem.write(addr, this.A);
 			this.PC++;
 		},
 		// LDH A,(n)
 		0xf0: function (mem) {
 			this.code = 'LDH A,(n)';
 			var n = mem.read8(++this.PC);
-			var addr = 0xff00 + n;
+			var addr = 0xFF00 + n;
 			this.A = mem.read8(addr);
 			this.PC++;
 		},
@@ -1300,7 +1300,6 @@ if (typeof exports !== 'undefined') {
 // ----------------------------------------------------------------------------
 		// JP (HL)
 		0xe9: function (mem) {
-//			var addr = mem.read16(this.HL);
 			var addr = this.HL;
 			this.code = 'JP (HL)' + addr.toString(16);
 			this.PC = addr;
@@ -1480,7 +1479,7 @@ if (typeof exports !== 'undefined') {
 		},
 		// RET Z
 		0xc8: function (mem) {
-			this.code = 'RET NZ';
+			this.code = 'RET Z';
 			if (this.flags.Z) {
 				this.SP += 2;
 				var nn = mem.read16(this.SP);
@@ -1513,13 +1512,13 @@ if (typeof exports !== 'undefined') {
 		},
 // ----------------------------------------------------------------------------
 		// RETI
-		0xd9: function (mem) {
+		0xd9: function (mem) {//TODO
 			this.code = 'RETI';
 			this.SP += 2;
 			var addr = mem.read16(this.SP);
 			this.PC = addr;
 			// then enable Interrupts
-			// TODO this.MEI = 1;
+			// TODO this.IME = 1;
 		},
 
 // ============================================================================
