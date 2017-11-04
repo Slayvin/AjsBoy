@@ -92,6 +92,15 @@
 			this.flags.H = 1;
 			this.PC++;
 		};
+		// Read bit at position b for int n
+		this['BIT b,n'] = function (b, n) {
+			this.code = 'BIT ' + b + ',' + n;
+			var mask = 0x1 << b;
+			this.flags.Z = !(mask & n) | 0;
+			this.flags.N = 0;
+			this.flags.H = 1;
+			this.PC++;
+		};
 	}).apply(Cpu.prototype);
 // ============================================================================
 // All extended Operation codes
@@ -378,7 +387,7 @@
 		0x46: function (mem) {
 			var addr = this.HL;
 			var n = mem.read8(addr);
-			this['BIT n,r'](0, n);
+			this['BIT b,n'](0, n);
 		},
 		// BIT 0,A
 		0x47: function () {
@@ -414,7 +423,7 @@
 		0x4e: function (mem) {
 			var addr = this.HL;
 			var n = mem.read8(addr);
-			this['BIT n,r'](1, n);
+			this['BIT b,n'](1, n);
 		},
 		// BIT 1,A
 		0x4f: function () {
@@ -450,7 +459,7 @@
 		0x56: function (mem) {
 			var addr = this.HL;
 			var n = mem.read8(addr);
-			this['BIT n,r'](2, n);
+			this['BIT b,n'](2, n);
 		},
 		// BIT 2,A
 		0x57: function () {
@@ -486,7 +495,7 @@
 		0x5e: function (mem) {
 			var addr = this.HL;
 			var n = mem.read8(addr);
-			this['BIT n,r'](3, n);
+			this['BIT b,n'](3, n);
 		},
 		// BIT 3,A
 		0x5f: function () {
@@ -522,7 +531,7 @@
 		0x66: function (mem) {
 			var addr = this.HL;
 			var n = mem.read8(addr);
-			this['BIT n,r'](4, n);
+			this['BIT b,n'](4, n);
 		},
 		// BIT 4,A
 		0x67: function () {
@@ -558,7 +567,7 @@
 		0x6e: function (mem) {
 			var addr = this.HL;
 			var n = mem.read8(addr);
-			this['BIT n,r'](5, n);
+			this['BIT b,n'](5, n);
 		},
 		// BIT 5,A
 		0x6f: function () {
@@ -594,7 +603,7 @@
 		0x76: function (mem) {
 			var addr = this.HL;
 			var n = mem.read8(addr);
-			this['BIT n,r'](6, n);
+			this['BIT b,n'](6, n);
 		},
 		// BIT 6,A
 		0x77: function () {
@@ -630,7 +639,7 @@
 		0x7e: function (mem) {
 			var addr = this.HL;
 			var n = mem.read8(addr);
-			this['BIT n,r'](7, n);
+			this['BIT b,n'](7, n);
 		},
 		// BIT 7,A
 		0x7f: function () {
