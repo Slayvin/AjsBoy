@@ -58,7 +58,7 @@ if (typeof exports !== 'undefined') {
 			this.flags.Z = (result & 0xFF) === 0 ? 1 : 0;
 			this.flags.N = 0;
 			this.flags.H = ((this.A & 0x0F) + (n & 0x0F) + this.flags.C) > 0x0F ? 1 : 0;
-			this.flags.C = (this.A + n + this.flags.C) > 0xFF ? 1 : 0;
+			this.flags.C = result > 0xFF ? 1 : 0;
 			this.A = result & 0xFF;
 			this.PC++;
 
@@ -132,7 +132,8 @@ if (typeof exports !== 'undefined') {
 			var result = (this.A - n) & 0xFF;
 			this.flags.Z = result === 0 ? 1 : 0;
 			this.flags.N = 1;
-			this.flags.H = (this.A ^ n ^ result) & 0x10;
+			this.flags.H = (this.A & 0x0F) < (n & 0x0F) ? 1 : 0;
+//			this.flags.H = (this.A ^ n ^ result) & 0x10;
 			this.flags.C = this.A < n ? 1 : 0;
 			this.PC++;
 		};
@@ -1147,7 +1148,6 @@ if (typeof exports !== 'undefined') {
 // ============================================================================
 // Misc
 // ============================================================================
-		// SWAP n
 		// DAA
 		0x27: function () {
 			if (!this.flags.N) {
@@ -1175,7 +1175,7 @@ if (typeof exports !== 'undefined') {
 		},
 		// CPL
 		0x2f: function () {
-			this.A = (0xFF - this.A);
+			this.A = (~this.A) & 0xFF;
 			this.flags.N = 1;
 			this.flags.H = 1;
 			this.PC++;
@@ -1185,6 +1185,7 @@ if (typeof exports !== 'undefined') {
 			this.flags.N = 0;
 			this.flags.H = 0;
 			this.flags.C = this.flags.C ? 0 : 1;
+			this.PC++;
 		},
 		// SCF
 		0x37: function () {
@@ -1223,28 +1224,23 @@ if (typeof exports !== 'undefined') {
 // ============================================================================
 		// RLCA
 		0x07: function () {
-			this.code = 'RLCA';
-			this.flags.C = this.A >>> 7;
-			this.A = (this.A << 1) & 0xFF | this.flags.C;
-			this.flags.Z = (this.A === 0) | 0;
-			this.flags.N = 0;
-			this.flags.H = 0;
-			this.PC++;
+			this.A = this['RL n'](this.A, false);
+			this.flags.Z = 0;
 		},
 		// RLA
 		0x17: function () {
-			this.code = 'RLA';
-			var carry = this.A >>> 7;
-			this.A = (this.A << 1) & 0xFF | this.flags.C;
-			this.flags.C = carry;
-			this.flags.Z = (this.A === 0) | 0;
-			this.flags.N = 0;
-			this.flags.H = 0;
-			this.PC++;
+			this.A = this['RL n'](this.A, true);
+			this.flags.Z = 0;
 		},
-		// RR A
+		// RRCA
+		0x0f: function () {
+			this.A = this['RR n'](this.A, false);
+			this.flags.Z = 0;
+		},
+		// RRA
 		0x1f: function () {
-			this.A = this['RR n'](this.A);
+			this.A = this['RR n'](this.A, true);
+			this.flags.Z = 0;
 		},
 
 // ============================================================================

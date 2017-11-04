@@ -15,8 +15,8 @@ var demoRomsPath = 'demo/';
 //emulator.loadProgram(testRomsPath + 'individual/06-ld r,r.gb').then(function () { // PASSED
 //emulator.loadProgram(testRomsPath + 'individual/07-jr,jp,call,ret,rst.gb').then(function () { // PASSED
 //emulator.loadProgram(testRomsPath + 'individual/08-misc instrs.gb').then(function () { // PASSED
-emulator.loadProgram(testRomsPath + 'individual/09-op r,r.gb').then(function () {
-//emulator.loadProgram(testRomsPath + 'individual/10-bit ops.gb').then(function () {
+//emulator.loadProgram(testRomsPath + 'individual/09-op r,r.gb').then(function () { // PASSED
+emulator.loadProgram(testRomsPath + 'individual/10-bit ops.gb').then(function () {
 //emulator.loadProgram(testRomsPath + 'individual/11-op a,(hl).gb').then(function () {
 //emulator.loadProgram(gameRomsPath + 'Tetris (World).gb').then(function () {
 //emulator.loadProgram(gameRomsPath + 'Dr. Mario (JU) (V1.0) [!].gb').then(function () {

@@ -8,36 +8,58 @@
 		// ====================================================================
 		// Misc
 		// ====================================================================
-		this['RL n'] = function (n) {
-			this.code = 'RL ' + n.toString(16);
-			var carry = n >>> 7;
-			var result = (n << 1) & 0xFF | this.flags.C;
+		this['RL n'] = function (n, wCY) {
+			this.code = 'RL' + (wCY ? ' ' : 'C ') + n.toString(16);
+			var bit7 = (n & 0xFF) >>> 7;
+			var result = (n << 1) & 0xFF | (wCY ? this.flags.C : bit7);
 			this.flags.Z = result === 0 ? 1 : 0;
 			this.flags.N = 0;
 			this.flags.H = 0;
-			this.flags.C = carry;
+			this.flags.C = bit7;
 			this.PC++;
 			return result;
 		};
-		this['RR n'] = function (n) {
-			this.code = 'RR ' + n.toString(16);
-			var result = (n >>> 1) | (this.flags.C << 7);
+		this['RR n'] = function (n, wCY) {
+			this.code = 'RR' + (wCY ? ' ' : 'C ') + n.toString(16);
+			var bit0 = n & 1;
+			var result = ((n & 0xFF) >>> 1) | (wCY ? this.flags.C << 7 : bit0 << 7);
 			this.flags.Z = result === 0 ? 1 : 0;
+			this.flags.N = 0;
+			this.flags.H = 0;
+			this.flags.C = bit0;
+			this.PC++;
+			return result;
+		};
+		this['SLA n'] = function (n) {
+			this.code = 'SLA ' + n.toString(16);
+			var result = n << 1;
+			this.flags.Z = (result & 0xFF) === 0 ? 1 : 0;
+			this.flags.N = 0;
+			this.flags.H = 0;
+			this.flags.C = (n & 0xFF) >>> 7;
+			this.PC++;
+			return (result & 0xFF);
+		};
+		this['SRA n'] = function (n) {
+			this.code = 'SRA ' + n.toString(16);
+			var bit7 = n & (1 << 7);
+			var result = (n >> 1) | bit7;
+			this.flags.Z = (result & 0xFF) === 0 ? 1 : 0;
 			this.flags.N = 0;
 			this.flags.H = 0;
 			this.flags.C = n & 1;
 			this.PC++;
-			return result;
+			return (result & 0xFF);
 		};
 		this['SRL n'] = function (n) {
 			this.code = 'SRL ' + n.toString(16);
-			var result = n >>> 1;
-			this.flags.Z = result === 0 ? 1 : 0;
+			var result = (n & 0xFF) >>> 1;
+			this.flags.Z = (result & 0xFF) === 0 ? 1 : 0;
 			this.flags.N = 0;
 			this.flags.H = 0;
 			this.flags.C = n & 1;
 			this.PC++;
-			return result;
+			return (result & 0xFF);
 		};
 		this['SET b,n'] = function (b, n) {
 			var mask = 1 << b;
@@ -53,7 +75,11 @@
 			this.code = 'SWAP ' + n.toString(16);
 			var lo = n & 0x0F;
 			var hi = n & 0xF0;
-			var result = (lo << 4) & (hi >>> 4);
+			var result = (lo << 4) | (hi >>> 4);
+			this.flags.Z = result === 0 ? 1 : 0;
+			this.flags.N = 0;
+			this.flags.H = 0;
+			this.flags.C = 0;
 			this.PC++;
 			return result;
 		};
@@ -71,60 +97,222 @@
 // All extended Operation codes
 // ============================================================================
 	Cpu.prototype.instructions.extended = {
-// RLCA
-// RLA
-// RRCA
-
-// RLC n
-// ----------------------------------------------------------------------------
-		// RL A
-		0x17: function () {
-			this.A = this['RL n'](this.A);
+		// RLC B
+		0x00: function () {
+			this.B = this['RL n'](this.B, false);
 		},
+		// RLC C
+		0x01: function () {
+			this.C = this['RL n'](this.C, false);
+		},
+		// RLC D
+		0x02: function () {
+			this.D = this['RL n'](this.D, false);
+		},
+		// RLC E
+		0x03: function () {
+			this.E = this['RL n'](this.E, false);
+		},
+		// RLC H
+		0x04: function () {
+			this.H = this['RL n'](this.H, false);
+		},
+		// RLC L
+		0x05: function () {
+			this.L = this['RL n'](this.L, false);
+		},
+		// RLC (HL)
+		0x06: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			var result = this['RL n'](n, false);
+			mem.write(addr, result);
+		},
+		// RLC A
+		0x07: function () {
+			this.A = this['RL n'](this.A, false);
+		},
+// ----------------------------------------------------------------------------
+		// RRC B
+		0x08: function () {
+			this.B = this['RR n'](this.B, false);
+		},
+		// RRC C
+		0x09: function () {
+			this.C = this['RR n'](this.C, false);
+		},
+		// RRC D
+		0x0a: function () {
+			this.D = this['RR n'](this.D, false);
+		},
+		// RRC E
+		0x0b: function () {
+			this.E = this['RR n'](this.E, false);
+		},
+		// RRC H
+		0x0c: function () {
+			this.H = this['RR n'](this.H, false);
+		},
+		// RRC L
+		0x0d: function () {
+			this.L = this['RR n'](this.L, false);
+		},
+		// RRC (HL)
+		0x0e: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			var result = this['RR n'](n, false);
+			mem.write(addr, result);
+		},
+		// RRC A
+		0x0f: function () {
+			this.A = this['RR n'](this.A, false);
+		},
+// ----------------------------------------------------------------------------
 		// RL B
 		0x10: function () {
-			this.B = this['RL n'](this.B);
+			this.B = this['RL n'](this.B, true);
 		},
 		// RL C
 		0x11: function () {
-			this.C = this['RL n'](this.C);
+			this.C = this['RL n'](this.C, true);
+		},
+		// RL D
+		0x12: function () {
+			this.D = this['RL n'](this.D, true);
+		},
+		// RL E
+		0x13: function () {
+			this.E = this['RL n'](this.E, true);
+		},
+		// RL H
+		0x14: function () {
+			this.H = this['RL n'](this.H, true);
+		},
+		// RL L
+		0x15: function () {
+			this.L = this['RL n'](this.L, true);
+		},
+		// RL (HL)
+		0x16: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			var result = this['RL n'](n, true);
+			mem.write(addr, result);
+		},
+		// RL A
+		0x17: function () {
+			this.A = this['RL n'](this.A, true);
 		},
 // ----------------------------------------------------------------------------
-// RRC
-// ----------------------------------------------------------------------------
-		// RR A
-		0x1f: function () {
-			this.A = this['RR n'](this.A);
-		},
 		// RR B
 		0x18: function () {
-			this.B = this['RR n'](this.B);
+			this.B = this['RR n'](this.B, true);
 		},
 		// RR C
 		0x19: function () {
-			this.C = this['RR n'](this.C);
+			this.C = this['RR n'](this.C, true);
 		},
 		// RR D
 		0x1a: function () {
-			this.D = this['RR n'](this.D);
+			this.D = this['RR n'](this.D, true);
 		},
 		// RR E
 		0x1b: function () {
-			this.E = this['RR n'](this.E);
+			this.E = this['RR n'](this.E, true);
 		},
 		// RR H
 		0x1c: function () {
-			this.H = this['RR n'](this.H);
+			this.H = this['RR n'](this.H, true);
 		},
 		// RR L
 		0x1d: function () {
-			this.L = this['RR n'](this.L);
+			this.L = this['RR n'](this.L, true);
+		},
+		// RR (HL)
+		0x1e: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			var result = this['RR n'](n, true);
+			mem.write(addr, result);
+		},
+		// RR A
+		0x1f: function () {
+			this.A = this['RR n'](this.A, true);
 		},
 // ----------------------------------------------------------------------------
-		// SRL A
-		0x3f: function () {
-			this.A = this['SRL n'](this.A);
+		// SLA B
+		0x20: function () {
+			this.B = this['SLA n'](this.B);
 		},
+		// SLA C
+		0x21: function () {
+			this.C = this['SLA n'](this.C);
+		},
+		// SLA D
+		0x22: function () {
+			this.D = this['SLA n'](this.D);
+		},
+		// SLA E
+		0x23: function () {
+			this.E = this['SLA n'](this.E);
+		},
+		// SLA H
+		0x24: function () {
+			this.H = this['SLA n'](this.H);
+		},
+		// SLA L
+		0x25: function () {
+			this.L = this['SLA n'](this.L);
+		},
+		// SLA (HL)
+		0x26: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			var result = this['SLA n'](n);
+			mem.write(addr, result);
+		},
+		// SLA A
+		0x27: function () {
+			this.A = this['SLA n'](this.A);
+		},
+// ----------------------------------------------------------------------------
+		// SRA B
+		0x28: function () {
+			this.B = this['SRA n'](this.B);
+		},
+		// SRA C
+		0x29: function () {
+			this.C = this['SRA n'](this.C);
+		},
+		// SRA D
+		0x2a: function () {
+			this.D = this['SRA n'](this.D);
+		},
+		// SRA E
+		0x2b: function () {
+			this.E = this['SRA n'](this.E);
+		},
+		// SRA H
+		0x2c: function () {
+			this.H = this['SRA n'](this.H);
+		},
+		// SRA L
+		0x2d: function () {
+			this.L = this['SRA n'](this.L);
+		},
+		// SRA (HL)
+		0x2e: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			var result = this['SRA n'](n);
+			mem.write(addr, result);
+		},
+		// SRA A
+		0x2f: function () {
+			this.A = this['SRA n'](this.A);
+		},
+// ----------------------------------------------------------------------------
 		// SRL B
 		0x38: function () {
 			this.B = this['SRL n'](this.B);
@@ -155,6 +343,10 @@
 			var n = mem.read8(addr);
 			var result = this['SRL n'](n);
 			mem.write(addr, result);
+		},
+		// SRL A
+		0x3f: function () {
+			this.A = this['SRL n'](this.A);
 		},
 // ----------------------------------------------------------------------------
 		// BIT 6,B
@@ -479,10 +671,6 @@
 			this.A = this['RES b,n'](7, this.A);
 		},
 // ----------------------------------------------------------------------------
-		// SWAP A
-		0x37: function () {
-			this.A = this['SWAP n'](this.A);
-		},
 		// SWAP B
 		0x30: function () {
 			this.B = this['SWAP n'](this.B);
@@ -507,6 +695,17 @@
 		0x35: function () {
 			this.L = this['SWAP n'](this.L);
 		},
+		// SWAP (HL)
+		0x36: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			this.result = this['SWAP n'](n);
+			mem.write(addr, result);
+		},
+		// SWAP A
+		0x37: function () {
+			this.A = this['SWAP n'](this.A);
+		}
 
 	};
 })(Cpu);

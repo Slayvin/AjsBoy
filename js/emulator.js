@@ -96,23 +96,7 @@ gbEmu.prototype.run = function () {
 	var breakpoints_ = [
 		0x0000,
 		0x0101,
-		0xC0E2,
-//		0xC25A,
-//		0xC263,
-		0xC26F,
-//		0xC7E0,
-		0xC45C,
-//		0xC49A,
-//		0xC4E3,
-//		0xC6BA,
-
-
-//		0xC2CC,
-
-//		0xC4E6,
-//		0xCBA6,
-//		0xCBB0,
-//		0xD801
+		0xC00C
 	];
 	while (i < gbEmu.cyclesPerFrame) {
 		if (!this.paused) {
