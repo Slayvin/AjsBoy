@@ -349,6 +349,223 @@
 			this.A = this['SRL n'](this.A);
 		},
 // ----------------------------------------------------------------------------
+// READ BIT 0
+		// BIT 0,B
+		0x40: function () {
+			this['BIT n,r'](0, 'B');
+		},
+		// BIT 0,C
+		0x41: function () {
+			this['BIT n,r'](0, 'C');
+		},
+		// BIT 0,D
+		0x42: function () {
+			this['BIT n,r'](0, 'D');
+		},
+		// BIT 0,E
+		0x43: function () {
+			this['BIT n,r'](0, 'E');
+		},
+		// BIT 0,H
+		0x44: function () {
+			this['BIT n,r'](0, 'H');
+		},
+		// BIT 0,L
+		0x45: function () {
+			this['BIT n,r'](0, 'L');
+		},
+		// BIT 0,(HL)
+		0x46: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			this['BIT n,r'](0, n);
+		},
+		// BIT 0,A
+		0x47: function () {
+			this['BIT n,r'](0, 'A');
+		},
+// ----------------------------------------------------------------------------
+// READ BIT 1
+		// BIT 1,B
+		0x48: function () {
+			this['BIT n,r'](1, 'B');
+		},
+		// BIT 1,C
+		0x49: function () {
+			this['BIT n,r'](1, 'C');
+		},
+		// BIT 1,D
+		0x4a: function () {
+			this['BIT n,r'](1, 'D');
+		},
+		// BIT 1,E
+		0x4b: function () {
+			this['BIT n,r'](1, 'E');
+		},
+		// BIT 1,H
+		0x4c: function () {
+			this['BIT n,r'](1, 'H');
+		},
+		// BIT 1,L
+		0x4d: function () {
+			this['BIT n,r'](1, 'L');
+		},
+		// BIT 1,(HL)
+		0x4e: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			this['BIT n,r'](1, n);
+		},
+		// BIT 1,A
+		0x4f: function () {
+			this['BIT n,r'](1, 'A');
+		},
+// ----------------------------------------------------------------------------
+// READ BIT 2
+		// BIT 2,B
+		0x50: function () {
+			this['BIT n,r'](2, 'B');
+		},
+		// BIT 2,C
+		0x51: function () {
+			this['BIT n,r'](2, 'C');
+		},
+		// BIT 2,D
+		0x52: function () {
+			this['BIT n,r'](2, 'D');
+		},
+		// BIT 2,E
+		0x53: function () {
+			this['BIT n,r'](2, 'E');
+		},
+		// BIT 2,H
+		0x54: function () {
+			this['BIT n,r'](2, 'H');
+		},
+		// BIT 2,L
+		0x55: function () {
+			this['BIT n,r'](2, 'L');
+		},
+		// BIT 2,(HL)
+		0x56: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			this['BIT n,r'](2, n);
+		},
+		// BIT 2,A
+		0x57: function () {
+			this['BIT n,r'](2, 'A');
+		},
+// ----------------------------------------------------------------------------
+// READ BIT 3
+		// BIT 3,B
+		0x58: function () {
+			this['BIT n,r'](3, 'B');
+		},
+		// BIT 3,C
+		0x59: function () {
+			this['BIT n,r'](3, 'C');
+		},
+		// BIT 3,D
+		0x5a: function () {
+			this['BIT n,r'](3, 'D');
+		},
+		// BIT 3,E
+		0x5b: function () {
+			this['BIT n,r'](3, 'E');
+		},
+		// BIT 3,H
+		0x5c: function () {
+			this['BIT n,r'](3, 'H');
+		},
+		// BIT 3,L
+		0x5d: function () {
+			this['BIT n,r'](3, 'L');
+		},
+		// BIT 3,(HL)
+		0x5e: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			this['BIT n,r'](3, n);
+		},
+		// BIT 3,A
+		0x5f: function () {
+			this['BIT n,r'](3, 'A');
+		},
+// ----------------------------------------------------------------------------
+// READ BIT 4
+		// BIT 4,B
+		0x60: function () {
+			this['BIT n,r'](4, 'B');
+		},
+		// BIT 4,C
+		0x61: function () {
+			this['BIT n,r'](4, 'C');
+		},
+		// BIT 4,D
+		0x62: function () {
+			this['BIT n,r'](4, 'D');
+		},
+		// BIT 4,E
+		0x63: function () {
+			this['BIT n,r'](4, 'E');
+		},
+		// BIT 4,H
+		0x64: function () {
+			this['BIT n,r'](4, 'H');
+		},
+		// BIT 4,L
+		0x65: function () {
+			this['BIT n,r'](4, 'L');
+		},
+		// BIT 4,(HL)
+		0x66: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			this['BIT n,r'](4, n);
+		},
+		// BIT 4,A
+		0x67: function () {
+			this['BIT n,r'](4, 'A');
+		},
+// ----------------------------------------------------------------------------
+// READ BIT 5
+		// BIT 5,B
+		0x68: function () {
+			this['BIT n,r'](5, 'B');
+		},
+		// BIT 5,C
+		0x69: function () {
+			this['BIT n,r'](5, 'C');
+		},
+		// BIT 5,D
+		0x6a: function () {
+			this['BIT n,r'](5, 'D');
+		},
+		// BIT 5,E
+		0x6b: function () {
+			this['BIT n,r'](5, 'E');
+		},
+		// BIT 5,H
+		0x6c: function () {
+			this['BIT n,r'](5, 'H');
+		},
+		// BIT 5,L
+		0x6d: function () {
+			this['BIT n,r'](5, 'L');
+		},
+		// BIT 5,(HL)
+		0x6e: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			this['BIT n,r'](5, n);
+		},
+		// BIT 5,A
+		0x6f: function () {
+			this['BIT n,r'](5, 'A');
+		},
+// ----------------------------------------------------------------------------
+// READ BIT 6
 		// BIT 6,B
 		0x70: function () {
 			this['BIT n,r'](6, 'B');
@@ -357,22 +574,363 @@
 		0x71: function () {
 			this['BIT n,r'](6, 'C');
 		},
+		// BIT 6,D
+		0x72: function () {
+			this['BIT n,r'](6, 'D');
+		},
+		// BIT 6,E
+		0x73: function () {
+			this['BIT n,r'](6, 'E');
+		},
+		// BIT 6,H
+		0x74: function () {
+			this['BIT n,r'](6, 'H');
+		},
+		// BIT 6,L
+		0x75: function () {
+			this['BIT n,r'](6, 'L');
+		},
+		// BIT 6,(HL)
+		0x76: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			this['BIT n,r'](6, n);
+		},
+		// BIT 6,A
+		0x77: function () {
+			this['BIT n,r'](6, 'A');
+		},
+// ----------------------------------------------------------------------------
+// READ BIT 5
+		// BIT 7,B
+		0x78: function () {
+			this['BIT n,r'](7, 'B');
+		},
+		// BIT 7,C
+		0x79: function () {
+			this['BIT n,r'](7, 'C');
+		},
+		// BIT 7,D
+		0x7a: function () {
+			this['BIT n,r'](7, 'D');
+		},
+		// BIT 7,E
+		0x7b: function () {
+			this['BIT n,r'](7, 'E');
+		},
 		// BIT 7,H
 		0x7c: function () {
 			this['BIT n,r'](7, 'H');
 		},
+		// BIT 7,L
+		0x7d: function () {
+			this['BIT n,r'](7, 'L');
+		},
+		// BIT 7,(HL)
+		0x7e: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			this['BIT n,r'](7, n);
+		},
+		// BIT 7,A
+		0x7f: function () {
+			this['BIT n,r'](7, 'A');
+		},
 // ----------------------------------------------------------------------------
+// SET BIT 0
 		// SET 0,B
 		0xc0: function () {
 			this.B = this['SET b,n'](0, this.B);
+		},
+		// SET 0,C
+		0xc1: function () {
+			this.C = this['SET b,n'](0, this.C);
+		},
+		// SET 0,D
+		0xc2: function () {
+			this.D = this['SET b,n'](0, this.D);
+		},
+		// SET 0,E
+		0xc3: function () {
+			this.E = this['SET b,n'](0, this.E);
+		},
+		// SET 0,H
+		0xc4: function () {
+			this.H = this['SET b,n'](0, this.H);
+		},
+		// SET 0,L
+		0xc5: function () {
+			this.L = this['SET b,n'](0, this.L);
+		},
+		// SET 0,(HL)
+		0xc6: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			var result = this['SET b,n'](0, n);
+			mem.write(addr, result);
+		},
+		// SET 0,A
+		0xc7: function () {
+			this.A = this['SET b,n'](0, this.A);
+		},
+// ----------------------------------------------------------------------------
+// SET BIT 1
+		// SET 1,B
+		0xc8: function () {
+			this.B = this['SET b,n'](1, this.B);
+		},
+		// SET 1,C
+		0xc9: function () {
+			this.C = this['SET b,n'](1, this.C);
+		},
+		// SET 1,D
+		0xca: function () {
+			this.D = this['SET b,n'](1, this.D);
+		},
+		// SET 1,E
+		0xcb: function () {
+			this.E = this['SET b,n'](1, this.E);
+		},
+		// SET 1,H
+		0xcc: function () {
+			this.H = this['SET b,n'](1, this.H);
+		},
+		// SET 1,L
+		0xcd: function () {
+			this.L = this['SET b,n'](1, this.L);
+		},
+		// SET 1,(HL)
+		0xce: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			var result = this['SET b,n'](1, n);
+			mem.write(addr, result);
+		},
+		// SET 1,A
+		0xcf: function () {
+			this.A = this['SET b,n'](1, this.A);
+		},
+// ----------------------------------------------------------------------------
+// SET BIT 2
+		// SET 2,B
+		0xd0: function () {
+			this.B = this['SET b,n'](2, this.B);
+		},
+		// SET 2,C
+		0xd1: function () {
+			this.C = this['SET b,n'](2, this.C);
+		},
+		// SET 2,D
+		0xd2: function () {
+			this.D = this['SET b,n'](2, this.D);
+		},
+		// SET 2,E
+		0xd3: function () {
+			this.E = this['SET b,n'](2, this.E);
+		},
+		// SET 2,H
+		0xd4: function () {
+			this.H = this['SET b,n'](2, this.H);
+		},
+		// SET 2,L
+		0xd5: function () {
+			this.L = this['SET b,n'](2, this.L);
+		},
+		// SET 2,(HL)
+		0xd6: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			var result = this['SET b,n'](2, n);
+			mem.write(addr, result);
+		},
+		// SET 2,A
+		0xd7: function () {
+			this.A = this['SET b,n'](2, this.A);
+		},
+// ----------------------------------------------------------------------------
+// SET BIT 3
+		// SET 3,B
+		0xd8: function () {
+			this.B = this['SET b,n'](3, this.B);
+		},
+		// SET 3,C
+		0xd9: function () {
+			this.C = this['SET b,n'](3, this.C);
+		},
+		// SET 3,D
+		0xda: function () {
+			this.D = this['SET b,n'](3, this.D);
+		},
+		// SET 3,E
+		0xdb: function () {
+			this.E = this['SET b,n'](3, this.E);
+		},
+		// SET 3,H
+		0xdc: function () {
+			this.H = this['SET b,n'](3, this.H);
+		},
+		// SET 3,L
+		0xdd: function () {
+			this.L = this['SET b,n'](3, this.L);
+		},
+		// SET 3,(HL)
+		0xde: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			var result = this['SET b,n'](3, n);
+			mem.write(addr, result);
+		},
+		// SET 3,A
+		0xdf: function () {
+			this.A = this['SET b,n'](3, this.A);
+		},
+// ----------------------------------------------------------------------------
+// SET BIT 4
+		// SET 4,B
+		0xe0: function () {
+			this.B = this['SET b,n'](4, this.B);
+		},
+		// SET 4,C
+		0xe1: function () {
+			this.C = this['SET b,n'](4, this.C);
+		},
+		// SET 4,D
+		0xe2: function () {
+			this.D = this['SET b,n'](4, this.D);
 		},
 		// SET 4,E
 		0xe3: function () {
 			this.E = this['SET b,n'](4, this.E);
 		},
+		// SET 4,H
+		0xe4: function () {
+			this.H = this['SET b,n'](4, this.H);
+		},
+		// SET 4,L
+		0xe5: function () {
+			this.L = this['SET b,n'](4, this.L);
+		},
+		// SET 4,(HL)
+		0xe6: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			var result = this['SET b,n'](4, n);
+			mem.write(addr, result);
+		},
+		// SET 4,A
+		0xe7: function () {
+			this.A = this['SET b,n'](4, this.A);
+		},
+// ----------------------------------------------------------------------------
+// SET BIT 5
+		// SET 5,B
+		0xe8: function () {
+			this.B = this['SET b,n'](5, this.B);
+		},
+		// SET 5,C
+		0xe9: function () {
+			this.C = this['SET b,n'](5, this.C);
+		},
+		// SET 5,D
+		0xea: function () {
+			this.D = this['SET b,n'](5, this.D);
+		},
+		// SET 5,E
+		0xeb: function () {
+			this.E = this['SET b,n'](5, this.E);
+		},
+		// SET 5,H
+		0xec: function () {
+			this.H = this['SET b,n'](5, this.H);
+		},
+		// SET 5,L
+		0xed: function () {
+			this.L = this['SET b,n'](5, this.L);
+		},
+		// SET 5,(HL)
+		0xee: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			var result = this['SET b,n'](5, n);
+			mem.write(addr, result);
+		},
 		// SET 5,A
 		0xef: function () {
 			this.A = this['SET b,n'](5, this.A);
+		},
+// ----------------------------------------------------------------------------
+// SET BIT 6
+		// SET 6,B
+		0xf0: function () {
+			this.B = this['SET b,n'](6, this.B);
+		},
+		// SET 6,C
+		0xf1: function () {
+			this.C = this['SET b,n'](6, this.C);
+		},
+		// SET 6,D
+		0xf2: function () {
+			this.D = this['SET b,n'](6, this.D);
+		},
+		// SET 6,E
+		0xf3: function () {
+			this.E = this['SET b,n'](6, this.E);
+		},
+		// SET 6,H
+		0xf4: function () {
+			this.H = this['SET b,n'](6, this.H);
+		},
+		// SET 6,L
+		0xf5: function () {
+			this.L = this['SET b,n'](6, this.L);
+		},
+		// SET 6,(HL)
+		0xf6: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			var result = this['SET b,n'](6, n);
+			mem.write(addr, result);
+		},
+		// SET 6,A
+		0xf7: function () {
+			this.A = this['SET b,n'](6, this.A);
+		},
+// ----------------------------------------------------------------------------
+// SET BIT 7
+		// SET 7,B
+		0xf8: function () {
+			this.B = this['SET b,n'](7, this.B);
+		},
+		// SET 7,C
+		0xf9: function () {
+			this.C = this['SET b,n'](7, this.C);
+		},
+		// SET 7,D
+		0xfa: function () {
+			this.D = this['SET b,n'](7, this.D);
+		},
+		// SET 7,E
+		0xfb: function () {
+			this.E = this['SET b,n'](7, this.E);
+		},
+		// SET 7,H
+		0xfc: function () {
+			this.H = this['SET b,n'](7, this.H);
+		},
+		// SET 7,L
+		0xfd: function () {
+			this.L = this['SET b,n'](7, this.L);
+		},
+		// SET 7,(HL)
+		0xfe: function (mem) {
+			var addr = this.HL;
+			var n = mem.read8(addr);
+			var result = this['SET b,n'](7, n);
+			mem.write(addr, result);
+		},
+		// SET 7,A
+		0xff: function () {
+			this.A = this['SET b,n'](7, this.A);
 		},
 // ----------------------------------------------------------------------------
 // RESET BIT 0
@@ -404,7 +962,7 @@
 		0x86: function (mem) {
 			var addr = this.HL;
 			var n = mem.read8(addr);
-			this.result = this['RES b,n'](0, n);
+			var result = this['RES b,n'](0, n);
 			mem.write(addr, result);
 		},
 		// RES 0,A
@@ -441,7 +999,7 @@
 		0x8e: function (mem) {
 			var addr = this.HL;
 			var n = mem.read8(addr);
-			this.result = this['RES b,n'](1, n);
+			var result = this['RES b,n'](1, n);
 			mem.write(addr, result);
 		},
 		// RES 1,A
@@ -478,7 +1036,7 @@
 		0x96: function (mem) {
 			var addr = this.HL;
 			var n = mem.read8(addr);
-			this.result = this['RES b,n'](2, n);
+			var result = this['RES b,n'](2, n);
 			mem.write(addr, result);
 		},
 		// RES 2,A
@@ -515,7 +1073,7 @@
 		0x9e: function (mem) {
 			var addr = this.HL;
 			var n = mem.read8(addr);
-			this.result = this['RES b,n'](3, n);
+			var result = this['RES b,n'](3, n);
 			mem.write(addr, result);
 		},
 		// RES 3,A
@@ -552,7 +1110,7 @@
 		0xa6: function (mem) {
 			var addr = this.HL;
 			var n = mem.read8(addr);
-			this.result = this['RES b,n'](4, n);
+			var result = this['RES b,n'](4, n);
 			mem.write(addr, result);
 		},
 		// RES 4,A
@@ -589,7 +1147,7 @@
 		0xae: function (mem) {
 			var addr = this.HL;
 			var n = mem.read8(addr);
-			this.result = this['RES b,n'](5, n);
+			var result = this['RES b,n'](5, n);
 			mem.write(addr, result);
 		},
 		// RES 5,A
@@ -626,7 +1184,7 @@
 		0xb6: function (mem) {
 			var addr = this.HL;
 			var n = mem.read8(addr);
-			this.result = this['RES b,n'](6, n);
+			var result = this['RES b,n'](6, n);
 			mem.write(addr, result);
 		},
 		// RES 6,A
@@ -663,7 +1221,7 @@
 		0xbe: function (mem) {
 			var addr = this.HL;
 			var n = mem.read8(addr);
-			this.result = this['RES b,n'](7, n);
+			var result = this['RES b,n'](7, n);
 			mem.write(addr, result);
 		},
 		// RES 7,A
@@ -699,7 +1257,7 @@
 		0x36: function (mem) {
 			var addr = this.HL;
 			var n = mem.read8(addr);
-			this.result = this['SWAP n'](n);
+			var result = this['SWAP n'](n);
 			mem.write(addr, result);
 		},
 		// SWAP A
