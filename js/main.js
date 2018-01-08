@@ -6,10 +6,10 @@ var gameRomsPath = 'games/';
 var demoRomsPath = 'demo/';
 
 
-emulator.loadProgram(testRomsPath + 'cpu_instrs.gb').then(function () {
+//emulator.loadProgram(testRomsPath + 'cpu_instrs.gb').then(function () {
 //emulator.loadProgram(testRomsPath + 'individual/02-interrupts.gb').then(function () {
 //emulator.loadProgram(gameRomsPath + 'Tetris (World).gb').then(function () {
-//emulator.loadProgram(gameRomsPath + 'Dr. Mario (JU) (V1.0) [!].gb').then(function () {
+emulator.loadProgram(gameRomsPath + 'Dr. Mario (JU) (V1.0) [!].gb').then(function () {
 //emulator.loadProgram(demoRomsPath + 'pocket.gb').then(function () {
 //emulator.loadProgram(demoRomsPath + 'bgbtest.gb').then(function () {
 	// Start emulation

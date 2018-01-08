@@ -83,3 +83,32 @@ canvas{
 	display: inline-block;
 
 }
+.key-map{
+	display: inline-block;
+}
+.key-map td{
+	text-align: center;
+}
+.key-map button{
+	outline: 0;
+	border-radius: 50%;
+	border: 2px solid grey;
+}
+.key-map button.dir{
+	height: 32px;
+	width: 32px;
+}
+.key-map button.main{
+	height: 48px;
+	width: 48px;
+}
+.key-map button.function{
+	height: 24px;
+	width: 48px;
+	border-radius: 12px;
+	font-size: 10px;
+}
+.key-map button:active,
+.key-map button.pressed{
+	background-color: grey;
+}

@@ -37,8 +37,13 @@ function Lcd(Mmu) {
 		this.spritePalette0.load(this.mmu.read8(0xFF48));
 		this.spritePalette1.load(this.mmu.read8(0xFF49));
 	};
-
-	this.getTile = function (id) {
+	
+	/**
+	 * 
+	 * @param {integer} id
+	 * @returns {Array}
+	 */
+	this.getTile__ = function (id) {
 		var tileData = new Array(8);
 		var addr = id * 16;
 		for (var line = 0; line < 8; line++) {

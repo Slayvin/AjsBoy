@@ -70,12 +70,14 @@ gbEmu.debugger.prototype.update = function () {
 
 //	var iData = new ImageData(new Uint8ClampedArray(this.mmu.tileMap), 128, 192);
 	for (var tile = 0; tile < 384; tile++) {
-		var tileData = this.getTile(tile);
+		var tileData = this.getTileData(tile);
 		this.tileMap.putImageData(tileData, 8 * (tile % 16), 8 * Math.floor(tile / 16));
 	}
-	for (var addr = 0; addr < 1024; addr++) {
+	
+	for (var addr = 0; addr < (32 * 32); addr++) {
 		var tile = this.mmu.vram.tileMap0[addr];
-		var tileData = this.getTile(tile);
+		if(tile<128){tile+=256;}// depends on LCDC ?
+		var tileData = this.getTileData(tile);
 		this.bgMap.putImageData(tileData, 8 * (addr % 32), 8 * Math.floor(addr / 32));
 
 	}
@@ -90,7 +92,7 @@ gbEmu.debugger.prototype.update = function () {
 };
 
 gbEmu.debugger.prototype.updateTileMap = function () {
-	for (var addr = 0; addr < 6144; addr++) {
+	for (var addr = 0; addr < (64 * 96); addr++) {
 		var lo = this.mmu.readVram(addr + addr);
 		var hi = this.mmu.readVram(addr + addr + 1);
 		for (var i = 0; i < 8; i++) {
@@ -102,16 +104,22 @@ gbEmu.debugger.prototype.updateTileMap = function () {
 		}
 	}
 };
-
-gbEmu.debugger.prototype.updateBackground = function () {
-	for (var addr = 0; addr < 1024; addr++) {
+/*
+gbEmu.debugger.prototype.updateBackground__ = function () {
+	for (var addr = 0; addr < (32 * 32); addr++) {
 		var tile = this.mmu.vram.tileMap0(addr);
-		var tileData = this.getTile(tile);
+		var tileData = this.getTileData(tile);
 		this.bgMap.putImageData(tileData, 8 * (addr % 32), 8 * Math.floor(addr / 32));
 
 	}
-};
-gbEmu.debugger.prototype.getTile = function (id) {
+};*/
+
+/**
+ * 
+ * @param {type} id
+ * @returns {ImageData}
+ */
+gbEmu.debugger.prototype.getTileData = function (id) {
 	var tileArray = new Uint8ClampedArray(this.mmu.tileMap.buffer, id * 256, 256);
 	var tileData = new ImageData(tileArray, 8, 8);
 	return tileData;

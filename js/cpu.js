@@ -82,22 +82,10 @@ function Cpu(Mmu) {
 
 Cpu.prototype.execute = function (opcode) {
 	if (this.isExtendedInstruction) {
-		try {
-			this.instructions.extended[opcode].call(this, this.memory);
-			this.isExtendedInstruction = false;
-		} catch (err) {
-			window.console.log(err);
-			window.console.log(this.memory.memory);
-			throw 'Extended (0xCB) instruction 0x' + opcode.toString(16) + ' not implemented.';
-		}
+		this.instructions.extended[opcode].call(this, this.memory);
+		this.isExtendedInstruction = false;
 	} else {
-		try {
-			this.instructions[opcode].call(this, this.memory);
-		} catch (err) {
-			window.console.log(err);
-			window.console.log(this.memory.memory);
-			throw 'Instruction 0x' + opcode.toString(16) + ' not implemented.';
-		}
+		this.instructions[opcode].call(this, this.memory);
 	}
 };
 
