@@ -90,13 +90,18 @@ canvas{
 	text-align: center;
 }
 .key-map button{
+	position: relative;
 	outline: 0;
 	border-radius: 50%;
 	border: 2px solid grey;
 }
+
 .key-map button.dir{
 	height: 32px;
 	width: 32px;
+	background: url('arrow.png');
+	background-size: 32px;
+	background-position: -4px center;
 }
 .key-map button.main{
 	height: 48px;
@@ -108,7 +113,22 @@ canvas{
 	border-radius: 12px;
 	font-size: 10px;
 }
+.key-map button:hover{
+	border-color: #333;
+	background-color: #CCC;
+}
 .key-map button:active,
 .key-map button.pressed{
-	background-color: grey;
+	background-color: #BBB;
+	top:2px;
+}
+
+#key-up{
+	transform: rotate(90deg);
+}
+#key-right{
+	transform: rotate(180deg);
+}
+#key-down{
+	transform: rotate(-90deg);
 }
