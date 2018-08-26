@@ -1,11 +1,11 @@
 'use strict';
 /**
  * 
- * @param {MemController} Mmu
+ * @param {gbEmu} Emulator
  * @returns {Lcd}
  */
-function Lcd(Mmu) {
-	this.mmu = Mmu;
+function Lcd(Emulator) {
+	this.mmu = Emulator.mmu;
 	this.data_background = new Uint8ClampedArray(0x40000);// 256px * 256px * [r,g,b,a]
 	this.data = new Uint8ClampedArray(0x16800);// 160px * 144px * [r,g,b,a]
 

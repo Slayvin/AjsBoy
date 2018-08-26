@@ -18,14 +18,10 @@ emulator.loadProgram(gameRomsPath + 'Dr. Mario (JU) (V1.0) [!].gb').then(functio
 
 
 var stepBtn = document.querySelector('#step');
-var runBtn = document.querySelector('#run');
 var pauseBtn = document.querySelector('#pause');
 
 stepBtn.onclick = function () {
 	emulator.step();
-};
-runBtn.onclick = function () {
-	emulator.run();
 };
 pauseBtn.onclick = function () {
 	emulator.pause();

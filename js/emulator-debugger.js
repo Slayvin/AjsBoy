@@ -4,15 +4,13 @@
 
 /**
  * 
- * @param {Cpu} cpu
- * @param {MemController} memory
- * @param {Lcd} lcd
+ * @param {gbEmu} Emulator
  * @returns {gbEmu.debugger}
  */
-gbEmu.debugger = function (cpu, mc, lcd) {
-	this.cpu = cpu;
-	this.mmu = mc;
-	this.lcd = lcd;
+gbEmu.debugger = function (Emulator) {
+	this.cpu = Emulator.cpu;
+	this.mmu = Emulator.mmu;
+	this.lcd = Emulator.lcd;
 
 	this.pc = document.querySelector('#pc');
 	this.code = document.querySelector('#code');
@@ -73,10 +71,10 @@ gbEmu.debugger.prototype.update = function () {
 		var tileData = this.getTileData(tile);
 		this.tileMap.putImageData(tileData, 8 * (tile % 16), 8 * Math.floor(tile / 16));
 	}
-	
+
 	for (var addr = 0; addr < (32 * 32); addr++) {
 		var tile = this.mmu.vram.tileMap0[addr];
-		if(tile<128){tile+=256;}// depends on LCDC ?
+//		if(tile<128){tile+=256;}// depends on LCDC ?
 		var tileData = this.getTileData(tile);
 		this.bgMap.putImageData(tileData, 8 * (addr % 32), 8 * Math.floor(addr / 32));
 
@@ -105,14 +103,14 @@ gbEmu.debugger.prototype.updateTileMap = function () {
 	}
 };
 /*
-gbEmu.debugger.prototype.updateBackground__ = function () {
-	for (var addr = 0; addr < (32 * 32); addr++) {
-		var tile = this.mmu.vram.tileMap0(addr);
-		var tileData = this.getTileData(tile);
-		this.bgMap.putImageData(tileData, 8 * (addr % 32), 8 * Math.floor(addr / 32));
-
-	}
-};*/
+ gbEmu.debugger.prototype.updateBackground__ = function () {
+ for (var addr = 0; addr < (32 * 32); addr++) {
+ var tile = this.mmu.vram.tileMap0(addr);
+ var tileData = this.getTileData(tile);
+ this.bgMap.putImageData(tileData, 8 * (addr % 32), 8 * Math.floor(addr / 32));
+ 
+ }
+ };*/
 
 /**
  * 
@@ -120,7 +118,15 @@ gbEmu.debugger.prototype.updateBackground__ = function () {
  * @returns {ImageData}
  */
 gbEmu.debugger.prototype.getTileData = function (id) {
-	var tileArray = new Uint8ClampedArray(this.mmu.tileMap.buffer, id * 256, 256);
+	var lcdc = this.mmu.read8(0xff40);
+	var tile = id;
+	if ((0x10 & lcdc) === 0) {
+		if (tile < 128) {
+			tile += 256;
+		}
+
+	}
+	var tileArray = new Uint8ClampedArray(this.mmu.tileMap.buffer, tile * 256, 256);
 	var tileData = new ImageData(tileArray, 8, 8);
 	return tileData;
 };

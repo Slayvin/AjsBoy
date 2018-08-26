@@ -11,6 +11,7 @@ var keyMap = {
 };
 
 document.addEventListener('keydown', (event) => {
+	event.preventDefault();
 	const keyName = event.key;
 	Object.keys(keyMap).forEach((key) => {
 		if (key === keyName) {
@@ -20,8 +21,10 @@ document.addEventListener('keydown', (event) => {
 			// Update memory input register
 		}
 	});
+	return false;
 });
 document.addEventListener('keyup', (event) => {
+	event.preventDefault();
 	const keyName = event.key;
 	Object.keys(keyMap).forEach((key) => {
 		if (key === keyName) {
@@ -30,5 +33,5 @@ document.addEventListener('keyup', (event) => {
 			// Update memory input register
 		}
 	});
-	event.preventDefault();
+	return false;
 });

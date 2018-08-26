@@ -1,13 +1,13 @@
 'use strict';
 /**
  * 
- * @param {MemController} Mmu
+ * @param {gbEmu} Emulator
  * @returns {Cpu}
  */
-function Cpu(Mmu) {
+function Cpu(Emulator) {
 	'use strict';
 	// Init memory
-	this.memory = Mmu;
+	this.memory = Emulator.mmu;
 
 	var TIMA = 0xFF05;
 	var TMA = 0xFF06;
@@ -16,10 +16,8 @@ function Cpu(Mmu) {
 	// Tells if latest executed instruction is 0xCB
 	this.isExtendedInstruction = false;
 
-	// Interrupts flags
-	this.IME = 0;
-//	this.IF=0xFF0F;
-//	this.IE=0xFFFF;
+	// Interrupts controller
+	this.imu = Emulator.imu;
 
 	// 8-bits registers
 	this.A = 0x00; // Used mainly for arithmetic operations

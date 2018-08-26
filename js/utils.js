@@ -14,5 +14,5 @@ var Utils = {
 	},
 	'carryFromBit15': function (a, b) {
 		return (((a & 0xFFFF) + (b & 0xFFFF)) & 0x10000) === 0x10000 ? 1 : 0;
-	},
+	}
 };

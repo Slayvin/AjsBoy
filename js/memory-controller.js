@@ -24,7 +24,7 @@ function MemController() {
 	 * @returns {int}
 	 */
 	this.read8 = function (addr) {
-		if (addr < 0x100 && this.memory[0xFF50] === 1) {
+		if (addr < 0x100 && this.memory[0xFF50] === 1) {//0xFF50 : Boot rom disable flag
 			return this.rom[addr] & 0xFF;
 		} else if (0x100 <= addr && addr < 0x8000) {
 			return this.rom[addr] & 0xFF;

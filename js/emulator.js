@@ -4,13 +4,14 @@ function gbEmu() {
 	this.name = 'JsBoy';
 	this.programLoaded = false;
 	this.paused = false;
-	this.realBoot = !true;
+	this.realBoot = true;
 	this.debug = !false;
 
 	this.mmu = new MemController();
-	this.cpu = new Cpu(this.mmu);
-	this.lcd = new Lcd(this.mmu);
-	this.debugger = new gbEmu.debugger(this.cpu, this.mmu, this.lcd);
+	this.imu = new InterruptsController(this);
+	this.cpu = new Cpu(this);
+	this.lcd = new Lcd(this);
+	this.debugger = new gbEmu.debugger(this);
 }
 
 gbEmu.cyclesPerFrame = 16384 / 1;
@@ -66,14 +67,17 @@ gbEmu.prototype.loadBootstrap = function (name) {
 
 };
 
-gbEmu.prototype.setDefaults = function () {
+gbEmu.prototype.setProgramStartState = function () {
 	this.cpu.AF = 0x01B0;
 	this.cpu.BC = 0x0013;
 	this.cpu.DE = 0x00D8;
 	this.cpu.HL = 0x014D;
 	this.cpu.SP = 0xFFFE;
+	this.cpu.PC = 0x0100;
 
 	this.mmu.memory[0xFF50] = 1; // TODO use flags instead
+
+	return this;
 };
 
 gbEmu.prototype.init = function () {
@@ -84,9 +88,7 @@ gbEmu.prototype.init = function () {
 			this.run();
 		}.bind(this));
 	} else {
-		this.setDefaults();
-		this.cpu.PC = 0x0100;
-		this.run();
+		this.setProgramStartState().run();
 	}
 };
 
@@ -107,10 +109,13 @@ gbEmu.prototype.run = function () {
 			this.paused = true;
 //			i = gbEmu.cyclesPerFrame;
 		}
-		// TEST vblank
 		if ((i % 192) === 0) {// TODO: get actual value from instructions
 			var line = this.mmu.read8(0xff44) & 0xFF;
 			this.mmu.write(0xff44, ++line);
+		}
+		// Check for interrupts:
+		if (this.imu.IME) {
+			this.imu.processInterrupts();
 		}
 	}
 
@@ -120,6 +125,7 @@ gbEmu.prototype.run = function () {
 	this.lcd.updatePalette();
 	this.debugger.updateTileMap();
 	if (!this.paused) {
+		this.imu.IF = 1;
 		window.requestAnimationFrame(this.run.bind(this));
 	}
 
@@ -143,4 +149,3 @@ gbEmu.prototype.pause = function () {
 		this.run();
 	}
 };
-

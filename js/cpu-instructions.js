@@ -1210,12 +1210,12 @@ if (typeof exports !== 'undefined') {
 		},
 		// DI
 		0xf3: function (mem) {
-			this.IME = 0;
+			this.imu.IME = 0;
 			this.PC++;
 		},
 		// EI
 		0xfb: function (mem) {
-			this.IME = 1;
+			this.imu.IME = 1;
 			this.PC++;
 		},
 
@@ -1508,13 +1508,13 @@ if (typeof exports !== 'undefined') {
 		},
 // ----------------------------------------------------------------------------
 		// RETI
-		0xd9: function (mem) {//TODO
+		0xd9: function (mem) {
 			this.code = 'RETI';
 			var addr = mem.read16(this.SP);
 			this.SP += 2;
 			this.PC = addr;
 			// then enable Interrupts
-			// TODO this.IME = 1;
+			this.imu.IME = 1;
 		},
 
 // ============================================================================
