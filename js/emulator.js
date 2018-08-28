@@ -4,17 +4,18 @@ function gbEmu() {
 	this.name = 'JsBoy';
 	this.programLoaded = false;
 	this.paused = false;
-	this.realBoot = true;
+	this.realBoot = !true;
 	this.debug = !false;
 
-	this.mmu = new MemController();
+	this.mmu = new MemController(this);
 	this.imu = new InterruptsController(this);
 	this.cpu = new Cpu(this);
 	this.lcd = new Lcd(this);
+	this.inputs = new InputController(this);
 	this.debugger = new gbEmu.debugger(this);
 }
 
-gbEmu.cyclesPerFrame = 16384 / 1;
+gbEmu.cyclesPerFrame = 16384 / 2;
 
 /**
  * Load program into rom
@@ -98,7 +99,8 @@ gbEmu.prototype.run = function () {
 	var breakpoints_ = [
 		0x0000,
 		0x0101,
-		0xC00C
+		0xC00C,
+		0x0060,
 	];
 	while (i < gbEmu.cyclesPerFrame) {
 		if (!this.paused) {

@@ -4,13 +4,13 @@
 
 /**
  * 
- * @param {gbEmu} Emulator
+ * @param {gbEmu} emulator
  * @returns {gbEmu.debugger}
  */
-gbEmu.debugger = function (Emulator) {
-	this.cpu = Emulator.cpu;
-	this.mmu = Emulator.mmu;
-	this.lcd = Emulator.lcd;
+gbEmu.debugger = function (emulator) {
+	this.cpu = emulator.cpu;
+	this.mmu = emulator.mmu;
+	this.lcd = emulator.lcd;
 
 	this.pc = document.querySelector('#pc');
 	this.code = document.querySelector('#code');
@@ -30,6 +30,9 @@ gbEmu.debugger = function (Emulator) {
 	this.flagC = document.querySelector('#flag-C');
 	this.ly = document.querySelector('#lcd-ly');
 	this.lcdc = document.querySelector('#lcd-c');
+	this.if = document.querySelector('#io-if');
+	this.ie = document.querySelector('#io-ie');
+	this.p1 = document.querySelector('#io-p1');
 	this.bgMap = document.querySelector('#lcd-background canvas').getContext("2d");
 	this.tileMap = document.querySelector('#tile-map canvas').getContext("2d");
 	this.bgPalette = document.querySelector('#palette-bg canvas').getContext("2d");
@@ -59,6 +62,9 @@ gbEmu.debugger.prototype.update = function () {
 	this.flagC.innerHTML = this.cpu.flags.C.toString(2);
 	this.ly.innerHTML = this.mmu.read8(0xff44);
 	this.lcdc.innerHTML = this.mmu.read8(0xff40).toString(16);
+	this.if.innerHTML = this.mmu.read8(0xff0f).toString(16);
+	this.ie.innerHTML = this.mmu.read8(0xffff).toString(16);
+	this.p1.innerHTML = this.mmu.read8(0xff00).toString(16);
 
 	var iData = new ImageData(new Uint8ClampedArray(this.mmu.memory.buffer), 64, 256);
 	this.memoryMap.putImageData(iData, 0, 0);

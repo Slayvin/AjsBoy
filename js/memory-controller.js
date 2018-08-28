@@ -1,9 +1,10 @@
 'use strict';
 /**
  * 
+ * @param {gbEmu} emulator
  * @returns {MemController}
  */
-function MemController() {
+function MemController(emulator) {
 	this.rom = new Uint8Array(0x8000);
 	this.rom_bank0 = new Uint8Array(this.rom.buffer, 0x00, 0x4000);
 	this.rom_bankX = new Uint8Array(this.rom.buffer, 0x4000, 0x4000);
@@ -28,6 +29,8 @@ function MemController() {
 			return this.rom[addr] & 0xFF;
 		} else if (0x100 <= addr && addr < 0x8000) {
 			return this.rom[addr] & 0xFF;
+		} else if (addr === 0xFF00) {
+			return emulator.inputs.getKeyState(this.memory[0xFF00]);
 		} else {
 			return this.memory[addr] & 0xFF;
 		}
