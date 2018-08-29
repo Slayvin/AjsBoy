@@ -26,6 +26,7 @@
 					<tr class="row">
 						<td>SP</td>
 						<td class="cell"><span id="sp"></span></td>
+						<td></td>
 					</tr>
 				</table>
 
@@ -35,16 +36,23 @@
 							<th colspan=2>Call Stack</th>
 						</tr>
 					</thead>
-					<tr class="row">
-						<td>1</td>
-						<td class="cell"></td>
-					</tr>
-					<tr class="row">
-						<td>2</td>
-						<td class="cell"></td>
-					</tr>
-
 				</table>
+				<script>
+					var stackTable = document.getElementById('stack');
+					var tableBody = document.createElement('tbody');
+					stackTable.appendChild(tableBody);
+					for (var i = 1; i <= 16; i++) {
+						var row = document.createElement('tr');
+						row.classList.add('row');
+						var cellId = document.createElement('td');
+						cellId.innerHTML = i;
+						var cell = document.createElement('td');
+						cell.classList.add('cell');
+						row.appendChild(cellId);
+						row.appendChild(cell);
+						tableBody.appendChild(row);
+					}
+				</script> 
 			</div>
 			<div>
 				<table class="table">
@@ -80,6 +88,7 @@
 						</tr>
 					</tbody>
 				</table>
+				<!--CPU Flags-->
 				<table class="table">
 					<thead>
 						<tr>
@@ -105,6 +114,7 @@
 						</tr>
 					</tbody>
 				</table>
+
 				<table class="table">
 					<thead>
 						<tr>
@@ -130,27 +140,38 @@
 						</tr>
 					</tbody>
 				</table>
-				<table class="table">
+				<!--IO Registers-->
+				<table id="io-registers" class="table">
 					<thead>
 						<tr>
-							<th colspan=2>IO Registers</th>
+							<th colspan=3>IO Registers</th>
 						</tr>
 					</thead>
-					<tbody>
-						<tr class="row">
-							<td>IF</td>
-							<td class="cell" id="io-if"></td>
-						</tr>
-						<tr class="row">
-							<td>IE</td>
-							<td class="cell" id="io-ie"></td>
-						</tr>
-						<tr class="row">
-							<td>P1</td>
-							<td class="cell" id="io-p1"></td>
-						</tr>
-					</tbody>
+
 				</table>
+				<script>
+					const ioRegisters = {FF00: 'P1', FF01: 'BC', FF02: 'SC', FF04: 'DIV', FF05: 'TIMA', FF06: 'TMA', FF07: 'TAC', FF0F: 'IF',
+						FF40: 'LCDC', FF41: 'STAT', FF42: 'SCY', FF43: 'SCX'};
+					var ioTable = document.getElementById('io-registers');
+					var tableBody = document.createElement('tbody');
+					ioTable.appendChild(tableBody);
+					Object.keys(ioRegisters).forEach((ioAddress) => {
+						var row = document.createElement('tr');
+						row.classList.add('row');
+						var cellAddr = document.createElement('td');
+						cellAddr.innerHTML = ioAddress;
+						var cell = document.createElement('td');
+						cell.classList.add('cell');
+						cell.setAttribute('id', 'io-' + ioAddress);
+						var cellName = document.createElement('td');
+						cellName.innerHTML = '(' + ioRegisters[ioAddress] + ')';
+						row.appendChild(cellAddr);
+						row.appendChild(cell);
+						row.appendChild(cellName);
+						tableBody.appendChild(row);
+					});
+				</script> 
+				<!--Inputs Map-->
 				<table class="key-map">
 					<tr>
 						<td></td>

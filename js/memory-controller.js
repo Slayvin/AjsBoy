@@ -6,6 +6,7 @@
  */
 function MemController(emulator) {
 	this.rom = new Uint8Array(0x8000);
+	this.rom.fill(0);
 	this.rom_bank0 = new Uint8Array(this.rom.buffer, 0x00, 0x4000);
 	this.rom_bankX = new Uint8Array(this.rom.buffer, 0x4000, 0x4000);
 	this.memory = new Uint8Array(0x10000);

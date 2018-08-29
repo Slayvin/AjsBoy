@@ -16,23 +16,21 @@ gbEmu.debugger = function (emulator) {
 	this.code = document.querySelector('#code');
 	this.sp = document.querySelector('#sp');
 	this.stack = document.querySelectorAll('#stack .cell');
-	this.regA = document.querySelector('#reg-A');
-	this.regB = document.querySelector('#reg-B');
-	this.regC = document.querySelector('#reg-C');
-	this.regD = document.querySelector('#reg-D');
-	this.regE = document.querySelector('#reg-E');
-	this.regF = document.querySelector('#reg-F');
-	this.regH = document.querySelector('#reg-H');
-	this.regL = document.querySelector('#reg-L');
-	this.flagZ = document.querySelector('#flag-Z');
-	this.flagN = document.querySelector('#flag-N');
-	this.flagH = document.querySelector('#flag-H');
-	this.flagC = document.querySelector('#flag-C');
+	const cpuRegisters = ['A', 'B', 'C', 'D', 'E', 'F', 'H', 'L'];
+	cpuRegisters.forEach((r) => {
+		this['reg' + r] = document.querySelector('#reg-' + r);
+	});
+	const flags = ['Z', 'N', 'H', 'C'];
+	flags.forEach((f) => {
+		this['flag' + f] = document.querySelector('#flag-' + f);
+	});
 	this.ly = document.querySelector('#lcd-ly');
 	this.lcdc = document.querySelector('#lcd-c');
-	this.if = document.querySelector('#io-if');
-	this.ie = document.querySelector('#io-ie');
-	this.p1 = document.querySelector('#io-p1');
+	const ioRegisters = ['FF00', 'FF01', 'FF02', 'FF04', 'FF05', 'FF06', 'FF07', 'FF0F',
+		'FF40', 'FF41', 'FF42', 'FF43'];
+	ioRegisters.forEach((ioAddress) => {
+		this[ioAddress] = document.getElementById('io-' + ioAddress);
+	});
 	this.bgMap = document.querySelector('#lcd-background canvas').getContext("2d");
 	this.tileMap = document.querySelector('#tile-map canvas').getContext("2d");
 	this.bgPalette = document.querySelector('#palette-bg canvas').getContext("2d");
@@ -43,47 +41,67 @@ gbEmu.debugger = function (emulator) {
 };
 
 gbEmu.debugger.prototype.update = function () {
-	this.pc.innerHTML = this.cpu.PC.toString(16);
-	this.sp.innerHTML = this.cpu.SP.toString(16);
-	this.stack[0].innerHTML = this.mmu.read16(0xfffe).toString(16);
-	this.stack[1].innerHTML = this.mmu.read16(0xfffc).toString(16);
-	this.code.innerHTML = this.cpu.code;
-	this.regA.innerHTML = this.cpu.A.toString(16);
-	this.regB.innerHTML = this.cpu.B.toString(16);
-	this.regC.innerHTML = this.cpu.C.toString(16);
-	this.regD.innerHTML = this.cpu.D.toString(16);
-	this.regE.innerHTML = this.cpu.E.toString(16);
-	this.regF.innerHTML = this.cpu.F.toString(16);
-	this.regH.innerHTML = this.cpu.H.toString(16);
-	this.regL.innerHTML = this.cpu.L.toString(16);
-	this.flagZ.innerHTML = this.cpu.flags.Z.toString(2);
-	this.flagN.innerHTML = this.cpu.flags.N.toString(2);
-	this.flagH.innerHTML = this.cpu.flags.H.toString(2);
-	this.flagC.innerHTML = this.cpu.flags.C.toString(2);
-	this.ly.innerHTML = this.mmu.read8(0xff44);
-	this.lcdc.innerHTML = this.mmu.read8(0xff40).toString(16);
-	this.if.innerHTML = this.mmu.read8(0xff0f).toString(16);
-	this.ie.innerHTML = this.mmu.read8(0xffff).toString(16);
-	this.p1.innerHTML = this.mmu.read8(0xff00).toString(16);
+	if (!false) {
+		this.pc.innerHTML = this.cpu.PC.toString(16);
+		this.sp.innerHTML = this.cpu.SP.toString(16);
+		for (var s = 0; s < 16; s++) {
+			this.stack[s].innerHTML = this.mmu.read16(0xfffe - s * 2).toString(16).toUpperCase();
+			// Note: the stack doesn't necessarily starts at 0xFFFE ! A program could set the initial pointer to another address.
+			// This means the value displayed from 0xFFFE and below doesn't always represent the stack!
+			// TODO : read stack values whenever PUSH or POP functions are triggered, or set correct address when LD SP function is triggered
+		}
+		this.code.innerHTML = this.cpu.code;
+		const cpuRegisters = ['A', 'B', 'C', 'D', 'E', 'F', 'H', 'L'];
+		cpuRegisters.forEach((r) => {
+			this['reg' + r].innerHTML = this.cpu[r].toString(16).toUpperCase();
+		});
+	}
+	if (false) {
+		this.flagZ.innerHTML = this.cpu.flags.Z.toString(2);
+		this.flagN.innerHTML = this.cpu.flags.N.toString(2);
+		this.flagH.innerHTML = this.cpu.flags.H.toString(2);
+		this.flagC.innerHTML = this.cpu.flags.C.toString(2);
+		this.ly.innerHTML = this.mmu.read8(0xff44);
+		this.lcdc.innerHTML = this.mmu.read8(0xff40).toString(16);
 
-	var iData = new ImageData(new Uint8ClampedArray(this.mmu.memory.buffer), 64, 256);
-	this.memoryMap.putImageData(iData, 0, 0);
-
-	var iData = new ImageData(this.lcd.data, 160, 144);
-	this.lcdBuffer.putImageData(iData, 0, 0);
+		const ioRegisters = {FF00: 0xff00, FF01: 0xff01, FF02: 0xff02, FF04: 0xff04, FF05: 0xff05, FF06: 0xff06, FF07: 0xff07, FF0F: 0xff0f,
+			FF40: 0xff40, FF41: 0xff41, FF42: 0xff42, FF43: 0xff43};
+		Object.keys(ioRegisters).forEach((ioAddress) => {
+			this[ioAddress].innerHTML = this.mmu.read8(ioRegisters[ioAddress]).toString(16).toUpperCase();
+		});
+	}
+	if (!false) {
+		var iData = new ImageData(new Uint8ClampedArray(this.mmu.memory.buffer), 64, 256);
+		this.memoryMap.putImageData(iData, 0, 0);
+	}
+	if (false) {
+		var iData = new ImageData(this.lcd.data, 160, 144);
+		this.lcdBuffer.putImageData(iData, 0, 0);
+	}
 
 //	var iData = new ImageData(new Uint8ClampedArray(this.mmu.tileMap), 128, 192);
-	for (var tile = 0; tile < 384; tile++) {
-		var tileData = this.getTileData(tile);
-		this.tileMap.putImageData(tileData, 8 * (tile % 16), 8 * Math.floor(tile / 16));
+	if (false) {
+		for (var tile = 0; tile < 384; tile++) {
+			var tileData = this.getTileData(tile);
+			this.tileMap.putImageData(tileData, 8 * (tile % 16), 8 * Math.floor(tile / 16));
+		}
 	}
 
 	for (var addr = 0; addr < (32 * 32); addr++) {
 		var tile = this.mmu.vram.tileMap0[addr];
 //		if(tile<128){tile+=256;}// depends on LCDC ?
 		var tileData = this.getTileData(tile);
-		this.bgMap.putImageData(tileData, 8 * (addr % 32), 8 * Math.floor(addr / 32));
-
+		var background = this.bgMap;
+		background.putImageData(tileData, 8 * (addr % 32), 8 * Math.floor(addr / 32));
+		var scrollY = this.mmu.read8(0xFF42);
+		var scrollX = this.mmu.read8(0xFF43);
+		background.beginPath();
+		background.moveTo(0, 0);
+		background.rect(scrollX, scrollY, 160, 144);
+//		background.rect(10,10,160,144);
+		background.lineWidth = 1;
+		background.strokeStyle = '#55aaff';
+		background.stroke();
 	}
 
 	// Palettes
