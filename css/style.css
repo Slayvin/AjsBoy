@@ -3,6 +3,16 @@ body{
 	background-color: #DDD;
 	color:#333;
 }
+#debugger{
+	border-left: 1px solid #BBB;
+	padding: 4px;
+	width: 280px;
+	position: absolute;
+	top:0;
+	bottom: 0;
+	right:0;
+	background-color: #cccccc;
+}
 .row label{
 	font-size: 10px;
 }
@@ -57,20 +67,19 @@ canvas{
 	font-size: 12px;
 	background-color: #EEE;
 	display: inline-block;
-	width: auto;
 	border: 1px solid #333;
-	margin: 1px;
-	padding: 1px;
+	padding: 2px;
+	box-sizing: border-box;
 }
 
 .cell{
-	width: 40px;
+	min-width: 40px;
 	text-align: left;
 	border: 1px solid #CCC;
 	background-color: #EEE;
 }
 .cellLong{
-	width: 100px;
+	min-width: 100px;
 }
 
 .row{
@@ -78,7 +87,15 @@ canvas{
 	background-color: #DDD;
 	height: 20px;
 }
-
+.table-title{
+	float: left;
+	position: relative;
+	top: 3px;
+}
+.debug-cb{
+	float: right;
+	margin-left: 20px;
+}
 #VRegisters, #stack, #keys{
 	display: inline-block;
 

@@ -8,28 +8,135 @@
 	</head>
 
 	<body>
-		<h1>GameBoy Emulation</h1>
+		<div>FPS: <span id="fps"></span></div>
+		<main>
+			<h1>GameBoy Emulation</h1>
 
-		<div id="debugger">
+			<!--Inputs Map-->
+			<table class="key-map">
+				<tr>
+					<td></td>
+					<td><button class="dir" id="key-up"></button></td>
+					<td></td>
+					<td rowspan="2"><button class="main" id="key-A">A</button></td>
+					<td rowspan="2"><button class="main" id="key-B">B</button></td>
+				</tr>
+				<tr>
+					<td><button class="dir" id="key-left"></button></td>
+					<td></td>
+					<td><button class="dir" id="key-right"></button></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td><button class="dir" id="key-down"></button></td>
+					<td></td>
+					<td><button class="function" id="key-select">Select</button></td>
+					<td><button class="function" id="key-start">Start</button></td>
+				</tr>
+			</table>
+
+			<!--Emulator Controls-->
 			<div>
-				<table class="table">
-					<thead>
-						<tr>
-							<th colspan=3>CPU</th>
-						</tr>
-					</thead>
+				<button id="pause">Pause / Run</button>
+				<button id="step">Next</button>
+				<input id="debug" name="debug" type="checkbox"> Debug
+			</div>
+		</main>
+
+		<aside id="debugger">
+			<!--CPU-->
+			<table class="table" style="display: table;width:100%;">
+				<thead>
+					<tr>
+						<th colspan=3>
+							<span class="table-title">CPU</span>
+							<input type="checkbox" class="debug-cb" name="debug-cpu" id="debug-cpu">
+						</th>
+					</tr>
+				</thead>
+				<tbody>
 					<tr class="row">
-						<td>PC</td>
-						<td class="cell"><span id="pc"></span></td>
-						<td class="cellLong"><span id="code"></span></td>
+						<td style="width: 15%">PC</td>
+						<td class="cell" ><span id="pc"></span></td>
+						<td class="cellLong" style="width: 60%"><span id="code"></span></td>
 					</tr>
 					<tr class="row">
 						<td>SP</td>
 						<td class="cell"><span id="sp"></span></td>
 						<td></td>
 					</tr>
-				</table>
+				</tbody>
+			</table>
 
+			<!--CPU Registers-->
+			<table class="table">
+				<thead>
+					<tr>
+						<th colspan=4>
+							<span class="table-title">CPU Registers</span>
+							<input type="checkbox" class="debug-cb" name="debug-cpu-registers" id="debug-cpu-registers">
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr class="row">
+						<td>A</td>
+						<td class="cell" id="reg-A"></td>
+						<td>F</td>
+						<td class="cell" id="reg-F"></td>
+					</tr>
+					<tr class="row">
+						<td>B</td>
+						<td class="cell" id="reg-B"></td>
+						<td>C</td>
+						<td class="cell" id="reg-C"></td>
+					</tr>
+					<tr class="row">
+						<td>D</td>
+						<td class="cell" id="reg-D"></td>
+						<td>E</td>
+						<td class="cell" id="reg-E"></td>
+					</tr>
+					<tr class="row">
+						<td>H</td>
+						<td class="cell" id="reg-H"></td>
+						<td>L</td>
+						<td class="cell" id="reg-L"></td>
+					</tr>
+				</tbody>
+			</table>
+
+			<!--CPU Flags-->
+			<table class="table">
+				<thead>
+					<tr>
+						<th colspan=2>
+							<span class="table-title">CPU Flags</span>
+							<input type="checkbox" class="debug-cb" name="debug-cpu-flags" id="debug-cpu-flags">
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr class="row">
+						<td>Z</td>
+						<td class="cell" id="flag-Z"></td>
+					</tr>
+					<tr class="row">
+						<td>N</td>
+						<td class="cell" id="flag-N"></td>
+					</tr>
+					<tr class="row">
+						<td>H</td>
+						<td class="cell" id="flag-H"></td>
+					</tr>
+					<tr class="row">
+						<td>C</td>
+						<td class="cell" id="flag-C"></td>
+					</tr>
+				</tbody>
+			</table>
+
+			<div>
 				<table id="stack" class="table">
 					<thead>
 						<tr>
@@ -53,93 +160,7 @@
 						tableBody.appendChild(row);
 					}
 				</script> 
-			</div>
-			<div>
-				<table class="table">
-					<thead>
-						<tr>
-							<th colspan=4>CPU Registers</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr class="row">
-							<td>A</td>
-							<td class="cell" id="reg-A"></td>
-							<td>F</td>
-							<td class="cell" id="reg-F"></td>
-						</tr>
-						<tr class="row">
-							<td>B</td>
-							<td class="cell" id="reg-B"></td>
-							<td>C</td>
-							<td class="cell" id="reg-C"></td>
-						</tr>
-						<tr class="row">
-							<td>D</td>
-							<td class="cell" id="reg-D"></td>
-							<td>E</td>
-							<td class="cell" id="reg-E"></td>
-						</tr>
-						<tr class="row">
-							<td>H</td>
-							<td class="cell" id="reg-H"></td>
-							<td>L</td>
-							<td class="cell" id="reg-L"></td>
-						</tr>
-					</tbody>
-				</table>
-				<!--CPU Flags-->
-				<table class="table">
-					<thead>
-						<tr>
-							<th colspan=2>CPU Flags</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr class="row">
-							<td>Z</td>
-							<td class="cell" id="flag-Z"></td>
-						</tr>
-						<tr class="row">
-							<td>N</td>
-							<td class="cell" id="flag-N"></td>
-						</tr>
-						<tr class="row">
-							<td>H</td>
-							<td class="cell" id="flag-H"></td>
-						</tr>
-						<tr class="row">
-							<td>C</td>
-							<td class="cell" id="flag-C"></td>
-						</tr>
-					</tbody>
-				</table>
 
-				<table class="table">
-					<thead>
-						<tr>
-							<th colspan=2>LCD Status</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr class="row">
-							<td>lcdc</td>
-							<td class="cell" id="lcd-c"></td>
-						</tr>
-						<tr class="row">
-							<td>stat</td>
-							<td class="cell" id="lcd-stat"></td>
-						</tr>
-						<tr class="row">
-							<td>LY</td>
-							<td class="cell" id="lcd-ly"></td>
-						</tr>
-						<tr class="row">
-							<td>count</td>
-							<td class="cell" id="lcd-count"></td>
-						</tr>
-					</tbody>
-				</table>
 				<!--IO Registers-->
 				<table id="io-registers" class="table">
 					<thead>
@@ -170,78 +191,78 @@
 						row.appendChild(cellName);
 						tableBody.appendChild(row);
 					});
-				</script> 
-				<!--Inputs Map-->
-				<table class="key-map">
-					<tr>
-						<td></td>
-						<td><button class="dir" id="key-up"></button></td>
-						<td></td>
-						<td rowspan="2"><button class="main" id="key-A">A</button></td>
-						<td rowspan="2"><button class="main" id="key-B">B</button></td>
-					</tr>
-					<tr>
-						<td><button class="dir" id="key-left"></button></td>
-						<td></td>
-						<td><button class="dir" id="key-right"></button></td>
-					</tr>
-					<tr>
-						<td></td>
-						<td><button class="dir" id="key-down"></button></td>
-						<td></td>
-						<td><button class="function" id="key-select">Select</button></td>
-						<td><button class="function" id="key-start">Start</button></td>
-					</tr>
+				</script>
 
+				<table class="table">
+					<thead>
+						<tr>
+							<th colspan=2>
+								<span class="table-title">LCD Status</span>
+								<input type="checkbox" class="debug-cb" name="debug-cpu" id="debug-cpu">
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr class="row">
+							<td>lcdc</td>
+							<td class="cell" id="lcd-c"></td>
+						</tr>
+						<tr class="row">
+							<td>stat</td>
+							<td class="cell" id="lcd-stat"></td>
+						</tr>
+						<tr class="row">
+							<td>LY</td>
+							<td class="cell" id="lcd-ly"></td>
+						</tr>
+						<tr class="row">
+							<td>count</td>
+							<td class="cell" id="lcd-count"></td>
+						</tr>
+					</tbody>
 				</table>
-			</div>
+		</aside>
 
-			<div>
-				<button id="pause">Pause / Run</button>
-				<button id="step">Next</button>
-				<input id="debug" name="debug" type="checkbox"> Debug
-			</div>
-
-			<div class="row">
-				<div class="column">
-					<label>Memory</label>
-					<div id="memory">
-						<canvas width=64 height=256></canvas>
-					</div>
-				</div>
-				<div class="column">
-					<label>Background Palette</label>
-					<div id="palette-bg">
-						<canvas width=4 height=1></canvas>
-					</div>
-					<label>Sprite Palette 0</label>
-					<div id="palette-0">
-						<canvas width=4 height=1></canvas>
-					</div>
-					<label>Sprite Palette 1</label>
-					<div id="palette-1">
-						<canvas width=4 height=1></canvas>
-					</div>
-					<label>Tile Map (VRAM)</label>
-					<div id="tile-map">
-						<canvas width=128 height=192></canvas>
-					</div>
-				</div>
-				<div class="column">
-					<label>Background</label>
-					<div id="lcd-background">
-						<canvas width=256 height=256></canvas>
-					</div>
-				</div>
-				<div class="column">
-					<label>LCD</label>
-					<div id="lcd">
-						<canvas width=160 height=144></canvas>
-					</div>
+		<!--Canvas-->
+		<div class="row">
+			<div class="column">
+				<label>Memory</label>
+				<div id="memory">
+					<canvas width=64 height=256></canvas>
 				</div>
 			</div>
-
+			<div class="column">
+				<label>Background Palette</label>
+				<div id="palette-bg">
+					<canvas width=4 height=1></canvas>
+				</div>
+				<label>Sprite Palette 0</label>
+				<div id="palette-0">
+					<canvas width=4 height=1></canvas>
+				</div>
+				<label>Sprite Palette 1</label>
+				<div id="palette-1">
+					<canvas width=4 height=1></canvas>
+				</div>
+				<label>Tile Map (VRAM)</label>
+				<div id="tile-map">
+					<canvas width=128 height=192></canvas>
+				</div>
+			</div>
+			<div class="column">
+				<label>Background</label>
+				<div id="lcd-background">
+					<canvas width=256 height=256></canvas>
+				</div>
+			</div>
+			<div class="column">
+				<label>LCD</label>
+				<div id="lcd">
+					<canvas width=160 height=144></canvas>
+				</div>
+			</div>
 		</div>
+
 
 		<script type="application/javascript" src="js/utils.js"></script>
 		<script type="application/javascript" src="js/lcd.js"></script>

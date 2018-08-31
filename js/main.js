@@ -6,15 +6,22 @@ var gameRomsPath = 'games/';
 var demoRomsPath = 'demo/';
 
 
-//emulator.loadProgram(demoRomsPath + 'bgbtest.gb').then(function () {
+//emulator.loadProgram(testRomsPath + 'bgbtest.gb').then(function () {
 //emulator.loadProgram(testRomsPath + 'cpu_instrs.gb').then(function () {
 //emulator.loadProgram(testRomsPath + 'individual/02-interrupts.gb').then(function () {
+//
+//emulator.loadProgram(gameRomsPath + 'Double Dragon (U) [!].gb').then(function () {
 //emulator.loadProgram(gameRomsPath + 'Dr. Mario (JU) (V1.0) [!].gb').then(function () {
+//emulator.loadProgram(gameRomsPath + 'Pipe Dream (U) [!].gb').then(function () {
 emulator.loadProgram(gameRomsPath + 'Tetris (World).gb').then(function () {
 //emulator.loadProgram(gameRomsPath + 'Super Mario Land (JUE) (V1.0) [!].gb').then(function () {
-//emulator.loadProgram(gameRomsPath + 'Super Mario Land 2 - 6 Golden Coins (UE) (V1.0) [!].gb').then(function () {
 //emulator.loadProgram(gameRomsPath + 'Super Mario Land 2 - 6 Golden Coins (UE) (V1.2) [!].gb').then(function () {
+//
+//emulator.loadProgram(demoRomsPath + 'adjtris.gb').then(function () {
 //emulator.loadProgram(demoRomsPath + 'pocket.gb').then(function () {
+//emulator.loadProgram(demoRomsPath + 'Hangman (PD).gb').then(function () {
+//emulator.loadProgram(demoRomsPath + 'ttt.gb').then(function () {
+//emulator.loadProgram(demoRomsPath + 'opus5.gb').then(function () {
 	// Start emulation
 	emulator.init();
 });

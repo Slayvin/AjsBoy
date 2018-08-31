@@ -15,7 +15,7 @@ var keyMap = {
  * @returns {InputController}
  */
 function InputController(emulator) {
-
+	this.keyStatus = {A: false, B: false, up: false, down: false, right: false, left: false, select: false, start: false};
 	this.keyState = [0xFF, 0xFF];
 	const keyPressedMasks = {'A': 0xFE, 'B': 0xFD, 'select': 0xFB, 'start': 0xF7, 'right': 0xFE, 'left': 0xFD, 'up': 0xFB, 'down': 0xF7};
 	const keyReleasedMasks = {'A': 0x01, 'B': 0x02, 'select': 0x04, 'start': 0x08, 'right': 0x01, 'left': 0x02, 'up': 0x04, 'down': 0x08};
@@ -27,15 +27,16 @@ function InputController(emulator) {
 		Object.keys(keyMap).forEach((key) => {
 			if (key === keyName) {
 				var keyPressed = keyMap[key];
-				this.keyState[keyIndex[keyPressed]] &= keyPressedMasks[keyPressed];
-				document.getElementById('key-' + keyPressed).classList.add('pressed');
+				if (!this.keyStatus[keyPressed]) {
+					this.keyStatus[keyPressed] = true;
+					this.keyState[keyIndex[keyPressed]] &= keyPressedMasks[keyPressed];
+					document.getElementById('key-' + keyPressed).classList.add('pressed');
 
-				// Add interrupt
-				emulator.imu.IF = 0x10;
-
+					// Add interrupt
+					emulator.imu.IF = 0x10;
+				}
 			}
 		});
-//		window.console.log(this.keyState);
 		return false;
 	});
 
@@ -45,9 +46,10 @@ function InputController(emulator) {
 		Object.keys(keyMap).forEach((key) => {
 			if (key === keyName) {
 				var keyReleased = keyMap[key];
+				this.keyStatus[keyReleased] = false;
 				this.keyState[keyIndex[keyReleased]] |= keyReleasedMasks[keyReleased];
 				document.getElementById('key-' + keyReleased).classList.remove('pressed');
-
+//				window.console.log(this.keyState);
 				// Update memory input register
 			}
 		});

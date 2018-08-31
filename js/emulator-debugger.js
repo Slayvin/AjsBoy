@@ -8,6 +8,9 @@
  * @returns {gbEmu.debugger}
  */
 gbEmu.debugger = function (emulator) {
+	this.fps = document.getElementById('fps');
+	this.previousTime = 0;
+
 	this.cpu = emulator.cpu;
 	this.mmu = emulator.mmu;
 	this.lcd = emulator.lcd;
@@ -38,10 +41,21 @@ gbEmu.debugger = function (emulator) {
 	this.objPalette1 = document.querySelector('#palette-1 canvas').getContext("2d");
 	this.memoryMap = document.querySelector('#memory canvas').getContext("2d");
 	this.lcdBuffer = document.querySelector('#lcd canvas').getContext("2d");
+
+	//Off-screen canvas
+	this.tmpCanvas = document.createElement('canvas');
+	this.tmpCanvas.width = 256;
+	this.tmpCanvas.height = 256;
+	this.background = this.tmpCanvas.getContext('2d');
+	this.background.lineWidth = 1;
+	this.background.strokeStyle = '#55aaff';
 };
 
-gbEmu.debugger.prototype.update = function () {
-	if (!false) {
+gbEmu.debugger.prototype.update = function (timestamp) {
+	var fps = 1000 / (timestamp - this.previousTime);
+	this.fps.innerHTML = fps.toFixed(2);
+	this.previousTime = timestamp;
+	if (false) {
 		this.pc.innerHTML = this.cpu.PC.toString(16);
 		this.sp.innerHTML = this.cpu.SP.toString(16);
 		for (var s = 0; s < 16; s++) {
@@ -70,7 +84,7 @@ gbEmu.debugger.prototype.update = function () {
 			this[ioAddress].innerHTML = this.mmu.read8(ioRegisters[ioAddress]).toString(16).toUpperCase();
 		});
 	}
-	if (!false) {
+	if (false) {
 		var iData = new ImageData(new Uint8ClampedArray(this.mmu.memory.buffer), 64, 256);
 		this.memoryMap.putImageData(iData, 0, 0);
 	}
@@ -86,55 +100,64 @@ gbEmu.debugger.prototype.update = function () {
 			this.tileMap.putImageData(tileData, 8 * (tile % 16), 8 * Math.floor(tile / 16));
 		}
 	}
-
-	for (var addr = 0; addr < (32 * 32); addr++) {
-		var tile = this.mmu.vram.tileMap0[addr];
-//		if(tile<128){tile+=256;}// depends on LCDC ?
-		var tileData = this.getTileData(tile);
-		var background = this.bgMap;
-		background.putImageData(tileData, 8 * (addr % 32), 8 * Math.floor(addr / 32));
+	if (!false) {// Update background
+		for (var addr = 0; addr < (32 * 32); addr++) {
+			var tile = this.mmu.vram.tileMap0[addr];
+//			if(tile<128){tile+=256;}// depends on LCDC ?
+			var tileData = this.getTileData(tile);
+			var ctx = this.background;
+			ctx.putImageData(tileData, 8 * (addr % 32), 8 * Math.floor(addr / 32));
+		}
 		var scrollY = this.mmu.read8(0xFF42);
 		var scrollX = this.mmu.read8(0xFF43);
-		background.beginPath();
-		background.moveTo(0, 0);
-		background.rect(scrollX, scrollY, 160, 144);
-//		background.rect(10,10,160,144);
-		background.lineWidth = 1;
-		background.strokeStyle = '#55aaff';
-		background.stroke();
+		// Test
+		this.lcdBuffer.drawImage(this.tmpCanvas, scrollX, scrollY, 160, 144, 0, 0, 160, 144);
+		if (!false) {
+			ctx.beginPath();
+			if (scrollX > (256 - 160)) {
+				ctx.rect(scrollX - 256, scrollY, 160, 144);
+			}
+			if (scrollY > (256 - 144)) {
+				ctx.rect(scrollX, scrollY - 256, 160, 144);
+			}
+			if (scrollX > (256 - 160) && scrollY > (256 - 144)) {
+				ctx.rect(scrollX - 256, scrollY - 256, 160, 144);
+			}
+			ctx.rect(scrollX, scrollY, 160, 144);
+			ctx.stroke();
+			ctx.closePath();
+		}
+		if (!false) {
+			this.bgMap.drawImage(this.tmpCanvas, 0, 0);
+		}
 	}
 
 	// Palettes
-	var iData = new ImageData(new Uint8ClampedArray(this.lcd.backgroundPalette.getImageData()), 4, 1);
-	this.bgPalette.putImageData(iData, 0, 0);
-	var iData = new ImageData(new Uint8ClampedArray(this.lcd.spritePalette0.getImageData()), 4, 1);
-	this.objPalette0.putImageData(iData, 0, 0);
-	var iData = new ImageData(new Uint8ClampedArray(this.lcd.spritePalette1.getImageData()), 4, 1);
-	this.objPalette1.putImageData(iData, 0, 0);
+	if (false) {
+		var iData = new ImageData(new Uint8ClampedArray(this.lcd.backgroundPalette.getImageData()), 4, 1);
+		this.bgPalette.putImageData(iData, 0, 0);
+		var iData = new ImageData(new Uint8ClampedArray(this.lcd.spritePalette0.getImageData()), 4, 1);
+		this.objPalette0.putImageData(iData, 0, 0);
+		var iData = new ImageData(new Uint8ClampedArray(this.lcd.spritePalette1.getImageData()), 4, 1);
+		this.objPalette1.putImageData(iData, 0, 0);
+	}
 };
 
 gbEmu.debugger.prototype.updateTileMap = function () {
-	for (var addr = 0; addr < (64 * 96); addr++) {
-		var lo = this.mmu.readVram(addr + addr);
-		var hi = this.mmu.readVram(addr + addr + 1);
+	for (var addr = 0; addr < (6144); addr++) {// 64px * 96px
+		var lo = this.mmu.readVram(addr * 2);
+		var hi = this.mmu.readVram(addr * 2 + 1);
 		for (var i = 0; i < 8; i++) {
 			var colorId = this.lcd.getColorId(lo, hi, i);
-			this.mmu.tileMap[4 * i + 0 + 32 * addr] = this.lcd.backgroundPalette.getColor(colorId);
-			this.mmu.tileMap[4 * i + 1 + 32 * addr] = this.lcd.backgroundPalette.getColor(colorId);
-			this.mmu.tileMap[4 * i + 2 + 32 * addr] = this.lcd.backgroundPalette.getColor(colorId);
-			this.mmu.tileMap[4 * i + 3 + 32 * addr] = 0xFF;
+			var color = this.lcd.backgroundPalette.getColor(colorId);
+			var address = (4 * i) + (32 * addr);
+			this.mmu.tileMap[address + 0] = color;
+			this.mmu.tileMap[address + 1] = color;
+			this.mmu.tileMap[address + 2] = color;
+			this.mmu.tileMap[address + 3] = 0xFF;
 		}
 	}
 };
-/*
- gbEmu.debugger.prototype.updateBackground__ = function () {
- for (var addr = 0; addr < (32 * 32); addr++) {
- var tile = this.mmu.vram.tileMap0(addr);
- var tileData = this.getTileData(tile);
- this.bgMap.putImageData(tileData, 8 * (addr % 32), 8 * Math.floor(addr / 32));
- 
- }
- };*/
 
 /**
  * 

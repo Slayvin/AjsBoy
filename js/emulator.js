@@ -15,7 +15,7 @@ function gbEmu() {
 	this.debugger = new gbEmu.debugger(this);
 }
 
-gbEmu.cyclesPerFrame = 16384 * 4;
+gbEmu.cyclesPerFrame = 16384 / 2;
 
 /**
  * Load program into rom
@@ -125,7 +125,7 @@ gbEmu.prototype.init = function () {
 	}
 };
 
-gbEmu.prototype.run = function () {
+gbEmu.prototype.run = function (timestamp) {
 	var i = 0;
 	var breakpoints = [];
 	var breakpoints_ = [
@@ -133,16 +133,17 @@ gbEmu.prototype.run = function () {
 		0x0100,
 		0xC00C,
 	];
+	window.requestAnimationFrame(this.run.bind(this));
 	while (i < gbEmu.cyclesPerFrame) {
 		if (!this.paused) {
 			this.step();
 		}
 		i++;
-		if (breakpoints.indexOf(this.cpu.PC) > -1) {
+		if (this.debug && (breakpoints.indexOf(this.cpu.PC) > -1)) {
 			this.paused = true;
 //			i = gbEmu.cyclesPerFrame;
 		}
-		if ((i % 48) === 0) {// TODO: get actual value from CPU instructions (count cpu cycles)
+		if ((i % 4) === 0) {// TODO: get actual value from CPU instructions (count cpu cycles)
 			var line = this.mmu.read8(0xff44) & 0xFF;
 			this.mmu.write(0xff44, ++line);
 		}
@@ -152,14 +153,14 @@ gbEmu.prototype.run = function () {
 		}
 	}
 
-	if (this.debug) {
-		this.debugger.update();
-	}
 	this.lcd.updatePalette();
 	this.debugger.updateTileMap();
+	
+	if (this.debug) {
+		this.debugger.update(timestamp);
+	}
 	if (!this.paused) {
 		this.imu.IF = 1;
-		window.requestAnimationFrame(this.run.bind(this));
 	}
 
 };
