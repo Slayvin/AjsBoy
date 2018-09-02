@@ -15,7 +15,22 @@ function gbEmu() {
 	this.debugger = new gbEmu.debugger(this);
 }
 
-gbEmu.cyclesPerFrame = 16384 / 2;
+/**
+ * Machine clocks per frame :
+ * 
+ *        ← 20 mc → ←     43+ mc     → ← 51 (max) mc →
+ *  ↑    |          |                   |                |
+ *  144  |   OAM    |      Pixel        |    H-Blank     |
+ * lines |  Search  |     Transfer      |                |
+ *  ↓    |          |                   |                |
+ *       -------------------------------------------------
+ *  ↑    |                                               |
+ *  10   |                   V-Blank                     |
+ * lines |                                               |
+ *  ↓    -------------------------------------------------
+ */
+gbEmu.cyclesPerFrame = 17556; // (144 + 10) lines * (20 + 43 + 51) machines clocks
+
 
 /**
  * Load program into rom
@@ -81,7 +96,7 @@ gbEmu.prototype.setProgramStartState = function () {
 	this.mmu.memory[0xFF07] = 0x00; // TAC
 	this.mmu.memory[0xFF10] = 0x80;
 	this.mmu.memory[0xFF11] = 0xBF;
-	this.mmu.memory[0xFF12] = 0xF3;
+	this.mmu.memory[0xFF12] = 0xF3; 
 	this.mmu.memory[0xFF14] = 0xBF;
 	this.mmu.memory[0xFF16] = 0x3F;
 	this.mmu.memory[0xFF17] = 0x00;
@@ -133,7 +148,6 @@ gbEmu.prototype.run = function (timestamp) {
 		0x0100,
 		0xC00C,
 	];
-	window.requestAnimationFrame(this.run.bind(this));
 	while (i < gbEmu.cyclesPerFrame) {
 		if (!this.paused) {
 			this.step();
@@ -152,6 +166,7 @@ gbEmu.prototype.run = function (timestamp) {
 			this.imu.processInterrupts();
 		}
 	}
+	window.requestAnimationFrame(this.run.bind(this));
 
 	this.lcd.updatePalette();
 	this.debugger.updateTileMap();
