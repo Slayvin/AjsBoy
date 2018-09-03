@@ -78,4 +78,4 @@ function Lcd(Emulator) {
 
 }
 
-Lcd.colors = palettes.lcd;
+Lcd.colors = palettes.default;

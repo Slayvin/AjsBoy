@@ -94,7 +94,7 @@ gbEmu.debugger.prototype.update = function (timestamp) {
 	}
 
 //	var iData = new ImageData(new Uint8ClampedArray(this.mmu.tileMap), 128, 192);
-	if (!false) {
+	if (false) {
 		for (var tile = 0; tile < 384; tile++) {
 			var tileData = this.getTileData(tile);
 			this.tileMap.putImageData(tileData, 8 * (tile % 16), 8 * Math.floor(tile / 16));
@@ -133,7 +133,7 @@ gbEmu.debugger.prototype.update = function (timestamp) {
 	}
 
 	// Palettes
-	if (!false) {
+	if (false) {
 		var iData = new ImageData(new Uint8ClampedArray(this.lcd.backgroundPalette.getImageData()), 4, 1);
 		this.bgPalette.putImageData(iData, 0, 0);
 		var iData = new ImageData(new Uint8ClampedArray(this.lcd.spritePalette0.getImageData()), 4, 1);

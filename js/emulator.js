@@ -13,6 +13,8 @@ function gbEmu() {
 	this.lcd = new Lcd(this);
 	this.inputs = new InputController(this);
 	this.debugger = new gbEmu.debugger(this);
+
+	this.divCounter = 0;
 }
 
 /**
@@ -96,7 +98,7 @@ gbEmu.prototype.setProgramStartState = function () {
 	this.mmu.memory[0xFF07] = 0x00; // TAC
 	this.mmu.memory[0xFF10] = 0x80;
 	this.mmu.memory[0xFF11] = 0xBF;
-	this.mmu.memory[0xFF12] = 0xF3; 
+	this.mmu.memory[0xFF12] = 0xF3;
 	this.mmu.memory[0xFF14] = 0xBF;
 	this.mmu.memory[0xFF16] = 0x3F;
 	this.mmu.memory[0xFF17] = 0x00;
@@ -161,6 +163,9 @@ gbEmu.prototype.run = function (timestamp) {
 			var line = this.mmu.read8(0xff44) & 0xFF;
 			this.mmu.write(0xff44, ++line);
 		}
+		// Update Timers
+		this.updateTimers();
+
 		// Check for interrupts:
 		if (this.imu.IME) {
 			this.imu.processInterrupts();
@@ -170,7 +175,7 @@ gbEmu.prototype.run = function (timestamp) {
 
 	this.lcd.updatePalette();
 	this.debugger.updateTileMap();
-	
+
 	if (this.debug) {
 		this.debugger.update(timestamp);
 	}
@@ -197,4 +202,16 @@ gbEmu.prototype.pause = function () {
 	} else {
 		this.run();
 	}
+};
+var div = 0;
+gbEmu.prototype.updateTimers = function () {
+	// Update DIV register @ 16384Hz
+	this.divCounter++;
+	if ((this.divCounter % 64) === 0) {
+		this.divCounter = 0;
+		div++;
+	}
+	div &= 0xFF;
+	this.mmu.memory[0xFF04] = div;
+
 };

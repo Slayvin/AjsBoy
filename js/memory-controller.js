@@ -57,6 +57,10 @@ function MemController(emulator) {
 //			console.log('Cannot write (' + data + ') in ROM at address 0x' + addr.toString(16));
 //			// TODO : handling of ROM/RAM banks
 //			this.memory[addr] = data;
+
+		} else if (addr === 0xFF04) {
+			// DIV register
+			this.memory[addr] = 0;
 		} else {
 			this.memory[addr] = data;
 		}

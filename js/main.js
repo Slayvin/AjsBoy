@@ -10,6 +10,7 @@ var demoRomsPath = 'demo/';
 //emulator.loadProgram(testRomsPath + 'blargg-tests/cpu_instrs/cpu_instrs.gb').then(function () {
 //emulator.loadProgram(testRomsPath + 'blargg-tests/cpu_instrs/individual/02-interrupts.gb').then(function () {
 // Games
+//emulator.loadProgram(gameRomsPath + 'Boxxle 2 (U).gb').then(function () {
 //emulator.loadProgram(gameRomsPath + 'Double Dragon (U) [!].gb').then(function () {
 //emulator.loadProgram(gameRomsPath + 'Dr. Mario (JU) (V1.0) [!].gb').then(function () {
 //emulator.loadProgram(gameRomsPath + 'Pipe Dream (U) [!].gb').then(function () {
