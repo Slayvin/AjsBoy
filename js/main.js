@@ -1,3 +1,5 @@
+/* global Palettes */
+/* global Lcd */
 console.log('Starting main program');
 
 var emulator = new gbEmu();
@@ -36,4 +38,30 @@ stepBtn.onclick = function () {
 };
 pauseBtn.onclick = function () {
 	emulator.pause();
+};
+
+var debugCheckboxes = document.getElementsByClassName('debug-cb');
+for (var i = 0; i < debugCheckboxes.length; i++) {
+	var checkbox = debugCheckboxes[i];
+//	window.console.log(checkbox);
+	checkbox.addEventListener("change", updateDebugStates, false);
+}
+function updateDebugStates() {
+	var isChecked = this.checked;
+	if (isChecked) { //checked
+		emulator.debugger.states[this.id] = true;
+	} else { //unchecked
+		emulator.debugger.states[this.id] = false;
+	}
+}
+
+var mainDebugCheckbox = document.getElementById('debug');
+mainDebugCheckbox.onchange = function () {
+	emulator.debug = this.checked;
+};
+
+var paletteSelector = document.getElementById('lcd-palette');
+paletteSelector.onchange = function () {
+//	window.console.log(this.value);
+	Lcd.colors = Palettes[this.value];
 };

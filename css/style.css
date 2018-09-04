@@ -13,6 +13,9 @@ body{
 	right:0;
 	background-color: #cccccc;
 }
+.row{
+	overflow: hidden;	
+}
 .row label{
 	font-size: 10px;
 }
@@ -82,7 +85,7 @@ canvas{
 	min-width: 100px;
 }
 
-.row{
+table .row{
 	text-align: center;
 	background-color: #DDD;
 	height: 20px;

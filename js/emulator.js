@@ -5,7 +5,7 @@ function gbEmu() {
 	this.programLoaded = false;
 	this.paused = false;
 	this.realBoot = true;
-	this.debug = !false;
+	this.debug = true;
 
 	this.mmu = new MemController(this);
 	this.imu = new InterruptsController(this);
@@ -175,9 +175,11 @@ gbEmu.prototype.run = function (timestamp) {
 
 	this.lcd.updatePalette();
 	this.debugger.updateTileMap();
+	this.debugger.updateLcd();
+	this.debugger.updateFPS(timestamp);
 
 	if (this.debug) {
-		this.debugger.update(timestamp);
+		this.debugger.update();
 	}
 	if (!this.paused) {
 		this.imu.IF = 1;

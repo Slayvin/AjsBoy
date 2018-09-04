@@ -8,8 +8,24 @@
  * @returns {gbEmu.debugger}
  */
 gbEmu.debugger = function (emulator) {
+	this.states = {
+		'debug-cpu': true,
+		'debug-cpu-registers': true,
+		'debug-cpu-flags': true,
+		'debug-call-stack': true,
+		'debug-io-registers': true,
+		'debug-lcd-status': true,
+		'debug-memory-map': true,
+		'debug-bg-palette': true,
+		'debug-sprite0-palette': true,
+		'debug-sprite1-palette': true,
+		'debug-vram-map': true,
+		'debug-bg-map': true
+	};
 	this.fps = document.getElementById('fps');
 	this.previousTime = 0;
+	this.minFps = 1000;
+	this.maxFps = 0;
 
 	this.cpu = emulator.cpu;
 	this.mmu = emulator.mmu;
@@ -20,6 +36,10 @@ gbEmu.debugger = function (emulator) {
 	this.sp = document.querySelector('#sp');
 	this.stack = document.querySelectorAll('#stack .cell');
 	const cpuRegisters = ['A', 'B', 'C', 'D', 'E', 'F', 'H', 'L'];
+	this.getCpuRegisters = function () {
+		return cpuRegisters;
+	};
+
 	cpuRegisters.forEach((r) => {
 		this['reg' + r] = document.querySelector('#reg-' + r);
 	});
@@ -51,68 +71,86 @@ gbEmu.debugger = function (emulator) {
 	this.background.strokeStyle = '#55aaff';
 };
 
-gbEmu.debugger.prototype.update = function (timestamp) {
+gbEmu.debugger.prototype.updateFPS = function (timestamp) {
 	var fps = 1000 / (timestamp - this.previousTime);
-	this.fps.innerHTML = fps.toFixed(2);
+//	if (fps < this.minFps && timestamp>1000) {
+//		this.minFps = fps;
+//	}
+//	if (fps > this.maxFps) {
+//		this.maxFps = fps;
+//	}
+	this.fps.innerHTML = fps.toFixed(2);// + ' (min:' + this.minFps.toFixed(2) + ' - max:' + this.maxFps.toFixed(2) + ')';
 	this.previousTime = timestamp;
-	if (false) {
+};
+
+gbEmu.debugger.prototype.update = function () {
+
+	if (this.states['debug-cpu']) {
 		this.pc.innerHTML = this.cpu.PC.toString(16);
 		this.sp.innerHTML = this.cpu.SP.toString(16);
+		this.code.innerHTML = this.cpu.code;
+	}
+
+	if (this.states['debug-call-stack']) {
 		for (var s = 0; s < 16; s++) {
 			this.stack[s].innerHTML = this.mmu.read16(0xfffe - s * 2).toString(16).toUpperCase();
 			// Note: the stack doesn't necessarily starts at 0xFFFE ! A program could set the initial pointer to another address.
 			// This means the value displayed from 0xFFFE and below doesn't always represent the stack!
 			// TODO : read stack values whenever PUSH or POP functions are triggered, or set correct address when LD SP function is triggered
 		}
-		this.code.innerHTML = this.cpu.code;
-		const cpuRegisters = ['A', 'B', 'C', 'D', 'E', 'F', 'H', 'L'];
-		cpuRegisters.forEach((r) => {
+	}
+
+	if (this.states['debug-cpu-registers']) {
+		this.getCpuRegisters().forEach((r) => {
 			this['reg' + r].innerHTML = this.cpu[r].toString(16).toUpperCase();
 		});
 	}
-	if (false) {
+
+	if (this.states['debug-cpu-flags']) {
 		this.flagZ.innerHTML = this.cpu.flags.Z.toString(2);
 		this.flagN.innerHTML = this.cpu.flags.N.toString(2);
 		this.flagH.innerHTML = this.cpu.flags.H.toString(2);
 		this.flagC.innerHTML = this.cpu.flags.C.toString(2);
+	}
+
+	if (this.states['debug-lcd-status']) {
 		this.ly.innerHTML = this.mmu.read8(0xff44);
 		this.lcdc.innerHTML = this.mmu.read8(0xff40).toString(16);
+	}
 
+	if (this.states['debug-io-registers']) {
 		const ioRegisters = {FF00: 0xff00, FF01: 0xff01, FF02: 0xff02, FF04: 0xff04, FF05: 0xff05, FF06: 0xff06, FF07: 0xff07, FF0F: 0xff0f,
 			FF40: 0xff40, FF41: 0xff41, FF42: 0xff42, FF43: 0xff43};
 		Object.keys(ioRegisters).forEach((ioAddress) => {
 			this[ioAddress].innerHTML = this.mmu.read8(ioRegisters[ioAddress]).toString(16).toUpperCase();
 		});
 	}
-	if (false) {
+	if (this.states['debug-memory-map']) {
 		var iData = new ImageData(new Uint8ClampedArray(this.mmu.memory.buffer), 64, 256);
 		this.memoryMap.putImageData(iData, 0, 0);
 	}
-	if (false) {
-		var iData = new ImageData(this.lcd.data, 160, 144);
-		this.lcdBuffer.putImageData(iData, 0, 0);
-	}
+//	if (false) {
+//		var iData = new ImageData(this.lcd.data, 160, 144);
+//		this.lcdBuffer.putImageData(iData, 0, 0);
+//	}
 
 //	var iData = new ImageData(new Uint8ClampedArray(this.mmu.tileMap), 128, 192);
-	if (false) {
+//	this.tileMap.putImageData(iData, 0, 0);
+
+	if (this.states['debug-vram-map']) {
 		for (var tile = 0; tile < 384; tile++) {
 			var tileData = this.getTileData(tile);
 			this.tileMap.putImageData(tileData, 8 * (tile % 16), 8 * Math.floor(tile / 16));
 		}
 	}
-	if (!false) {// Update background
-		for (var addr = 0; addr < (32 * 32); addr++) {
-			var tile = this.mmu.vram.tileMap0[addr];
-//			if(tile<128){tile+=256;}// depends on LCDC ?
-			var tileData = this.getTileData(tile);
-			var ctx = this.background;
-			ctx.putImageData(tileData, 8 * (addr % 32), 8 * Math.floor(addr / 32));
-		}
-		var scrollY = this.mmu.read8(0xFF42);
-		var scrollX = this.mmu.read8(0xFF43);
-		// Test
-		this.lcdBuffer.drawImage(this.tmpCanvas, scrollX, scrollY, 160, 144, 0, 0, 160, 144);
+	// Update background
+	if (this.states['debug-bg-map']) {
+
+		var ctx = this.background;
 		if (!false) {
+			var scrollY = this.mmu.read8(0xFF42);
+			var scrollX = this.mmu.read8(0xFF43);
+
 			ctx.beginPath();
 			if (scrollX > (256 - 160)) {
 				ctx.rect(scrollX - 256, scrollY, 160, 144);
@@ -127,22 +165,38 @@ gbEmu.debugger.prototype.update = function (timestamp) {
 			ctx.stroke();
 			ctx.closePath();
 		}
-		if (!false) {
-			this.bgMap.drawImage(this.tmpCanvas, 0, 0);
-		}
+		this.bgMap.drawImage(this.tmpCanvas, 0, 0);
 	}
 
+
 	// Palettes
-	if (false) {
+	if (this.states['debug-bg-palette']) {
 		var iData = new ImageData(new Uint8ClampedArray(this.lcd.backgroundPalette.getImageData()), 4, 1);
 		this.bgPalette.putImageData(iData, 0, 0);
+	}
+	if (this.states['debug-sprite0-palette']) {
 		var iData = new ImageData(new Uint8ClampedArray(this.lcd.spritePalette0.getImageData()), 4, 1);
 		this.objPalette0.putImageData(iData, 0, 0);
+	}
+	if (this.states['debug-sprite1-palette']) {
 		var iData = new ImageData(new Uint8ClampedArray(this.lcd.spritePalette1.getImageData()), 4, 1);
 		this.objPalette1.putImageData(iData, 0, 0);
 	}
 };
 
+gbEmu.debugger.prototype.updateLcd = function () {
+	for (var addr = 0; addr < (32 * 32); addr++) {
+		var tile = this.mmu.vram.tileMap0[addr];
+//			if(tile<128){tile+=256;}// depends on LCDC ?
+		var tileData = this.getTileData(tile);
+		this.background.putImageData(tileData, 8 * (addr % 32), 8 * Math.floor(addr / 32));
+	}
+
+	var scrollY = this.mmu.read8(0xFF42);
+	var scrollX = this.mmu.read8(0xFF43);
+
+	this.lcdBuffer.drawImage(this.tmpCanvas, scrollX, scrollY, 160, 144, 0, 0, 160, 144);
+};
 gbEmu.debugger.prototype.updateTileMap = function () {
 	for (var addr = 0; addr < (6144); addr++) {// 64px * 96px
 		var lo = this.mmu.readVram(addr * 2);
