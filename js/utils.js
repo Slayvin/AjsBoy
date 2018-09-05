@@ -14,5 +14,14 @@ var Utils = {
 	},
 	'carryFromBit15': function (a, b) {
 		return (((a & 0xFFFF) + (b & 0xFFFF)) & 0x10000) === 0x10000 ? 1 : 0;
+	},
+	'testBit': function (value, position) {
+		return (value & (1 << position)) > 0;
+	},
+	'setBit': function (value, position) {
+		return value | (1 << position);
+	},
+	'resetBit': function (value, position) {
+		return value & (0xFF - (1 << position));
 	}
 };

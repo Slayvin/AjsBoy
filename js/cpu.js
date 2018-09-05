@@ -9,10 +9,6 @@ function Cpu(Emulator) {
 	// Init memory
 	this.memory = Emulator.mmu;
 
-	var TIMA = 0xFF05;
-	var TMA = 0xFF06;
-	var TMC = 0xFF07;
-
 	// Tells if latest executed instruction is 0xCB
 	this.isExtendedInstruction = false;
 

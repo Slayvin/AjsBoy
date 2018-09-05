@@ -1,10 +1,10 @@
 'use strict';
 
-function gbEmu() {
+var gbEmu = function () {
 	this.name = 'JsBoy';
 	this.programLoaded = false;
 	this.paused = false;
-	this.realBoot = true;
+	this.realBoot = !true;
 	this.debug = true;
 
 	this.mmu = new MemController(this);
@@ -15,7 +15,14 @@ function gbEmu() {
 	this.debugger = new gbEmu.debugger(this);
 
 	this.divCounter = 0;
-}
+	this.timerCounter = 0;
+};
+
+// Emulator const
+gbEmu.DIV = 0xFF04;
+gbEmu.TIMA = 0xFF05;
+gbEmu.TMA = 0xFF06;
+gbEmu.TAC = 0xFF07;
 
 /**
  * Machine clocks per frame :
@@ -80,9 +87,13 @@ gbEmu.prototype.loadProgram = function (name, asCartridge) {
 
 };
 
+/**
+ * 
+ * @param {string} name
+ * @returns {Promise}
+ */
 gbEmu.prototype.loadBootstrap = function (name) {
 	return this.loadProgram(name, false);
-
 };
 
 gbEmu.prototype.setProgramStartState = function () {
@@ -93,9 +104,9 @@ gbEmu.prototype.setProgramStartState = function () {
 	this.cpu.SP = 0xFFFE;
 	this.cpu.PC = 0x0100;
 
-	this.mmu.memory[0xFF05] = 0x00; // TIMA
-	this.mmu.memory[0xFF06] = 0x00; // TMA
-	this.mmu.memory[0xFF07] = 0x00; // TAC
+	this.mmu.memory[gbEmu.TIMA] = 0x00; // TIMA
+	this.mmu.memory[gbEmu.TMA] = 0x00; // TMA
+	this.mmu.memory[gbEmu.TAC] = 0x00; // TAC
 	this.mmu.memory[0xFF10] = 0x80;
 	this.mmu.memory[0xFF11] = 0xBF;
 	this.mmu.memory[0xFF12] = 0xF3;
@@ -159,7 +170,7 @@ gbEmu.prototype.run = function (timestamp) {
 			this.paused = true;
 //			i = gbEmu.cyclesPerFrame;
 		}
-		if ((i % 4) === 0) {// TODO: get actual value from CPU instructions (count cpu cycles)
+		if ((i % 32) === 0) {// TODO: get actual value from CPU instructions (count cpu cycles)
 			var line = this.mmu.read8(0xff44) & 0xFF;
 			this.mmu.write(0xff44, ++line);
 		}
@@ -167,7 +178,7 @@ gbEmu.prototype.run = function (timestamp) {
 		this.updateTimers();
 
 		// Check for interrupts:
-		if (this.imu.IME) {
+		if (this.imu.IME && (this.mmu.read8(this.cpu.PC-1) !== 0xfb)) { // NOT sure it is correct (TODO)
 			this.imu.processInterrupts();
 		}
 	}
@@ -182,7 +193,7 @@ gbEmu.prototype.run = function (timestamp) {
 		this.debugger.update();
 	}
 	if (!this.paused) {
-		this.imu.IF = 1;
+		this.imu.requestInterrupt(1);
 	}
 
 };
@@ -214,6 +225,19 @@ gbEmu.prototype.updateTimers = function () {
 		div++;
 	}
 	div &= 0xFF;
-	this.mmu.memory[0xFF04] = div;
+	this.mmu.memory[gbEmu.DIV] = div;
+
+	// Check if timer is enabled
+	if (Utils.testBit(this.mmu.memory[gbEmu.TAC], 2)) {
+		this.timerCounter++;
+		if ((this.timerCounter % 2) === 0) {
+			this.mmu.memory[gbEmu.TIMA]++;
+			if (this.mmu.memory[gbEmu.TIMA] >= 0xFF) {
+				this.mmu.memory[gbEmu.TIMA] = this.mmu.memory[gbEmu.TMA];
+				this.imu.requestInterrupt(0x4);
+			}
+
+		}
+	}
 
 };

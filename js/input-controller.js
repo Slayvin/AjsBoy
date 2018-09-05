@@ -33,7 +33,7 @@ function InputController(emulator) {
 					document.getElementById('key-' + keyPressed).classList.add('pressed');
 
 					// Add interrupt
-					emulator.imu.IF = 0x10;
+					emulator.imu.requestInterrupt(0x10);
 				}
 			}
 		});
@@ -60,7 +60,7 @@ function InputController(emulator) {
 	var keys = document.querySelectorAll('.key-map button');
 	keys.forEach(function (button) {
 		button.addEventListener('click', (event) => {
-			emulator.imu.IF = 0x10;
+			emulator.imu.requestInterrupt(0x10);
 			event.preventDefault();
 		});
 	});
