@@ -10,15 +10,19 @@ var demoRomsPath = 'demo/';
 // Tests
 //emulator.loadProgram(testRomsPath + 'bgbtest.gb').then(function () {
 //emulator.loadProgram(testRomsPath + 'blargg-tests/cpu_instrs/cpu_instrs.gb').then(function () {
-emulator.loadProgram(testRomsPath + 'blargg-tests/cpu_instrs/individual/02-interrupts.gb').then(function () {
+//emulator.loadProgram(testRomsPath + 'blargg-tests/cpu_instrs/individual/02-interrupts.gb').then(function () {
 // Games
+//emulator.loadProgram(gameRomsPath + 'BattleCity (J) [!].gb').then(function () {
 //emulator.loadProgram(gameRomsPath + 'Boxxle 2 (U).gb').then(function () {
+//emulator.loadProgram(gameRomsPath + 'Castelian (E) [!].gb').then(function () {
+//emulator.loadProgram(gameRomsPath + 'Catrap (U) [!].gb').then(function () {
 //emulator.loadProgram(gameRomsPath + 'Double Dragon (U) [!].gb').then(function () {
 //emulator.loadProgram(gameRomsPath + 'Dr. Mario (JU) (V1.0) [!].gb').then(function () {
 //emulator.loadProgram(gameRomsPath + 'Pipe Dream (U) [!].gb').then(function () {
 //emulator.loadProgram(gameRomsPath + 'Tetris (World).gb').then(function () {
 //emulator.loadProgram(gameRomsPath + 'Super Mario Land (JUE) (V1.0) [!].gb').then(function () {
 //emulator.loadProgram(gameRomsPath + 'Super Mario Land 2 - 6 Golden Coins (UE) (V1.2) [!].gb').then(function () {
+emulator.loadProgram(gameRomsPath + 'Volley Fire (J).gb').then(function () {
 // Demos
 //emulator.loadProgram(demoRomsPath + 'adjtris.gb').then(function () {
 //emulator.loadProgram(demoRomsPath + 'pocket.gb').then(function () {
@@ -39,6 +43,18 @@ stepBtn.onclick = function () {
 pauseBtn.onclick = function () {
 	emulator.pause();
 };
+
+document.addEventListener('keydown', (event) => {
+	event.preventDefault();
+	const keyName = event.key;
+	if ('n' === keyName) {
+		emulator.step();
+	}
+	if ('p' === keyName) {
+		emulator.pause();
+	}
+	return false;
+});
 
 var debugCheckboxes = document.getElementsByClassName('debug-cb');
 for (var i = 0; i < debugCheckboxes.length; i++) {

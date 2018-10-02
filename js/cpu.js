@@ -38,13 +38,12 @@ function Cpu(Emulator) {
 	// C: Carry      (bit 4): is set when a carry from bit 7 is done in arithmetical operation
 	// Lowest 4 bits are unused
 
-	var flags = ['Z', 'N', 'H', 'C'];
-	for (var f = 0; f < flags.length; f++) {
-		Object.defineProperty(this.flags, flags[f], {
+	['Z', 'N', 'H', 'C'].forEach((flag, idx) => {
+		Object.defineProperty(this.flags, flag, {
 			get: function (offset) {
 				var mask = 1 << (7 - offset);
 				return ((this.F & mask) !== 0) | 0;
-			}.bind(this, f),
+			}.bind(this, idx),
 			set: function (offset, val) {
 				var mask = 1 << (7 - offset);
 				if (val === 0) {
@@ -52,16 +51,15 @@ function Cpu(Emulator) {
 				} else {
 					this.F |= mask;
 				}
-			}.bind(this, f)
+			}.bind(this, idx)
 		});
-	}
+	});
 
 	// 16-bits registers (8-bits registers used in pairs)
-	var registers = ['AF', 'BC', 'DE', 'HL'];
-	for (var r = 0; r < registers.length; r++) {
-		var hi = registers[r].substring(0, 1);
-		var lo = registers[r].substr(-1);
-		Object.defineProperty(this, registers[r], {
+	['AF', 'BC', 'DE', 'HL'].forEach(register => {
+		var hi = register.substring(0, 1);
+		var lo = register.substr(-1);
+		Object.defineProperty(this, register, {
 			get: function (registers) {
 				return this[registers.hi] << 8 | this[registers.lo];
 			}.bind(this, {'hi': hi, 'lo': lo}),
@@ -70,7 +68,7 @@ function Cpu(Emulator) {
 				this[registers.lo] = val & 0xFF;
 			}.bind(this, {'hi': hi, 'lo': lo})
 		});
-	}
+	});
 
 }
 

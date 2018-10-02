@@ -88,7 +88,7 @@ gbEmu.debugger.prototype.update = function () {
 	if (this.states['debug-cpu']) {
 		this.pc.innerHTML = this.cpu.PC.toString(16);
 		this.sp.innerHTML = this.cpu.SP.toString(16);
-		this.code.innerHTML = this.cpu.code;
+		this.code.innerHTML = this.mmu.memory[this.cpu.PC].toString(16);
 	}
 
 	if (this.states['debug-call-stack']) {
@@ -225,7 +225,6 @@ gbEmu.debugger.prototype.getTileData = function (id) {
 		if (tile < 128) {
 			tile += 256;
 		}
-
 	}
 	var tileArray = new Uint8ClampedArray(this.mmu.tileMap.buffer, tile * 256, 256);
 	var tileData = new ImageData(tileArray, 8, 8);

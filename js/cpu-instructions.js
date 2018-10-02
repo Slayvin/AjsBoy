@@ -1,10 +1,7 @@
+'use strict';
+
 /* global Cpu */
 /* global Utils */
-'use strict';
-if (typeof exports !== 'undefined') {
-	var CpuModule = require('./cpu.js');
-	var Cpu = CpuModule.Cpu;
-}
 
 (function (Cpu) {
 // ============================================================================
@@ -15,26 +12,26 @@ if (typeof exports !== 'undefined') {
 		// 8-bits loads
 		// ====================================================================
 		this['LD r,n'] = function (r, n) {
-			this.code = 'LD ' + r + ',' + n.toString(16);
+			// this.code = 'LD ' + r + ',' + n.toString(16);
 			this[r] = n;
 			this.PC++;
 		};
 		this['LD r1,r2'] = function (r1, r2) {
-			this.code = 'LD ' + r1 + ',' + r2;
+			// this.code = 'LD ' + r1 + ',' + r2;
 			this[r1] = this[r2];
 			this.PC++;
 		};
 		this['LD A,addr'] = function (addr) {
-			this.code = 'LD A,' + addr.toString(16);
+			// this.code = 'LD A,' + addr.toString(16);
 			this.A = this.memory.read8(addr);
 			this.PC++;
 		};
 		this['LD addr,A'] = function (addr) {
-			this.code = 'LD ' + addr.toString(16) + ',A';
+			// this.code = 'LD ' + addr.toString(16) + ',A';
 			this['LD addr,n'](addr, this.A);
 		};
 		this['LD addr,n'] = function (addr, n) {
-			this.code = 'LD ' + addr.toString(16) + ',' + n.toString(16);
+			// this.code = 'LD ' + addr.toString(16) + ',' + n.toString(16);
 			this.memory.write(addr, n);
 			this.PC++;
 		};
@@ -43,7 +40,7 @@ if (typeof exports !== 'undefined') {
 		// 8-bits ALU
 		// ====================================================================
 		this['ADD A,n'] = function (n) {
-			this.code = 'ADD A,' + n.toString(16);
+			// this.code = 'ADD A,' + n.toString(16);
 			var result = (this.A + n);
 			this.flags.Z = (result & 0xFF) === 0 ? 1 : 0;
 			this.flags.N = 0;
@@ -53,7 +50,7 @@ if (typeof exports !== 'undefined') {
 			this.PC++;
 		};
 		this['ADC A,n'] = function (n) {
-			this.code = 'ADC A,' + n.toString(16);
+			// this.code = 'ADC A,' + n.toString(16);
 			var result = (this.A + n + this.flags.C);
 			this.flags.Z = (result & 0xFF) === 0 ? 1 : 0;
 			this.flags.N = 0;
@@ -64,7 +61,7 @@ if (typeof exports !== 'undefined') {
 
 		};
 		this['SUB n'] = function (n) {
-			this.code = 'SUB n';
+			// this.code = 'SUB n';
 			var result = (this.A - n) & 0xFF;
 			this.flags.Z = result === 0 ? 1 : 0;
 			this.flags.N = 1;
@@ -74,7 +71,7 @@ if (typeof exports !== 'undefined') {
 			this.PC++;
 		};
 		this['SBC A,n'] = function (n) {
-			this.code = 'SBC A,n';
+			// this.code = 'SBC A,n';
 			var result = this.A - n - this.flags.C;
 			this.flags.Z = (result & 0xFF) === 0 ? 1 : 0;
 			this.flags.N = 1;
@@ -84,7 +81,7 @@ if (typeof exports !== 'undefined') {
 			this.PC++;
 		};
 		this['AND n'] = function (n) {
-			this.code = 'AND ' + n.toString();
+			// this.code = 'AND ' + n.toString();
 			this.A = (n & this.A) & 0xFF;
 			this.flags.Z = this.A === 0 ? 1 : 0;
 			this.flags.N = 0;
@@ -93,7 +90,7 @@ if (typeof exports !== 'undefined') {
 			this.PC++;
 		};
 		this['OR n'] = function (n) {
-			this.code = 'OR ' + n.toString();
+			// this.code = 'OR ' + n.toString();
 			this.A = (n | this.A) & 0xFF;
 			this.flags.Z = this.A === 0 ? 1 : 0;
 			this.flags.N = 0;
@@ -102,7 +99,7 @@ if (typeof exports !== 'undefined') {
 			this.PC++;
 		};
 		this['XOR n'] = function (n) {
-			this.code = 'XOR ' + n.toString();
+			// this.code = 'XOR ' + n.toString();
 			this.A = (n ^ this.A) & 0xFF;
 			this.flags.Z = this.A === 0 ? 1 : 0;
 			this.flags.N = 0;
@@ -111,7 +108,7 @@ if (typeof exports !== 'undefined') {
 			this.PC++;
 		};
 		this['INC n'] = function (n) {
-			this.code = 'INC ' + n.toString(16);
+			// this.code = 'INC ' + n.toString(16);
 			var result = (n + 1) & 0xff;
 			this.flags.Z = result === 0 ? 1 : 0;
 			this.flags.N = 0;
@@ -120,7 +117,7 @@ if (typeof exports !== 'undefined') {
 			return result;
 		};
 		this['DEC n'] = function (n) {
-			this.code = 'DEC ' + n.toString(16);
+			// this.code = 'DEC ' + n.toString(16);
 			var result = (n - 1) & 0xff;
 			this.flags.Z = result === 0 ? 1 : 0;
 			this.flags.N = 1;
@@ -141,18 +138,18 @@ if (typeof exports !== 'undefined') {
 		// 16-bits loads
 		// ======================================================
 		this['LD rr,nn'] = function (rr, nn) {
-			this.code = 'LD ' + rr + ',' + nn.toString(16);
+			// this.code = 'LD ' + rr + ',' + nn.toString(16);
 			this[rr] = nn;
 			this.PC++;
 		};
 		this['PUSH nn'] = function (nn) {
-			this.code = 'PUSH ' + nn.toString(16);
+			// this.code = 'PUSH ' + nn.toString(16);
 			this.memory.write(this.SP - 1, nn >>> 8);
 			this.memory.write(this.SP - 2, nn & 0xFF);
 			this.SP -= 2;
 		};
 		this['POP rr'] = function (rr) {
-			this.code = 'POP ';
+			// this.code = 'POP ';
 			this[rr] = this.memory.read16(this.SP);
 			this.SP += 2;
 		};
@@ -160,7 +157,7 @@ if (typeof exports !== 'undefined') {
 		// 16-bits ALU
 		// ======================================================
 		this['ADD HL,nn'] = function (nn) {
-			this.code = 'ADD HL,' + nn.toString(16);
+			// this.code = 'ADD HL,' + nn.toString(16);
 			var result = this.HL + nn;
 			this.flags.N = 0;
 			this.flags.H = Utils.carryFromBit11(this.HL, nn);
@@ -169,12 +166,12 @@ if (typeof exports !== 'undefined') {
 			this.PC++;
 		};
 		this['INC rr'] = function (rr) {
-			this.code = 'INC ' + rr;
+			// this.code = 'INC ' + rr;
 			this[rr] = (this[rr] + 1) & 0xffff;
 			this.PC++;
 		};
 		this['DEC rr'] = function (rr) {
-			this.code = 'DEC ' + rr;
+			// this.code = 'DEC ' + rr;
 			this[rr] = (this[rr] - 1) & 0xffff;
 			this.PC++;
 		};
@@ -532,49 +529,49 @@ if (typeof exports !== 'undefined') {
 // ----------------------------------------------------------------------------
 		// LD A,(C)
 		0xf2: function (mem) {
-			this.code = 'LD A,(C)';
+			// this.code = 'LD A,(C)';
 			var addr = 0xFF00 + this.C;
 			this.A = mem.read8(addr);
 			this.PC++;
 		},
 		// LD (C),A
 		0xe2: function (mem) {
-			this.code = 'LD (C),A';
+			// this.code = 'LD (C),A';
 			var addr = 0xFF00 + this.C;
 			mem.write(addr, this.A);
 			this.PC++;
 		},
 		// LD A,(HLD) | LD A,(HL-) | LDD A,(HL)
 		0x3a: function (mem) {
-			this.code = 'LD A,(HL-)';
+			// this.code = 'LD A,(HL-)';
 			this.A = mem.read8(this.HL);
 			this.HL = (this.HL - 1) & 0xFFFF;
 			this.PC++;
 		},
 		// LD (HLD),A | LD (HL-),A | LDD (HL),A
 		0x32: function (mem) {
-			this.code = 'LD (HL-),A';
+			// this.code = 'LD (HL-),A';
 			mem.write(this.HL, this.A);
 			this.HL = (this.HL - 1) & 0xFFFF;
 			this.PC++;
 		},
 		// LD A,(HLI) | LD A,(HL+) | LDI A,(HL)
 		0x2a: function (mem) {
-			this.code = 'LD A,(HL+)';
+			// this.code = 'LD A,(HL+)';
 			this.A = mem.read8(this.HL);
 			this.HL = (this.HL + 1) & 0xFFFF;
 			this.PC++;
 		},
 		// LD (HLI),A | LD (HL+),A | LDI (HL),A
 		0x22: function (mem) {
-			this.code = 'LD (HL+),A';
+			// this.code = 'LD (HL+),A';
 			mem.write(this.HL, this.A);
 			this.HL = (this.HL + 1) & 0xFFFF;
 			this.PC++;
 		},
 		// LDH (n),A
 		0xe0: function (mem) {
-			this.code = 'LDH (n),A';
+			// this.code = 'LDH (n),A';
 			var n = mem.read8(++this.PC);
 			var addr = 0xFF00 + n;
 			mem.write(addr, this.A);
@@ -582,7 +579,7 @@ if (typeof exports !== 'undefined') {
 		},
 		// LDH A,(n)
 		0xf0: function (mem) {
-			this.code = 'LDH A,(n)';
+			// this.code = 'LDH A,(n)';
 			var n = mem.read8(++this.PC);
 			var addr = 0xFF00 + n;
 			this.A = mem.read8(addr);
@@ -1249,14 +1246,14 @@ if (typeof exports !== 'undefined') {
 		// JP nn
 		0xc3: function (mem) {
 			var addr = mem.read16(++this.PC);
-			this.code = 'JP ' + addr.toString(16);
+			// this.code = 'JP ' + addr.toString(16);
 			this.PC = addr;
 		},
 // ----------------------------------------------------------------------------
 		// JP NZ,nn
 		0xc2: function (mem) {
 			var addr = mem.read16(++this.PC);
-			this.code = 'JP NZ,' + addr.toString(16);
+			// this.code = 'JP NZ,' + addr.toString(16);
 			if (!this.flags.Z) {
 				this.PC = addr;
 			} else {
@@ -1266,7 +1263,7 @@ if (typeof exports !== 'undefined') {
 		// JP Z,nn
 		0xca: function (mem) {
 			var addr = mem.read16(++this.PC);
-			this.code = 'JP Z,' + addr.toString(16);
+			// this.code = 'JP Z,' + addr.toString(16);
 			if (this.flags.Z) {
 				this.PC = addr;
 			} else {
@@ -1276,7 +1273,7 @@ if (typeof exports !== 'undefined') {
 		// JP NC,nn
 		0xd2: function (mem) {
 			var addr = mem.read16(++this.PC);
-			this.code = 'JP NC,' + addr.toString(16);
+			// this.code = 'JP NC,' + addr.toString(16);
 			if (!this.flags.C) {
 				this.PC = addr;
 			} else {
@@ -1286,7 +1283,7 @@ if (typeof exports !== 'undefined') {
 		// JP C,nn
 		0xda: function (mem) {
 			var addr = mem.read16(++this.PC);
-			this.code = 'JP C,' + addr.toString(16);
+			// this.code = 'JP C,' + addr.toString(16);
 			if (this.flags.C) {
 				this.PC = addr;
 			} else {
@@ -1297,20 +1294,20 @@ if (typeof exports !== 'undefined') {
 		// JP (HL)
 		0xe9: function (mem) {
 			var addr = this.HL;
-			this.code = 'JP (HL)' + addr.toString(16);
+			// this.code = 'JP (HL)' + addr.toString(16);
 			this.PC = addr;
 		},
 // ----------------------------------------------------------------------------
 		// JR n
 		0x18: function (mem) {
-			this.code = 'JR n';
+			// this.code = 'JR n';
 			var n = Utils.sign(mem.read8(++this.PC));
 			this.PC += n + 1;
 		},
 // ----------------------------------------------------------------------------
 		// JR NZ,n
 		0x20: function (mem) {
-			this.code = 'JR NZ,n';
+			// this.code = 'JR NZ,n';
 			var n = Utils.sign(mem.read8(++this.PC));
 			this.PC++;
 			if (!this.flags.Z) {
@@ -1319,7 +1316,7 @@ if (typeof exports !== 'undefined') {
 		},
 		// JR Z,n
 		0x28: function (mem) {
-			this.code = 'JR Z,n';
+			// this.code = 'JR Z,n';
 			var n = Utils.sign(mem.read8(++this.PC));
 			this.PC++;
 			if (this.flags.Z) {
@@ -1328,7 +1325,7 @@ if (typeof exports !== 'undefined') {
 		},
 		// JR NC,n
 		0x30: function (mem) {
-			this.code = 'JR NC,n';
+			// this.code = 'JR NC,n';
 			var n = Utils.sign(mem.read8(++this.PC));
 			this.PC++;
 			if (!this.flags.C) {
@@ -1337,7 +1334,7 @@ if (typeof exports !== 'undefined') {
 		},
 		// JR C,n
 		0x38: function (mem) {
-			this.code = 'JR C,n';
+			// this.code = 'JR C,n';
 			var n = Utils.sign(mem.read8(++this.PC));
 			this.PC++;
 			if (this.flags.C) {
@@ -1350,7 +1347,7 @@ if (typeof exports !== 'undefined') {
 // ============================================================================
 		// CALL nn
 		0xcd: function (mem) {
-			this.code = 'CALL';
+			// this.code = 'CALL';
 			var nn = mem.read16(++this.PC);
 			this['PUSH nn'](this.PC + 2);
 			this.PC = nn;
@@ -1359,7 +1356,7 @@ if (typeof exports !== 'undefined') {
 		// CALL NZ,nn
 		0xc4: function (mem) {
 			var nn = mem.read16(++this.PC);
-			this.code = 'CALL NZ,' + nn.toString(16);
+			// this.code = 'CALL NZ,' + nn.toString(16);
 			if (!this.flags.Z) {
 				this['PUSH nn'](this.PC + 2);
 				this.PC = nn;
@@ -1370,7 +1367,7 @@ if (typeof exports !== 'undefined') {
 		// CALL Z,nn
 		0xcc: function (mem) {
 			var nn = mem.read16(++this.PC);
-			this.code = 'CALL Z,' + nn.toString(16);
+			// this.code = 'CALL Z,' + nn.toString(16);
 			if (this.flags.Z) {
 				this['PUSH nn'](this.PC + 2);
 				this.PC = nn;
@@ -1381,7 +1378,7 @@ if (typeof exports !== 'undefined') {
 		// CALL NC,nn
 		0xd4: function (mem) {
 			var nn = mem.read16(++this.PC);
-			this.code = 'CALL NC,' + nn.toString(16);
+			// this.code = 'CALL NC,' + nn.toString(16);
 			if (!this.flags.C) {
 				this['PUSH nn'](this.PC + 2);
 				this.PC = nn;
@@ -1392,7 +1389,7 @@ if (typeof exports !== 'undefined') {
 		// CALL C,nn
 		0xdc: function (mem) {
 			var nn = mem.read16(++this.PC);
-			this.code = 'CALL C,' + nn.toString(16);
+			// this.code = 'CALL C,' + nn.toString(16);
 			if (this.flags.C) {
 				this['PUSH nn'](this.PC + 2);
 				this.PC = nn;
@@ -1405,49 +1402,49 @@ if (typeof exports !== 'undefined') {
 // ============================================================================
 		// RST $00
 		0xc7: function () {
-			this.code = 'RST $00';
+			// this.code = 'RST $00';
 			this['PUSH nn'](this.PC + 1);
 			this.PC = 0x0;
 		},
 		// RST $08
 		0xcf: function () {
-			this.code = 'RST $08';
+			// this.code = 'RST $08';
 			this['PUSH nn'](this.PC + 1);
 			this.PC = 0x08;
 		},
 		// RST $10
 		0xd7: function () {
-			this.code = 'RST $10';
+			// this.code = 'RST $10';
 			this['PUSH nn'](this.PC + 1);
 			this.PC = 0x10;
 		},
 		// RST $18
 		0xdf: function () {
-			this.code = 'RST $18';
+			// this.code = 'RST $18';
 			this['PUSH nn'](this.PC + 1);
 			this.PC = 0x18;
 		},
 		// RST $20
 		0xe7: function () {
-			this.code = 'RST $20';
+			// this.code = 'RST $20';
 			this['PUSH nn'](this.PC + 1);
 			this.PC = 0x20;
 		},
 		// RST $28
 		0xef: function () {
-			this.code = 'RST $28';
+			// this.code = 'RST $28';
 			this['PUSH nn'](this.PC + 1);
 			this.PC = 0x28;
 		},
 		// RST $30
 		0xf7: function () {
-			this.code = 'RST $30';
+			// this.code = 'RST $30';
 			this['PUSH nn'](this.PC + 1);
 			this.PC = 0x30;
 		},
 		// RST $38
 		0xff: function () {
-			this.code = 'RST $38';
+			// this.code = 'RST $38';
 			this['PUSH nn'](this.PC + 1);
 			this.PC = 0x38;
 		},
@@ -1456,7 +1453,7 @@ if (typeof exports !== 'undefined') {
 // ============================================================================
 		// RET
 		0xc9: function (mem) {
-			this.code = 'RET';
+			// this.code = 'RET';
 			var nn = mem.read16(this.SP);
 			this.SP += 2;
 			this.PC = nn;
@@ -1464,7 +1461,7 @@ if (typeof exports !== 'undefined') {
 // ----------------------------------------------------------------------------
 		// RET NZ
 		0xc0: function (mem) {
-			this.code = 'RET NZ';
+			// this.code = 'RET NZ';
 			if (!this.flags.Z) {
 				var nn = mem.read16(this.SP);
 				this.SP += 2;
@@ -1475,7 +1472,7 @@ if (typeof exports !== 'undefined') {
 		},
 		// RET Z
 		0xc8: function (mem) {
-			this.code = 'RET Z';
+			// this.code = 'RET Z';
 			if (this.flags.Z) {
 				var nn = mem.read16(this.SP);
 				this.SP += 2;
@@ -1486,7 +1483,7 @@ if (typeof exports !== 'undefined') {
 		},
 		// RET NC
 		0xd0: function (mem) {
-			this.code = 'RET NC';
+			// this.code = 'RET NC';
 			if (!this.flags.C) {
 				var nn = mem.read16(this.SP);
 				this.SP += 2;
@@ -1497,7 +1494,7 @@ if (typeof exports !== 'undefined') {
 		},
 		// RET C
 		0xd8: function (mem) {
-			this.code = 'RET C';
+			// this.code = 'RET C';
 			if (this.flags.C) {
 				var nn = mem.read16(this.SP);
 				this.SP += 2;
@@ -1509,7 +1506,7 @@ if (typeof exports !== 'undefined') {
 // ----------------------------------------------------------------------------
 		// RETI
 		0xd9: function (mem) {
-			this.code = 'RETI';
+			// this.code = 'RETI';
 			var addr = mem.read16(this.SP);
 			this.SP += 2;
 			this.PC = addr;
@@ -1521,7 +1518,7 @@ if (typeof exports !== 'undefined') {
 // Extended instructions
 // ============================================================================
 		0xcb: function () {
-			this.code = '...';
+			// this.code = '...';
 			this.isExtendedInstruction = true;
 			this.PC++;
 		}

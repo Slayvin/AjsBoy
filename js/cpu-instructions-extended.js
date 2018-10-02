@@ -1,5 +1,7 @@
-/* global Cpu */
 'use strict';
+
+/* global Cpu */
+
 (function (Cpu) {
 // ============================================================================
 // Common instructions
@@ -9,7 +11,7 @@
 		// Misc
 		// ====================================================================
 		this['RL n'] = function (n, wCY) {
-			this.code = 'RL' + (wCY ? ' ' : 'C ') + n.toString(16);
+			// this.code = 'RL' + (wCY ? ' ' : 'C ') + n.toString(16);
 			var bit7 = (n & 0xFF) >>> 7;
 			var result = (n << 1) & 0xFF | (wCY ? this.flags.C : bit7);
 			this.flags.Z = result === 0 ? 1 : 0;
@@ -20,7 +22,7 @@
 			return result;
 		};
 		this['RR n'] = function (n, wCY) {
-			this.code = 'RR' + (wCY ? ' ' : 'C ') + n.toString(16);
+			// this.code = 'RR' + (wCY ? ' ' : 'C ') + n.toString(16);
 			var bit0 = n & 1;
 			var result = ((n & 0xFF) >>> 1) | (wCY ? this.flags.C << 7 : bit0 << 7);
 			this.flags.Z = result === 0 ? 1 : 0;
@@ -31,7 +33,7 @@
 			return result;
 		};
 		this['SLA n'] = function (n) {
-			this.code = 'SLA ' + n.toString(16);
+			// this.code = 'SLA ' + n.toString(16);
 			var result = n << 1;
 			this.flags.Z = (result & 0xFF) === 0 ? 1 : 0;
 			this.flags.N = 0;
@@ -41,7 +43,7 @@
 			return (result & 0xFF);
 		};
 		this['SRA n'] = function (n) {
-			this.code = 'SRA ' + n.toString(16);
+			// this.code = 'SRA ' + n.toString(16);
 			var bit7 = n & (1 << 7);
 			var result = (n >> 1) | bit7;
 			this.flags.Z = (result & 0xFF) === 0 ? 1 : 0;
@@ -52,7 +54,7 @@
 			return (result & 0xFF);
 		};
 		this['SRL n'] = function (n) {
-			this.code = 'SRL ' + n.toString(16);
+			// this.code = 'SRL ' + n.toString(16);
 			var result = (n & 0xFF) >>> 1;
 			this.flags.Z = (result & 0xFF) === 0 ? 1 : 0;
 			this.flags.N = 0;
@@ -72,7 +74,7 @@
 			return n & mask;
 		};
 		this['SWAP n'] = function (n) {
-			this.code = 'SWAP ' + n.toString(16);
+			// this.code = 'SWAP ' + n.toString(16);
 			var lo = n & 0x0F;
 			var hi = n & 0xF0;
 			var result = (lo << 4) | (hi >>> 4);
@@ -85,7 +87,7 @@
 		};
 		// Read bit at position n for register r
 		this['BIT n,r'] = function (n, r) {
-			this.code = 'BIT ' + n + ',' + r;
+			// this.code = 'BIT ' + n + ',' + r;
 			var mask = 0x1 << n;
 			this.flags.Z = !(mask & this[r]) | 0;
 			this.flags.N = 0;
@@ -94,7 +96,7 @@
 		};
 		// Read bit at position b for int n
 		this['BIT b,n'] = function (b, n) {
-			this.code = 'BIT ' + b + ',' + n;
+			// this.code = 'BIT ' + b + ',' + n;
 			var mask = 0x1 << b;
 			this.flags.Z = !(mask & n) | 0;
 			this.flags.N = 0;

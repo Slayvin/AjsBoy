@@ -11,3 +11,16 @@ Resources
 * [Gameboy Bootstrap ROM - GbdevWiki](http://gbdev.gg8.se/wiki/articles/Gameboy_Bootstrap_ROM)
 * [Why did I spend 1.5 months creating a Gameboy emulator- · tomek's blog](https://blog.rekawek.eu/2017/02/09/coffee-gb/)
 
+Progression
+-----------
+ Module     | Progress                        | Description | Status
+ ---------- | ------------------------------- | ------------| --------------------
+ Cpu        |![](http://progressed.io/bar/98) | Cpu instructions | Halt function not implemented yet
+ Memory     |![](http://progressed.io/bar/30) |  
+ Timings    |![](http://progressed.io/bar/0)  |  
+ Interrupts |![](http://progressed.io/bar/80) |
+ Sound      |![](http://progressed.io/bar/0)  | 
+ Inputs     |![](http://progressed.io/bar/100)|
+ Graphics   |![](http://progressed.io/bar/30) |
+ Banking    |![](http://progressed.io/bar/00) | ROM & RAM Banking
+ Timers     |![](http://progressed.io/bar/50) | 

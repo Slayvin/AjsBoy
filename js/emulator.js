@@ -1,7 +1,9 @@
 'use strict';
 
+/* global Utils */
+
 var gbEmu = function () {
-	this.name = 'JsBoy';
+	this.name = 'AjsBoy';
 	this.programLoaded = false;
 	this.paused = false;
 	this.realBoot = !true;
@@ -45,26 +47,25 @@ gbEmu.cyclesPerFrame = 17556; // (144 + 10) lines * (20 + 43 + 51) machines cloc
  * Load program into rom
  * 
  * @param {string} name
- * @param {boolean} asCartridge
+ * @param {boolean} isCartridge
  * @returns {Promise}
  */
-gbEmu.prototype.loadProgram = function (name, asCartridge) {
-	var isCartridge = typeof asCartridge !== 'undefined' ? asCartridge : true;
-	return new Promise(function (resolve, reject) {
+gbEmu.prototype.loadProgram = function (name, isCartridge = true) {
+	return new Promise((resolve, reject) => {
 		// Load program.
 		var xhr = new XMLHttpRequest;
 
 		xhr.open("GET", "./roms/" + name, true);
 		xhr.responseType = "arraybuffer";
 
-		xhr.onload = function () {
+		xhr.onload = () => {
 			var rom = new Uint8Array(xhr.response);
 			if (isCartridge) {
 				this.mmu.rom = rom;
 			} else {
-				for (var i = 0; i < rom.length; i++) {
-					this.mmu.memory[i] = rom[i];
-				}
+				rom.forEach((byte, addr) => {
+					this.mmu.memory[addr] = byte;
+				});
 			}
 
 			if (xhr.readyState === 4) {
@@ -80,11 +81,9 @@ gbEmu.prototype.loadProgram = function (name, asCartridge) {
 					status: this.status
 				});
 			}
-		}.bind(this);
-
+		};
 		xhr.send();
-	}.bind(this));
-
+	});
 };
 
 /**
@@ -145,9 +144,9 @@ gbEmu.prototype.init = function () {
 	// reset Program counter
 	if (this.realBoot) {
 		this.cpu.PC = 0x0000;
-		this.loadBootstrap('DMG_ROM.bin').then(function () {
+		this.loadBootstrap('DMG_ROM.bin').then(() => {
 			this.run();
-		}.bind(this));
+		});
 	} else {
 		this.setProgramStartState().run();
 	}
@@ -178,7 +177,7 @@ gbEmu.prototype.run = function (timestamp) {
 		this.updateTimers();
 
 		// Check for interrupts:
-		if (this.imu.IME && (this.mmu.read8(this.cpu.PC-1) !== 0xfb)) { // NOT sure it is correct (TODO)
+		if (this.imu.IME && (this.mmu.read8(this.cpu.PC - 1) !== 0xfb)) { // NOT sure it is correct (TODO)
 			this.imu.processInterrupts();
 		}
 	}
@@ -213,6 +212,7 @@ gbEmu.prototype.pause = function () {
 	if (this.paused) {
 		window.console.log('emulation paused');
 	} else {
+		window.console.log('emulation unpaused');
 		this.run();
 	}
 };
@@ -230,14 +230,12 @@ gbEmu.prototype.updateTimers = function () {
 	// Check if timer is enabled
 	if (Utils.testBit(this.mmu.memory[gbEmu.TAC], 2)) {
 		this.timerCounter++;
-		if ((this.timerCounter % 2) === 0) {
+		if ((this.timerCounter % 8) === 0) {
 			this.mmu.memory[gbEmu.TIMA]++;
 			if (this.mmu.memory[gbEmu.TIMA] >= 0xFF) {
 				this.mmu.memory[gbEmu.TIMA] = this.mmu.memory[gbEmu.TMA];
 				this.imu.requestInterrupt(0x4);
 			}
-
 		}
 	}
-
 };
