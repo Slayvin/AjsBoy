@@ -50,7 +50,7 @@ gbEmu.debugger = function (emulator) {
 	this.ly = document.querySelector('#lcd-ly');
 	this.lcdc = document.querySelector('#lcd-c');
 	const ioRegisters = ['FF00', 'FF01', 'FF02', 'FF04', 'FF05', 'FF06', 'FF07', 'FF0F',
-		'FF40', 'FF41', 'FF42', 'FF43'];
+		'FF40', 'FF41', 'FF42', 'FF43', 'FFFF'];
 	ioRegisters.forEach((ioAddress) => {
 		this[ioAddress] = document.getElementById('io-' + ioAddress);
 	});
@@ -120,7 +120,7 @@ gbEmu.debugger.prototype.update = function () {
 
 	if (this.states['debug-io-registers']) {
 		const ioRegisters = {FF00: 0xff00, FF01: 0xff01, FF02: 0xff02, FF04: 0xff04, FF05: 0xff05, FF06: 0xff06, FF07: 0xff07, FF0F: 0xff0f,
-			FF40: 0xff40, FF41: 0xff41, FF42: 0xff42, FF43: 0xff43};
+			FF40: 0xff40, FF41: 0xff41, FF42: 0xff42, FF43: 0xff43, FFFF: 0xffff};
 		Object.keys(ioRegisters).forEach((ioAddress) => {
 			this[ioAddress].innerHTML = this.mmu.read8(ioRegisters[ioAddress]).toString(16).toUpperCase();
 		});

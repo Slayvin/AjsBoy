@@ -26,7 +26,7 @@ function InputController(emulator) {
 		const keyName = event.key;
 		Object.keys(keyMap).forEach((key) => {
 			if (key === keyName) {
-				var keyPressed = keyMap[key];
+				const keyPressed = keyMap[key];
 				if (!this.keyStatus[keyPressed]) {
 					this.keyStatus[keyPressed] = true;
 					this.keyState[keyIndex[keyPressed]] &= keyPressedMasks[keyPressed];
@@ -37,6 +37,7 @@ function InputController(emulator) {
 				}
 			}
 		});
+
 		return false;
 	});
 
@@ -45,15 +46,17 @@ function InputController(emulator) {
 		const keyName = event.key;
 		Object.keys(keyMap).forEach((key) => {
 			if (key === keyName) {
-				var keyReleased = keyMap[key];
+				const keyReleased = keyMap[key];
 				this.keyStatus[keyReleased] = false;
 				this.keyState[keyIndex[keyReleased]] |= keyReleasedMasks[keyReleased];
 				document.getElementById('key-' + keyReleased).classList.remove('pressed');
-//				window.console.log(this.keyState);
+
+				// Add interrupt
+					emulator.imu.requestInterrupt(0x10);
 				// Update memory input register
 			}
 		});
-//		window.console.log(this.keyState);
+
 		return false;
 	});
 
@@ -69,10 +72,10 @@ function InputController(emulator) {
 InputController.prototype.getKeyState = function (inputRegister) {
 	inputRegister |= 0xCF; // 11??1111
 	if ((inputRegister & 0x10) > 0) {
-		var keyState = this.keyState[0];
+		const keyState = this.keyState[0];
 		return (inputRegister & keyState);
 	} else if ((inputRegister & 0x20) > 0) {
-		var keyState = this.keyState[1];
+		const keyState = this.keyState[1];
 		return (inputRegister & keyState);
 	}
 	return 0xFF;

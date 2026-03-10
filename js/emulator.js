@@ -20,11 +20,11 @@ var gbEmu = function () {
 	this.timerCounter = 0;
 };
 
-// Emulator const
-gbEmu.DIV = 0xFF04;
-gbEmu.TIMA = 0xFF05;
-gbEmu.TMA = 0xFF06;
-gbEmu.TAC = 0xFF07;
+// Emulator const addresses
+gbEmu.DIV = 0xFF04; // Divider register (incremented at 16384Hz)
+gbEmu.TIMA = 0xFF05; // Timer counter
+gbEmu.TMA = 0xFF06; // Timer modulo
+gbEmu.TAC = 0xFF07; // Timer control
 
 /**
  * Machine clocks per frame :
@@ -96,44 +96,50 @@ gbEmu.prototype.loadBootstrap = function (name) {
 };
 
 gbEmu.prototype.setProgramStartState = function () {
-	this.cpu.AF = 0x01B0;
-	this.cpu.BC = 0x0013;
-	this.cpu.DE = 0x00D8;
-	this.cpu.HL = 0x014D;
-	this.cpu.SP = 0xFFFE;
-	this.cpu.PC = 0x0100;
+	this.cpu.AF = 0x00B0; // 'F' register is set to 0xB0 (10110000) at startup, with bits 7-4 = (Z, N, H, C flags)
+						  // 'A' register is not used until the boot rom is disabled, so we can set it to 0x00 for now
+						  // After boot rom is disabled, 'A' register will be set to 0x01 for DMG/SGB mode, 0x11 for CGB mode, or 0xFF for GBP mode
+	this.cpu.BC = 0x0013; // CGB mode only
+	this.cpu.DE = 0x00D8; // CGB mode only
+	this.cpu.HL = 0x014D; // CGB mode only
+	this.cpu.SP = 0xFFFE; // Stack pointer is set to 0xFFFE at startup
+	this.cpu.PC = 0x0100; // Program counter is set to 0x0100 at startup (after the boot rom)
 
-	this.mmu.memory[gbEmu.TIMA] = 0x00; // TIMA
-	this.mmu.memory[gbEmu.TMA] = 0x00; // TMA
-	this.mmu.memory[gbEmu.TAC] = 0x00; // TAC
-	this.mmu.memory[0xFF10] = 0x80;
-	this.mmu.memory[0xFF11] = 0xBF;
-	this.mmu.memory[0xFF12] = 0xF3;
-	this.mmu.memory[0xFF14] = 0xBF;
-	this.mmu.memory[0xFF16] = 0x3F;
-	this.mmu.memory[0xFF17] = 0x00;
-	this.mmu.memory[0xFF19] = 0xBF;
-	this.mmu.memory[0xFF1A] = 0x7F;
-	this.mmu.memory[0xFF1B] = 0xFF;
-	this.mmu.memory[0xFF1C] = 0x9F;
-	this.mmu.memory[0xFF1E] = 0xBF;
-	this.mmu.memory[0xFF20] = 0xFF;
-	this.mmu.memory[0xFF21] = 0x00;
-	this.mmu.memory[0xFF22] = 0x00;
-	this.mmu.memory[0xFF23] = 0xBF;
-	this.mmu.memory[0xFF24] = 0x77;
-	this.mmu.memory[0xFF25] = 0xF3;
-	this.mmu.memory[0xFF26] = 0xF1;
-	this.mmu.memory[0xFF40] = 0x91; // LCDC
-	this.mmu.memory[0xFF42] = 0x00; // SCY
-	this.mmu.memory[0xFF43] = 0x00; // SCX
-	this.mmu.memory[0xFF45] = 0x00; // LYC
+	// Initialize memory with default values at startup
+	// (These are actual values normally defined from boot rom, but since we are skipping it, we need to set them here)
+ 
+	this.mmu.memory[gbEmu.TIMA] = 0x00; // TIMA - Timer counter
+	this.mmu.memory[gbEmu.TMA] = 0x00; // TMA - Timer modulo
+	this.mmu.memory[gbEmu.TAC] = 0x00; // TAC - Timer control
+	this.mmu.memory[0xFF10] = 0x80; // NR10 - Sound mode 1 sweep register
+	this.mmu.memory[0xFF11] = 0xBF; // NR11 - Sound mode 1 length register
+	this.mmu.memory[0xFF12] = 0xF3; // NR12 - Sound mode 1 volume register
+	this.mmu.memory[0xFF14] = 0xBF; // NR14 - Sound mode 1 frequency register
+	this.mmu.memory[0xFF16] = 0x3F; // NR21 - Sound mode 2 length register
+	this.mmu.memory[0xFF17] = 0x00; // NR22 - Sound mode 2 volume register
+	this.mmu.memory[0xFF19] = 0xBF; // NR24 - Sound mode 2 frequency register
+	this.mmu.memory[0xFF1A] = 0x7F; // NR30 - Sound mode 3 on/off
+	this.mmu.memory[0xFF1B] = 0xFF; // NR31 - Sound mode 3 length register
+	this.mmu.memory[0xFF1C] = 0x9F; // NR32 - Sound mode 3 volume register
+	this.mmu.memory[0xFF1D] = 0x00; // NR33 - Sound mode 3 frequency register (lower 8 bits)
+	this.mmu.memory[0xFF1E] = 0xBF; // NR34 - Sound mode 3 frequency register (higher 3 bits) and control
+	this.mmu.memory[0xFF20] = 0xFF; // NR41 - Sound mode 4 length register
+	this.mmu.memory[0xFF21] = 0x00; // NR42 - Sound mode 4 volume register
+	this.mmu.memory[0xFF22] = 0x00; // NR43 - Sound mode 4 polynomial counter register
+	this.mmu.memory[0xFF23] = 0xBF; // NR44 - Sound mode 4 counter/consecutive
+	this.mmu.memory[0xFF24] = 0x77; // NR50 - Volume control for left and right channels
+	this.mmu.memory[0xFF25] = 0xF3; // NR51 - Selection of sound output terminal
+	this.mmu.memory[0xFF26] = 0xF1; // NR52 - Sound on/off (0xF1 for CGB mode, 0xF0 for SGB mode)
+	this.mmu.memory[0xFF40] = 0x91; // LCDC (Control) - 0x91 = 10010001b (BG and Window enabled, no sprites, 8x8 sprites, no window, LCD enabled)
+	this.mmu.memory[0xFF42] = 0x00; // SCY (Scroll Y)
+	this.mmu.memory[0xFF43] = 0x00; // SCX (Scroll X)
+	this.mmu.memory[0xFF45] = 0x00; // LYC (Compare Y)
 	this.mmu.memory[0xFF47] = 0xFC; // BGP (Background palette)
 	this.mmu.memory[0xFF48] = 0xFF; // OBP0 (Obj palette 0)
 	this.mmu.memory[0xFF49] = 0xFF; // OBP1 (Obj palette 1)
-	this.mmu.memory[0xFF4A] = 0x00; // WY
-	this.mmu.memory[0xFF4B] = 0x00; // WX
-	this.mmu.memory[0xFFFF] = 0x00; // IE	
+	this.mmu.memory[0xFF4A] = 0x00; // WY (Window Y position)
+	this.mmu.memory[0xFF4B] = 0x00; // WX (Window X position)
+	this.mmu.memory[0xFFFF] = 0x00; // IE (Interrupt Enable)
 
 	this.mmu.memory[0xFF50] = 1; // Boot rom disable flag
 
@@ -153,12 +159,12 @@ gbEmu.prototype.init = function () {
 };
 
 gbEmu.prototype.run = function (timestamp) {
-	var i = 0;
-	var breakpoints = [];
-	var breakpoints_ = [
-		0x0000,
-		0x0100,
-		0xC00C,
+	let i = 0;
+	// Debug only breakpoints (TODO: implement proper breakpoints in the debugger)
+	const breakpoints = [
+		//0x0000,
+		//0x0100,
+		//0xC00C,
 	];
 	while (i < gbEmu.cyclesPerFrame) {
 		if (!this.paused) {
@@ -170,7 +176,7 @@ gbEmu.prototype.run = function (timestamp) {
 //			i = gbEmu.cyclesPerFrame;
 		}
 		if ((i % 32) === 0) {// TODO: get actual value from CPU instructions (count cpu cycles)
-			var line = this.mmu.read8(0xff44) & 0xFF;
+			let line = this.mmu.read8(0xff44) & 0xFF;
 			this.mmu.write(0xff44, ++line);
 		}
 		// Update Timers
@@ -192,7 +198,7 @@ gbEmu.prototype.run = function (timestamp) {
 		this.debugger.update();
 	}
 	if (!this.paused) {
-		this.imu.requestInterrupt(1);
+		this.imu.requestInterrupt(0x1);
 	}
 
 };
