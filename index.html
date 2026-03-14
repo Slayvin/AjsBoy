@@ -46,31 +46,27 @@
 
 			<!--Emulator Controls-->
 			<div class="row">
-				<button id="pause"><u>P</u>ause / Run</button>
-				<button id="step"><u>N</u>ext</button>
-				<input id="debug" type="checkbox" checked> <label for="debug">Debug</label>
-				<br>
-				<label for="debug">Screen Color</label><br>
-				<select id="lcd-palette">
-					<option value="default">default</option>
-					<option value="lcd">LCD</option>
-					<option value="blues">Blue Sky</option>
-					<option value="eggplant">Eggplant</option>
-					<option value="cocoa">Cocoa</option>
-					<option value="candy">Candy</option>
-				</select>
+				<div class="column">
+					<button id="pause"><u>P</u>ause / Run</button>
+					<button id="step"><u>N</u>ext</button>
+					<input id="debug" type="checkbox" checked> <label for="debug">Debug</label>
+					<br>
+					<label for="debug">Screen Color</label><br>
+					<select id="lcd-palette">
+						<option value="default">default</option>
+						<option value="lcd">LCD</option>
+						<option value="blues">Blue Sky</option>
+						<option value="eggplant">Eggplant</option>
+						<option value="cocoa">Cocoa</option>
+						<option value="candy">Candy</option>
+					</select>
+				</div>
 			</div>
 
 			<!--Canvas-->
 			<div class="row">
 				<div class="column">
-					<label>
-						Memory
-						<input type="checkbox" class="debug-cb" id="debug-memory-map" checked>
-					</label>
-					<div id="memory">
-						<canvas width=64 height=256></canvas>
-					</div>
+					
 				</div>
 				<div class="column">
 					<label>

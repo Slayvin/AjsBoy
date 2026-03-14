@@ -14,13 +14,14 @@ body{
 	background-color: #cccccc;
 }
 .row{
-	overflow: hidden;	
+	display: flex;
+	gap: 4px;	
 }
 .row label{
 	font-size: 10px;
 }
 .column{
-	float: left;
+	flex-direction: column;
 	text-align: left;
 }
 .column:not(:first-of-type){
