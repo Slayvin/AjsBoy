@@ -14,69 +14,74 @@ var keyMap = {
  * @param {gbEmu} emulator
  * @returns {InputController}
  */
-function InputController(emulator) {
-	this.keyStatus = {A: false, B: false, up: false, down: false, right: false, left: false, select: false, start: false};
-	this.keyState = [0xFF, 0xFF];
-	const keyPressedMasks = {'A': 0xFE, 'B': 0xFD, 'select': 0xFB, 'start': 0xF7, 'right': 0xFE, 'left': 0xFD, 'up': 0xFB, 'down': 0xF7};
-	const keyReleasedMasks = {'A': 0x01, 'B': 0x02, 'select': 0x04, 'start': 0x08, 'right': 0x01, 'left': 0x02, 'up': 0x04, 'down': 0x08};
-	const keyIndex = {'A': 0, 'B': 0, 'select': 0, 'start': 0, 'right': 1, 'left': 1, 'up': 1, 'down': 1};
+class InputController {
+	constructor(emulator) {
+		this.keyStatus = { A: false, B: false, up: false, down: false, right: false, left: false, select: false, start: false };
+		this.keyState = [0xFF, 0xFF];
+		const keyPressedMasks = { 'A': 0xFE, 'B': 0xFD, 'select': 0xFB, 'start': 0xF7, 'right': 0xFE, 'left': 0xFD, 'up': 0xFB, 'down': 0xF7 };
+		const keyReleasedMasks = { 'A': 0x01, 'B': 0x02, 'select': 0x04, 'start': 0x08, 'right': 0x01, 'left': 0x02, 'up': 0x04, 'down': 0x08 };
+		const keyIndex = { 'A': 0, 'B': 0, 'select': 0, 'start': 0, 'right': 1, 'left': 1, 'up': 1, 'down': 1 };
 
-	document.addEventListener('keydown', (event) => {
-		event.preventDefault();
-		const keyName = event.key;
-		Object.keys(keyMap).forEach((key) => {
-			if (key === keyName) {
-				const keyPressed = keyMap[key];
-				if (!this.keyStatus[keyPressed]) {
-					this.keyStatus[keyPressed] = true;
-					this.keyState[keyIndex[keyPressed]] &= keyPressedMasks[keyPressed];
-					document.getElementById('key-' + keyPressed).classList.add('pressed');
+		document.addEventListener('keydown', (event) => {
+			event.preventDefault();
+			const keyName = event.key;
+			Object.keys(keyMap).forEach((key) => {
+				if (key === keyName) {
+					const keyPressed = keyMap[key];
+					if (!this.keyStatus[keyPressed]) {
+						this.keyStatus[keyPressed] = true;
+						this.keyState[keyIndex[keyPressed]] &= keyPressedMasks[keyPressed];
+						document.getElementById('key-' + keyPressed).classList.add('pressed');
+
+						// Add interrupt
+						emulator.imu.requestInterrupt(0x10);
+					}
+				}
+			});
+
+			return false;
+		});
+
+		document.addEventListener('keyup', (event) => {
+			event.preventDefault();
+			const keyName = event.key;
+			Object.keys(keyMap).forEach((key) => {
+				if (key === keyName) {
+					const keyReleased = keyMap[key];
+					this.keyStatus[keyReleased] = false;
+					this.keyState[keyIndex[keyReleased]] |= keyReleasedMasks[keyReleased];
+					document.getElementById('key-' + keyReleased).classList.remove('pressed');
 
 					// Add interrupt
 					emulator.imu.requestInterrupt(0x10);
+					// Update memory input register
 				}
-			}
+			});
+
+			return false;
 		});
 
-		return false;
-	});
-
-	document.addEventListener('keyup', (event) => {
-		event.preventDefault();
-		const keyName = event.key;
-		Object.keys(keyMap).forEach((key) => {
-			if (key === keyName) {
-				const keyReleased = keyMap[key];
-				this.keyStatus[keyReleased] = false;
-				this.keyState[keyIndex[keyReleased]] |= keyReleasedMasks[keyReleased];
-				document.getElementById('key-' + keyReleased).classList.remove('pressed');
-
-				// Add interrupt
-					emulator.imu.requestInterrupt(0x10);
-				// Update memory input register
-			}
+		const keys = document.querySelectorAll('.key-map button');
+		keys.forEach((button) => {
+			button.addEventListener('click', (event) => {
+				emulator.imu.requestInterrupt(0x10);
+				event.preventDefault();
+			});
 		});
+	}
 
-		return false;
-	});
+	getKeyState(inputRegister) {
+		const inputFlags = inputRegister | 0xCF; // 11??1111
+		if ((inputFlags & 0x10) > 0) {
+			const keyState = this.keyState[0];
+			return (inputFlags & keyState);
+		} else if ((inputFlags & 0x20) > 0) {
+			const keyState = this.keyState[1];
+			return (inputFlags & keyState);
+		}
 
-	var keys = document.querySelectorAll('.key-map button');
-	keys.forEach(function (button) {
-		button.addEventListener('click', (event) => {
-			emulator.imu.requestInterrupt(0x10);
-			event.preventDefault();
-		});
-	});
+		return 0xFF;
+	}
 }
 
-InputController.prototype.getKeyState = function (inputRegister) {
-	inputRegister |= 0xCF; // 11??1111
-	if ((inputRegister & 0x10) > 0) {
-		const keyState = this.keyState[0];
-		return (inputRegister & keyState);
-	} else if ((inputRegister & 0x20) > 0) {
-		const keyState = this.keyState[1];
-		return (inputRegister & keyState);
-	}
-	return 0xFF;
-};
+

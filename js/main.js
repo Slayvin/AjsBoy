@@ -3,32 +3,30 @@
 console.log('Starting main program');
 
 var emulator = new gbEmu();
-var testRomsPath = 'test/';
+var testRomsPath = 'tests/';
 var gameRomsPath = 'games/';
 var demoRomsPath = 'demo/';
 
 // Tests
-//emulator.loadProgram(testRomsPath + 'bgbtest.gb').then(function () {
-//emulator.loadProgram(testRomsPath + 'blargg-tests/cpu_instrs/cpu_instrs.gb').then(function () {
-//emulator.loadProgram(testRomsPath + 'blargg-tests/cpu_instrs/individual/02-interrupts.gb').then(function () {
+// emulator.loadProgram(testRomsPath + 'bgbtest.gb').then(function () {
+// emulator.loadProgram(testRomsPath + 'blargg/cpu_instrs.gb').then(function () {
+// emulator.loadProgram(testRomsPath + 'blargg/cpu_instrs/02-interrupts.gb').then(function () {
+// emulator.loadProgram(testRomsPath + 'blargg/cpu_instrs/06-ld r,r.gb').then(function () {
+// emulator.loadProgram(testRomsPath + 'blargg/cpu_instrs/10-bit ops.gb').then(function () {
+
+// emulator.loadProgram(testRomsPath + 'blargg/instr_timing.gb').then(function () {
+
+
 // Games
-//emulator.loadProgram(gameRomsPath + 'BattleCity (J) [!].gb').then(function () {
-//emulator.loadProgram(gameRomsPath + 'Boxxle 2 (U).gb').then(function () {
-//emulator.loadProgram(gameRomsPath + 'Castelian (E) [!].gb').then(function () {
-//emulator.loadProgram(gameRomsPath + 'Catrap (U) [!].gb').then(function () {
-//emulator.loadProgram(gameRomsPath + 'Double Dragon (U) [!].gb').then(function () {
-//emulator.loadProgram(gameRomsPath + 'Dr. Mario (JU) (V1.0) [!].gb').then(function () {
-//emulator.loadProgram(gameRomsPath + 'Pipe Dream (U) [!].gb').then(function () {
-//emulator.loadProgram(gameRomsPath + 'Tetris (World).gb').then(function () {
-//emulator.loadProgram(gameRomsPath + 'Super Mario Land (JUE) (V1.0) [!].gb').then(function () {
-//emulator.loadProgram(gameRomsPath + 'Super Mario Land 2 - 6 Golden Coins (UE) (V1.2) [!].gb').then(function () {
-emulator.loadProgram(gameRomsPath + 'Volley Fire (J).gb').then(function () {
+emulator.loadProgram(gameRomsPath + 'placeholder.gb').then(function () {
+
 // Demos
 //emulator.loadProgram(demoRomsPath + 'adjtris.gb').then(function () {
 //emulator.loadProgram(demoRomsPath + 'pocket.gb').then(function () {
 //emulator.loadProgram(demoRomsPath + 'Hangman (PD).gb').then(function () {
 //emulator.loadProgram(demoRomsPath + 'ttt.gb').then(function () {
 //emulator.loadProgram(demoRomsPath + 'opus5.gb').then(function () {
+
 	// Start emulation
 	emulator.init();
 });
@@ -56,14 +54,13 @@ document.addEventListener('keydown', (event) => {
 	return false;
 });
 
-var debugCheckboxes = document.getElementsByClassName('debug-cb');
-for (var i = 0; i < debugCheckboxes.length; i++) {
-	var checkbox = debugCheckboxes[i];
-//	window.console.log(checkbox);
+const debugCheckboxes = document.getElementsByClassName('debug-cb');
+for (let i = 0; i < debugCheckboxes.length; i++) {
+	const checkbox = debugCheckboxes[i];
 	checkbox.addEventListener("change", updateDebugStates, false);
 }
 function updateDebugStates() {
-	var isChecked = this.checked;
+	const isChecked = this.checked;
 	if (isChecked) { //checked
 		emulator.debugger.states[this.id] = true;
 	} else { //unchecked
@@ -78,6 +75,5 @@ mainDebugCheckbox.onchange = function () {
 
 var paletteSelector = document.getElementById('lcd-palette');
 paletteSelector.onchange = function () {
-//	window.console.log(this.value);
 	Lcd.colors = Palettes[this.value];
 };
